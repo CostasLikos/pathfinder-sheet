@@ -185,7 +185,7 @@ function ArmorPropertiesPanel({ armorProps = {}, onChange }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
         {/* Armor Check Penalty */}
-        <div className="stat-box">
+        <div className="stat-box flex flex-col items-center">
           <div className="text-sm font-bold mb-1" style={{ color: 'var(--accent)' }}>Armor Check Penalty</div>
           <div className="flex items-center gap-2 mb-2">
             <button
@@ -212,7 +212,7 @@ function ArmorPropertiesPanel({ armorProps = {}, onChange }) {
         </div>
 
         {/* Max Dex */}
-        <div className="stat-box">
+        <div className="stat-box flex flex-col items-center">
           <div className="text-sm font-bold mb-1" style={{ color: 'var(--accent)' }}>Maximum Dex Bonus</div>
           <div className="flex items-center gap-2 mb-2">
             <button
@@ -243,7 +243,7 @@ function ArmorPropertiesPanel({ armorProps = {}, onChange }) {
         </div>
 
         {/* Arcane Spell Failure */}
-        <div className="stat-box">
+        <div className="stat-box flex flex-col items-center">
           <div className="text-sm font-bold mb-1" style={{ color: 'var(--accent)' }}>Arcane Spell Failure</div>
           <div className="flex items-center gap-2 mb-2">
             <button
