@@ -63,8 +63,10 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
               <div className="text-xs mb-1 flex items-center gap-1" style={{ color: 'var(--text-dim)' }}>
                 Max <BuffBadge val={bt.hp ?? 0} />
               </div>
-              <div className="text-sm font-bold mb-1" style={{ color: 'var(--text)' }}>{effectiveMaxHP}</div>
               <SpinnerInput value={hp.max ?? 0} onChange={v => onChange('hp', { ...hp, max: Math.max(0, v) })} min={0} width="w-14" />
+              {(bt.hp ?? 0) !== 0 && (
+                <div className="text-sm font-bold mt-1" style={{ color: 'var(--positive)' }}>{effectiveMaxHP}</div>
+              )}
             </div>
             <div className="text-center">
               <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>Nonlethal</div>
