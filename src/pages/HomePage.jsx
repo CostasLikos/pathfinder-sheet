@@ -64,11 +64,11 @@ export default function HomePage() {
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: bgDarker }}>
       {/* Big sigil background */}
       <SigilBackground
-        size={700}
-        opacity={0.06}
+        size={null}
+        opacity={0.07}
         color={accentHex}
         className="absolute"
-        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 0 }}
+        style={{ width: '100vmin', height: '100vmin', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 0 }}
       />
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <input ref={importRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
