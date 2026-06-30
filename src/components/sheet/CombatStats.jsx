@@ -53,14 +53,14 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
           {onTogglePin && <PinButton pinned={pins.hp} onToggle={() => onTogglePin('hp')} />}
         </div>
         <div className="flex items-center gap-6 flex-wrap">
-          <div className="flex items-center gap-3">
+          <div className="flex items-start gap-3">
             <div className="text-center">
               <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>Current</div>
               <SpinnerInput value={hp.current ?? 0} onChange={v => onChange('hp', { ...hp, current: v })} width="w-14" />
             </div>
-            <span className="text-xl" style={{ color: 'var(--text-faint)' }}>/</span>
+            <span className="text-xl mt-4" style={{ color: 'var(--text-faint)' }}>/</span>
             <div className="text-center">
-              <div className="text-xs mb-1 flex items-center gap-1" style={{ color: 'var(--text-dim)' }}>
+              <div className="text-xs mb-1 flex items-center justify-center gap-1" style={{ color: 'var(--text-dim)' }}>
                 Max <BuffBadge val={bt.hp ?? 0} />
               </div>
               <SpinnerInput value={hp.max ?? 0} onChange={v => onChange('hp', { ...hp, max: Math.max(0, v) })} min={0} width="w-14" />

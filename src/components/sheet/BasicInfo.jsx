@@ -75,6 +75,22 @@ export default function BasicInfo({ character, onChange }) {
           {field('Deity', 'deity')}
           {field('Homeland', 'homeland')}
           {field('Experience', 'experience', 'number')}
+          {field('Age', 'age', 'number')}
+          {field('Gender', 'gender')}
+          {field('Size', 'size', 'text', ['Fine','Diminutive','Tiny','Small','Medium','Large','Huge','Gargantuan','Colossal'])}
+          {field('Height', 'height')}
+          {field('Weight', 'weight')}
+          {field('Background Occupation', 'background')}
+          <div className="col-span-2 md:col-span-3 flex flex-col gap-1">
+            <label className="text-gray-400 text-xs uppercase tracking-wide">Languages</label>
+            <input
+              type="text"
+              value={character.languages || ''}
+              onChange={e => onChange('languages', e.target.value)}
+              placeholder="e.g. Common, Elvish, Draconic..."
+              className="input-field text-sm"
+            />
+          </div>
         </div>
       </div>
     </div>
