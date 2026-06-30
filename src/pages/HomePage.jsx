@@ -287,7 +287,7 @@ export default function HomePage() {
               color: accentHex, fontSize: '0.65rem', letterSpacing: '0.2em',
               textTransform: 'uppercase', marginTop: '0.6rem',
               opacity: 0.7,
-            }}>— Mephistopheles</p>
+            }}>Mephistopheles</p>
           </div>
 
           {characters.length === 0 ? (
