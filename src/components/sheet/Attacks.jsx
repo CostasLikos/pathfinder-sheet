@@ -12,19 +12,44 @@ const emptyWeapon = () => ({
   id: crypto.randomUUID(),
   name: '',
   attackType: 'Melee',
-  ability: 'str',       // ability used for attack roll
-  dmgAbility: 'str',    // ability used for damage
-  attackMisc: 0,        // misc attack bonus (enchantment, feats, etc.)
+  ability: 'str',
+  dmgAbility: 'str',
+  attackMisc: 0,
   dmgDice: '1d6',
-  dmgMisc: 0,           // misc damage bonus
+  dmgMisc: 0,
   critRange: '20',
   critMult: '×2',
   damageType: 'S',
   notes: '',
-  // Temp buffs (reset-able)
   tempAttack: 0,
   tempDamage: 0,
+  activePresets: [],   // e.g. ['powerAttack', 'flanking']
+  extraDice: [],       // e.g. [{id, count, die, label}]
 })
+
+// ── PF1e preset definitions ───────────────────────────────────────────────────
+// Each preset is a function(bab) → { atkBonus, dmgBonus, label, desc }
+const PRESETS = {
+  powerAttack: (bab) => {
+    const n = Math.floor(bab / 4) + 1
+    return { atkBonus: -n, dmgBonus: n * 2, label: 'Power Attack', desc: `−${n} atk / +${n * 2} dmg` }
+  },
+  powerAttack2H: (bab) => {
+    const n = Math.floor(bab / 4) + 1
+    return { atkBonus: -n, dmgBonus: Math.floor(n * 3), label: 'PA (2H)', desc: `−${n} atk / +${Math.floor(n * 3)} dmg (2-handed)` }
+  },
+  deadlyAim: (bab) => {
+    const n = Math.floor(bab / 4) + 1
+    return { atkBonus: -n, dmgBonus: n * 2, label: 'Deadly Aim', desc: `−${n} atk / +${n * 2} dmg (ranged)` }
+  },
+  twfPrimary: () => ({ atkBonus: -2, dmgBonus: 0, label: 'TWF Primary', desc: '−2 atk (TWF feat + light off-hand)' }),
+  twfOffhand:  () => ({ atkBonus: -2, dmgBonus: 0, label: 'TWF Off-hand', desc: '−2 atk (TWF feat + light off-hand)' }),
+  flanking:    () => ({ atkBonus: +2, dmgBonus: 0, label: 'Flanking', desc: '+2 atk (flanking)' }),
+  charge:      () => ({ atkBonus: +2, dmgBonus: 0, label: 'Charge', desc: '+2 atk / −2 AC (charge)' }),
+}
+
+const EXTRA_DIE_TYPES = ['d3','d4','d6','d8','d10','d12']
+const emptyExtraDie = () => ({ id: crypto.randomUUID(), count: 1, die: 'd6', label: '' })
 
 function DiceRoller({ result, onClose }) {
   return (
@@ -54,9 +79,8 @@ function rollDice(expr) {
 function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {} }) {
   const [expanded, setExpanded] = useState(false)
   const [rollResult, setRollResult] = useState(null)
-
-  const strMod = abilityMod(abilities.str ?? 10)
-  const dexMod = abilityMod(abilities.dex ?? 10)
+  const [showPresets, setShowPresets] = useState(false)
+  const [showExtraDice, setShowExtraDice] = useState(false)
 
   // apply ability score buffs
   const effAbilities = Object.fromEntries(
@@ -65,19 +89,34 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
   const abilityModForAttack = abilityMod(effAbilities[weapon.ability] ?? 10)
   const abilityModForDmg   = abilityMod(effAbilities[weapon.dmgAbility] ?? 10)
 
-  // Build attack bonus string (BAB + ability + misc + temp + buff)
-  const baseAttackBonus = (bab ?? 0) + abilityModForAttack + (weapon.attackMisc ?? 0) + (weapon.tempAttack ?? 0) + (buffTotals.attackRoll ?? 0)
+  // Compute active preset bonuses
+  const activePresets = weapon.activePresets ?? []
+  const presetAtkBonus = activePresets.reduce((sum, key) => sum + (PRESETS[key]?.(bab ?? 0)?.atkBonus ?? 0), 0)
+  const presetDmgBonus = activePresets.reduce((sum, key) => sum + (PRESETS[key]?.(bab ?? 0)?.dmgBonus ?? 0), 0)
 
-  // Generate all attacks from BAB (every 5 points = extra attack at -5)
-  const attackBonuses = []
-  let current = baseAttackBonus
+  const togglePreset = (key) => {
+    const next = activePresets.includes(key)
+      ? activePresets.filter(p => p !== key)
+      : [...activePresets, key]
+    onUpdate('activePresets', next)
+  }
+
+  // Extra dice
+  const extraDice = weapon.extraDice ?? []
+  const addExtraDie = () => onUpdate('extraDice', [...extraDice, emptyExtraDie()])
+  const updateExtraDie = (id, field, val) => onUpdate('extraDice', extraDice.map(d => d.id === id ? { ...d, [field]: val } : d))
+  const removeExtraDie = (id) => onUpdate('extraDice', extraDice.filter(d => d.id !== id))
+
+  // Build attack bonus (BAB + ability + misc + temp + buff + presets)
+  const baseAttackBonus = (bab ?? 0) + abilityModForAttack + (weapon.attackMisc ?? 0) + (weapon.tempAttack ?? 0) + (buffTotals.attackRoll ?? 0) + presetAtkBonus
+  const totalDmgBonus   = abilityModForDmg + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
+
+  // Generate iterative attacks from BAB
   const babVal = bab ?? 0
-  attackBonuses.push(current)
-  if (babVal >= 6)  attackBonuses.push(current - 5)
-  if (babVal >= 11) attackBonuses.push(current - 10)
-  if (babVal >= 16) attackBonuses.push(current - 15)
-
-  const totalDmgBonus = abilityModForDmg + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0)
+  const attackBonuses = [baseAttackBonus]
+  if (babVal >= 6)  attackBonuses.push(baseAttackBonus - 5)
+  if (babVal >= 11) attackBonuses.push(baseAttackBonus - 10)
+  if (babVal >= 16) attackBonuses.push(baseAttackBonus - 15)
 
   const rollAttack = (bonus) => {
     const d20 = Math.floor(Math.random() * 20) + 1
@@ -93,11 +132,19 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
 
   const rollDamage = () => {
     const { rolls, total: diceTotal } = rollDice(weapon.dmgDice || '1d6')
-    const total = diceTotal + totalDmgBonus
+    let total = diceTotal + totalDmgBonus
+    const extraParts = []
+    for (const ed of extraDice) {
+      const sides = parseInt(ed.die.replace('d', ''))
+      const exRolls = Array.from({ length: ed.count }, () => Math.floor(Math.random() * sides) + 1)
+      const exTotal = exRolls.reduce((a, b) => a + b, 0)
+      total += exTotal
+      extraParts.push(`${ed.label ? ed.label + ' ' : ''}${ed.count}${ed.die}(${exRolls.join('+')})`)
+    }
     setRollResult({
       label: `${weapon.name || 'Attack'} — Damage Roll`,
       total,
-      breakdown: `${weapon.dmgDice}(${rolls.join('+')}) ${formatMod(totalDmgBonus)}`,
+      breakdown: `${weapon.dmgDice}(${rolls.join('+')}) ${formatMod(totalDmgBonus)}${extraParts.length ? ' + ' + extraParts.join(' + ') : ''}`,
     })
   }
 
@@ -234,6 +281,109 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
           />
         </span>
         {weapon.tempDamage !== 0 && <span className="text-yellow-500">+ Buff {formatMod(weapon.tempDamage)}</span>}
+      </div>
+
+      {/* ── Presets ── */}
+      <div className="border-t border-pf-border/30">
+        <button
+          onClick={() => setShowPresets(x => !x)}
+          className="w-full flex items-center justify-between px-3 py-1.5 text-xs"
+          style={{ color: activePresets.length > 0 ? 'var(--accent)' : 'var(--text-faint)', backgroundColor: 'transparent' }}
+        >
+          <span>⚔ Combat Presets {activePresets.length > 0 && `(${activePresets.length} active)`}</span>
+          <span>{showPresets ? '▲' : '▼'}</span>
+        </button>
+        {showPresets && (
+          <div className="px-3 pb-3">
+            <div className="flex flex-wrap gap-2 mb-2">
+              {Object.entries(PRESETS).map(([key, fn]) => {
+                const p = fn(babVal)
+                const active = activePresets.includes(key)
+                return (
+                  <button
+                    key={key}
+                    onClick={() => togglePreset(key)}
+                    className="text-xs px-2 py-1 rounded font-semibold transition-all"
+                    style={{
+                      backgroundColor: active ? 'var(--accent)' : 'var(--bg-surface)',
+                      color: active ? 'var(--bg-darker)' : 'var(--text-dim)',
+                      border: `1px solid ${active ? 'var(--accent)' : 'var(--bg-border)'}`,
+                    }}
+                    title={p.desc}
+                  >
+                    {p.label}
+                    <span className="ml-1 opacity-70">
+                      {p.atkBonus !== 0 && (p.atkBonus > 0 ? `+${p.atkBonus}` : p.atkBonus)}
+                      {p.atkBonus !== 0 && p.dmgBonus !== 0 && '/'}
+                      {p.dmgBonus !== 0 && `+${p.dmgBonus}dmg`}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+            {activePresets.length > 0 && (
+              <div className="text-xs space-y-0.5" style={{ color: 'var(--text-faint)' }}>
+                {activePresets.map(key => {
+                  const p = PRESETS[key]?.(babVal)
+                  return p ? <div key={key}>• {p.desc}</div> : null
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Extra Dice ── */}
+      <div className="border-t border-pf-border/30">
+        <button
+          onClick={() => setShowExtraDice(x => !x)}
+          className="w-full flex items-center justify-between px-3 py-1.5 text-xs"
+          style={{ color: extraDice.length > 0 ? '#f59e0b' : 'var(--text-faint)', backgroundColor: 'transparent' }}
+        >
+          <span>🎲 Extra Damage Dice {extraDice.length > 0 && `(${extraDice.map(d => `${d.count}${d.die}${d.label ? ' ' + d.label : ''}`).join(', ')})`}</span>
+          <span>{showExtraDice ? '▲' : '▼'}</span>
+        </button>
+        {showExtraDice && (
+          <div className="px-3 pb-3 space-y-2">
+            {extraDice.map(ed => (
+              <div key={ed.id} className="flex items-center gap-2 flex-wrap">
+                <input
+                  type="number"
+                  value={ed.count}
+                  min={1} max={20}
+                  onChange={e => updateExtraDie(ed.id, 'count', Math.max(1, Number(e.target.value)))}
+                  className="w-10 text-center text-xs rounded focus:outline-none"
+                  style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: 'var(--text)' }}
+                />
+                <select
+                  value={ed.die}
+                  onChange={e => updateExtraDie(ed.id, 'die', e.target.value)}
+                  className="text-xs rounded focus:outline-none px-1 py-0.5"
+                  style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: '#f59e0b' }}
+                >
+                  {EXTRA_DIE_TYPES.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <input
+                  type="text"
+                  value={ed.label}
+                  onChange={e => updateExtraDie(ed.id, 'label', e.target.value)}
+                  placeholder="label (e.g. Flaming, Sneak Attack)"
+                  className="flex-1 min-w-24 text-xs rounded px-1 py-0.5 focus:outline-none"
+                  style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: 'var(--text-dim)' }}
+                />
+                <button
+                  onClick={() => removeExtraDie(ed.id)}
+                  className="text-red-500 text-xs px-1"
+                >✕</button>
+              </div>
+            ))}
+            <button
+              onClick={addExtraDie}
+              className="text-xs px-3 py-1 rounded"
+              style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)', color: 'var(--text-dim)' }}
+            >+ Add Extra Die</button>
+          </div>
+        )}
       </div>
 
       {/* Expanded Edit Panel */}
