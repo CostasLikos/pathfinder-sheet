@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useCharacterStore } from '../store/characterStore'
+import SigilBackground from '../components/SigilBackground'
 import BasicInfo from '../components/sheet/BasicInfo'
 import AbilityScores from '../components/sheet/AbilityScores'
 import CombatStats from '../components/sheet/CombatStats'
@@ -74,8 +75,14 @@ export default function CharacterPage() {
 
       {/* Sticky header: topbar + tabs */}
       <div className="sticky top-0 z-20">
-        <div className="top-bar px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="top-bar px-4 py-3 flex items-center justify-between relative overflow-hidden">
+          <SigilBackground
+            size={null}
+            opacity={0.18}
+            className="absolute"
+            style={{ width: '33%', height: 'auto', top: '50%', left: '0', transform: 'translateY(-50%)', zIndex: 0 }}
+          />
+          <div className="flex items-center gap-3 min-w-0 relative z-10">
             <button onClick={() => navigate('/')} className="text-sm flex-shrink-0" style={{ color: 'var(--text-dim)' }}>← Back</button>
             <div className="w-px h-5 flex-shrink-0" style={{ backgroundColor: 'var(--bg-border)' }} />
             <div className="min-w-0">
@@ -87,7 +94,7 @@ export default function CharacterPage() {
               </span>
             </div>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
+          <div className="flex gap-2 flex-shrink-0 relative z-10">
             <button onClick={() => exportCharacter(id)} className="btn-secondary text-xs py-1 px-3">Export</button>
             <button onClick={() => setSettingsOpen(true)} className="btn-secondary text-xs py-1 px-3" title="Settings">⚙️</button>
           </div>

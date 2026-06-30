@@ -3,6 +3,7 @@ import { useCharacterStore } from '../store/characterStore'
 import { useRef, useState, useEffect } from 'react'
 import SettingsPanel from '../components/SettingsPanel'
 import { THEMES, useThemeStore } from '../store/themeStore'
+import SigilBackground from '../components/SigilBackground'
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -60,7 +61,15 @@ export default function HomePage() {
   const dimColor   = hex2rgba(accentDim,  0.6)
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: bgDarker }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: bgDarker }}>
+      {/* Big sigil background */}
+      <SigilBackground
+        size={700}
+        opacity={0.06}
+        color={accentHex}
+        className="absolute"
+        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 0 }}
+      />
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <input ref={importRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
 
