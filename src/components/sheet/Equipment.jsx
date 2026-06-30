@@ -161,6 +161,132 @@ function ItemRow({ item, onUpdate, onRemove }) {
   )
 }
 
+function ArmorPropertiesPanel({ armorProps = {}, onChange }) {
+  const checkPenalty = armorProps.checkPenalty ?? 0
+  const maxDex       = armorProps.maxDex ?? ''
+  const spellFailure = armorProps.spellFailure ?? 0
+
+  const [sfRoll, setSfRoll] = useState(null)
+
+  const rollSpellFailure = () => {
+    const roll = Math.ceil(Math.random() * 100)
+    setSfRoll({ roll, failed: roll <= spellFailure })
+  }
+
+  const set = (key, val) => onChange('armorProps', { ...armorProps, [key]: val })
+
+  return (
+    <div className="card">
+      <h2 className="section-title mb-3">Worn Armor Properties</h2>
+      <p className="text-xs mb-4" style={{ color: 'var(--text-faint)' }}>
+        These values are read from your equipped armor and automatically affect AC, skill checks, and spell casting.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        {/* Armor Check Penalty */}
+        <div className="stat-box">
+          <div className="text-sm font-bold mb-1" style={{ color: 'var(--accent)' }}>Armor Check Penalty</div>
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => set('checkPenalty', Math.max(0, checkPenalty - 1))}
+              className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-bold"
+              style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)' }}
+            >−</button>
+            <span className="text-2xl font-bold w-8 text-center" style={{ color: checkPenalty > 0 ? '#ef4444' : 'var(--text)' }}>
+              {checkPenalty}
+            </span>
+            <button
+              onClick={() => set('checkPenalty', checkPenalty + 1)}
+              className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-bold"
+              style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)' }}
+            >+</button>
+          </div>
+          <div className="text-xs space-y-0.5" style={{ color: 'var(--text-faint)' }}>
+            <div className="font-semibold mb-1" style={{ color: 'var(--text-dim)' }}>Penalizes:</div>
+            <div>• Acrobatics, Climb, Escape Artist</div>
+            <div>• Fly, Ride, Sleight of Hand</div>
+            <div>• Stealth</div>
+            <div style={{ color: checkPenalty > 0 ? '#f59e0b' : 'var(--text-faint)' }}>• Swim (×2 penalty)</div>
+          </div>
+        </div>
+
+        {/* Max Dex */}
+        <div className="stat-box">
+          <div className="text-sm font-bold mb-1" style={{ color: 'var(--accent)' }}>Maximum Dex Bonus</div>
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => set('maxDex', maxDex === '' ? null : Math.max(0, Number(maxDex) - 1))}
+              className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-bold"
+              style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)' }}
+            >−</button>
+            <span className="text-2xl font-bold w-8 text-center" style={{ color: maxDex === '' || maxDex === null ? 'var(--text-faint)' : 'var(--text)' }}>
+              {maxDex === '' || maxDex === null ? '∞' : maxDex}
+            </span>
+            <button
+              onClick={() => set('maxDex', maxDex === '' || maxDex === null ? 0 : Number(maxDex) + 1)}
+              className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-bold"
+              style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)' }}
+            >+</button>
+          </div>
+          <button
+            onClick={() => set('maxDex', null)}
+            className="text-xs px-2 py-0.5 rounded mb-2"
+            style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text-faint)' }}
+          >Reset to ∞ (no cap)</button>
+          <div className="text-xs space-y-0.5" style={{ color: 'var(--text-faint)' }}>
+            <div className="font-semibold mb-1" style={{ color: 'var(--text-dim)' }}>Affects:</div>
+            <div>• Caps DEX bonus applied to AC</div>
+            <div>• Does NOT affect saves, skills,</div>
+            <div>&nbsp; attack rolls, or initiative</div>
+          </div>
+        </div>
+
+        {/* Arcane Spell Failure */}
+        <div className="stat-box">
+          <div className="text-sm font-bold mb-1" style={{ color: 'var(--accent)' }}>Arcane Spell Failure</div>
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => set('spellFailure', Math.max(0, spellFailure - 5))}
+              className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-bold"
+              style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)' }}
+            >−</button>
+            <span className="text-2xl font-bold w-12 text-center" style={{ color: spellFailure > 0 ? '#ef4444' : 'var(--text)' }}>
+              {spellFailure}%
+            </span>
+            <button
+              onClick={() => set('spellFailure', Math.min(100, spellFailure + 5))}
+              className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-bold"
+              style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)' }}
+            >+</button>
+          </div>
+          {spellFailure > 0 && (
+            <button
+              onClick={rollSpellFailure}
+              className="text-xs px-3 py-1 rounded font-bold mb-2 w-full"
+              style={{ backgroundColor: 'var(--accent)', color: 'var(--bg-darker)' }}
+            >Roll d100</button>
+          )}
+          {sfRoll && (
+            <div className="text-xs text-center px-2 py-1 rounded mb-2"
+              style={{ backgroundColor: sfRoll.failed ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)', border: `1px solid ${sfRoll.failed ? '#ef4444' : 'var(--positive)'}`, color: sfRoll.failed ? '#ef4444' : 'var(--positive)' }}>
+              Rolled {sfRoll.roll} — {sfRoll.failed ? '✗ Spell FAILS' : '✓ Spell succeeds'}
+            </div>
+          )}
+          <div className="text-xs space-y-0.5" style={{ color: 'var(--text-faint)' }}>
+            <div className="font-semibold mb-1" style={{ color: 'var(--text-dim)' }}>Affects:</div>
+            <div>• Arcane spells only (wizard, sorcerer,</div>
+            <div>&nbsp; bard, magus, etc.)</div>
+            <div>• Roll d100 before casting — fail if ≤ %</div>
+            <div>• Divine spells are unaffected</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
 export default function Equipment({ character, onChange, pins = {}, onTogglePin }) {
   const gear = character.gear ?? []
   const currency = character.currency ?? { pp: 0, gp: 0, sp: 0, cp: 0 }
@@ -196,6 +322,12 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
 
   return (
     <div className="space-y-4">
+      {/* Armor Properties */}
+      <ArmorPropertiesPanel
+        armorProps={character.armorProps ?? {}}
+        onChange={onChange}
+      />
+
       {/* Weight & Encumbrance */}
       <div className="card">
         <div className="flex items-start justify-between flex-wrap gap-4 mb-3">

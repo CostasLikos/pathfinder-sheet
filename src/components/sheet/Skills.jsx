@@ -7,7 +7,12 @@ const ABILITY_OPTIONS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 // Build a lookup map from key → skill definition
 const SKILL_MAP = Object.fromEntries(SKILLS.map(s => [s.key, s]))
 
-export default function Skills({ character, onChange, pinnedSkills = [], onToggleSkillPin }) {
+// Skills affected by Armor Check Penalty (PF1e rules)
+const ACP_SKILLS = new Set(['acrobatics','climb','escapeArtist','fly','ride','sleightOfHand','stealth','swim'])
+// Swim gets double ACP
+const ACP_DOUBLE = new Set(['swim'])
+
+export default function Skills({ character, onChange, pinnedSkills = [], onToggleSkillPin, armorCheckPenalty = 0 }) {
   const { abilities, skills = {} } = character
 
   // Skill order stored in character, falls back to default
@@ -29,14 +34,17 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
 
   const getTotal = (skill) => {
     const s     = getSkillData(skill.key)
-    const ab    = s.ability ?? skill.ability  // custom skills can override ability
+    const ab    = s.ability ?? skill.ability
     const ranks = s.ranks ?? 0
     const mod   = abilityMod(abilities[ab] ?? 10)
     const isCS  = s.classSkill ?? false
     const misc  = s.misc ?? 0
     const csBonus = isCS && ranks > 0 ? 3 : 0
-    return ranks + mod + csBonus + misc
+    const acp   = ACP_SKILLS.has(skill.key) ? (ACP_DOUBLE.has(skill.key) ? armorCheckPenalty * 2 : armorCheckPenalty) : 0
+    return ranks + mod + csBonus + misc - acp
   }
+
+  const getACP = (skill) => ACP_SKILLS.has(skill.key) ? (ACP_DOUBLE.has(skill.key) ? armorCheckPenalty * 2 : armorCheckPenalty) : 0
 
   const updateSkill = (key, field, value) => {
     onChange('skills', { ...skills, [key]: { ...(skills[key] || {}), [field]: value } })
@@ -114,6 +122,7 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
               const ab     = s.ability ?? skill.ability
               const mod    = abilityMod(abilities[ab] ?? 10)
               const total  = getTotal(skill)
+              const acp    = getACP(skill)
               const isDrag = dragging === skill.key
               const isDragOver = dragOverKey.current === skill.key && dragging && dragging !== skill.key
               const isEven = rowIndex % 2 === 0
@@ -256,10 +265,12 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                       style={{
                         backgroundColor: 'var(--bg-darker)',
                         color: total >= 10 ? 'var(--positive)' : total >= 5 ? 'var(--accent)' : 'var(--text)',
-                        border: '1px solid var(--bg-border)',
+                        border: `1px solid ${acp > 0 ? 'var(--warning)' : 'var(--bg-border)'}`,
                       }}
+                      title={acp > 0 ? `Armor Check Penalty −${acp}${ACP_DOUBLE.has(skill.key) ? ' (×2 for Swim)' : ''} applied` : ''}
                     >
                       {formatMod(total)}
+                      {acp > 0 && <span className="ml-0.5 text-xs" style={{ color: 'var(--warning)' }}>⚔</span>}
                     </span>
                   </td>
                 </tr>

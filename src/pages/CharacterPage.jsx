@@ -13,7 +13,7 @@ import Equipment from '../components/sheet/Equipment'
 import Dashboard from '../components/sheet/Dashboard'
 import SettingsPanel from '../components/SettingsPanel'
 
-const TABS = ['📌 Dashboard', 'Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Buffs & Tracking', 'Notes']
+const TABS = ['📌 Dashboard', 'Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Buff & Debuff', 'Notes']
 
 export default function CharacterPage() {
   const { id } = useParams()
@@ -36,6 +36,15 @@ export default function CharacterPage() {
 
   const update = (field, value) => updateCharacter(id, { [field]: value })
   const updateAbility = (ab, value) => updateCharacter(id, { abilities: { ...character.abilities, [ab]: value } })
+
+  // Compute net buff/debuff totals from all active stat buffs
+  const buffTotals = (() => {
+    const t = { attackRoll:0, damage:0, ac:0, initiative:0, fort:0, ref:0, will:0, hp:0, cmb:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 }
+    ;(character.statBuffs ?? []).filter(b => b.active).forEach(b => {
+      Object.keys(t).forEach(k => { t[k] += (b.mods?.[k] ?? 0) * (b.type === 'debuff' ? -1 : 1) })
+    })
+    return t
+  })()
 
   // ── Pin helpers ────────────────────────────────────────────────────────────
   const pins = character.pins ?? { sections: [], skills: [] }
@@ -88,7 +97,7 @@ export default function CharacterPage() {
           {TABS.map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)} className={`tab-btn ${activeTab === tab ? 'active' : ''}`}>
               {tab}
-              {tab === 'Buffs & Tracking' && character.class?.toLowerCase() === 'bard' && (
+              {tab === 'Buff & Debuff' && character.class?.toLowerCase() === 'bard' && (
                 <span className="ml-1 text-xs px-1 rounded" style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)' }}>🎶</span>
               )}
               {tab === '📌 Dashboard' && (pins.sections?.length > 0 || pins.skills?.length > 0) && (
@@ -116,12 +125,15 @@ export default function CharacterPage() {
               onChange={updateAbility}
               pinned={pinnedMap.abilities}
               onTogglePin={() => toggleSectionPin('abilities')}
+              buffTotals={buffTotals}
             />
             <CombatStats
               character={character}
               onChange={update}
               pins={pinnedMap}
               onTogglePin={toggleSectionPin}
+              buffTotals={buffTotals}
+              armorProps={character.armorProps ?? {}}
             />
           </>
         )}
@@ -132,6 +144,7 @@ export default function CharacterPage() {
             onChange={update}
             pinned={pinnedMap.attacks}
             onTogglePin={() => toggleSectionPin('attacks')}
+            buffTotals={buffTotals}
           />
         )}
 
@@ -150,6 +163,7 @@ export default function CharacterPage() {
             onChange={update}
             pinnedSkills={pins.skills ?? []}
             onToggleSkillPin={toggleSkillPin}
+            armorCheckPenalty={character.armorProps?.checkPenalty ?? 0}
           />
         )}
 
@@ -171,7 +185,7 @@ export default function CharacterPage() {
           />
         )}
 
-        {activeTab === 'Buffs & Tracking' && (
+        {activeTab === 'Buff & Debuff' && (
           <BuffTracker
             character={character}
             onChange={update}

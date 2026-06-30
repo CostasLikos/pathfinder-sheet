@@ -66,6 +66,10 @@ const defaultCharacter = () => ({
   pins: { sections: [], skills: [] },
   // Session spell list (spell names saved for quick access)
   sessionSpells: [],
+  // Stat-modifying buffs/debuffs
+  statBuffs: [],
+  // Armor properties
+  armorProps: { checkPenalty: 0, maxDex: null, spellFailure: 0 },
 })
 
 export const useCharacterStore = create(
