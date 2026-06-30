@@ -99,14 +99,14 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          <div className="stat-box text-center">
-            <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>BAB</div>
+          <div className="stat-box flex flex-col items-center justify-center gap-1">
+            <div className="text-xs" style={{ color: 'var(--text-dim)' }}>BAB</div>
             <SpinnerInput value={bab ?? 0} onChange={v => onChange('bab', v)} width="w-12" />
           </div>
-          <div className="stat-box text-center">
-            <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>Initiative</div>
-            <div className="text-xl font-bold mb-1" style={{ color: 'var(--text)' }}>{formatMod(totalInit)}</div>
-            <div className="flex items-center justify-center gap-1 text-xs" style={{ color: 'var(--text-faint)' }}>
+          <div className="stat-box flex flex-col items-center justify-center gap-1">
+            <div className="text-xs" style={{ color: 'var(--text-dim)' }}>Initiative</div>
+            <div className="text-xl font-bold" style={{ color: 'var(--text)' }}>{formatMod(totalInit)}</div>
+            <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-faint)' }}>
               <span>Misc</span>
               <SpinnerInput value={initiative?.misc ?? 0} onChange={v => onChange('initiative', { ...initiative, misc: v })} width="w-10" />
             </div>

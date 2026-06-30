@@ -10,14 +10,23 @@ export default function SpinnerInput({ value, onChange, min, max, step = 1, clas
     onChange(next)
   }
 
+  const btnStyle = {
+    backgroundColor: 'transparent',
+    color: 'var(--accent)',
+    border: '1px solid var(--bg-border)',
+    lineHeight: 1,
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  }
+
   return (
-    <div className={`flex items-center ${className}`}>
+    <div className={`flex items-center gap-1 ${className}`}>
       <button
         onClick={dec}
-        className="h-7 w-7 flex items-center justify-center rounded-l text-base font-bold select-none transition-colors"
-        style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--accent)', border: '1px solid var(--bg-border)', borderRight: 'none' }}
-        onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent-dim)'; e.currentTarget.style.borderColor = 'var(--accent)' }}
-        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--bg-surface)'; e.currentTarget.style.borderColor = 'var(--bg-border)' }}
+        className="h-5 w-5 flex items-center justify-center rounded-full text-xs font-bold select-none"
+        style={btnStyle}
+        onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)'; e.currentTarget.style.borderColor = 'var(--accent)' }}
+        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--bg-border)' }}
       >−</button>
       <input
         type="number"
@@ -28,17 +37,17 @@ export default function SpinnerInput({ value, onChange, min, max, step = 1, clas
           if (max !== undefined && v > max) return
           onChange(v)
         }}
-        className={`${width} h-7 text-center text-sm font-bold focus:outline-none`}
+        className={`${width} h-5 text-center text-xs font-bold focus:outline-none rounded`}
         style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text)', border: '1px solid var(--bg-border)' }}
         onFocus={e => e.target.style.borderColor = 'var(--accent)'}
         onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
       />
       <button
         onClick={inc}
-        className="h-7 w-7 flex items-center justify-center rounded-r text-base font-bold select-none transition-colors"
-        style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--accent)', border: '1px solid var(--bg-border)', borderLeft: 'none' }}
-        onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent-dim)'; e.currentTarget.style.borderColor = 'var(--accent)' }}
-        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--bg-surface)'; e.currentTarget.style.borderColor = 'var(--bg-border)' }}
+        className="h-5 w-5 flex items-center justify-center rounded-full text-xs font-bold select-none"
+        style={btnStyle}
+        onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)'; e.currentTarget.style.borderColor = 'var(--accent)' }}
+        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--bg-border)' }}
       >+</button>
     </div>
   )

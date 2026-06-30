@@ -306,6 +306,28 @@ export const THEMES = {
       '--warning':    '#92400e',
     }
   },
+
+  mephisto: {
+    id: 'mephisto',
+    name: 'Mephisto',
+    preview: ['#0a1012', '#c8236a'],
+    vars: {
+      '--bg-darker':  '#060c0e',
+      '--bg-dark':    '#0a1214',
+      '--bg-surface': '#0f1c20',
+      '--bg-border':  '#1a3035',
+      '--accent':     '#c8236a',
+      '--accent-dim': '#6b1a2e',
+      '--accent-hover': '#e0407f',
+      '--text':       '#e4eff0',
+      '--text-dim':   '#5aabb8',
+      '--text-faint': '#1e3a40',
+      '--danger':     '#7b1030',
+      '--danger-hover': '#9e1840',
+      '--positive':   '#1a8e7a',
+      '--warning':    '#c87a20',
+    }
+  },
 }
 
 export const useThemeStore = create(
