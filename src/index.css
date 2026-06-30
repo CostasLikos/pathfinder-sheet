@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide native browser number spinners — we use custom +/- buttons */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+
+:root {
+  --bg-darker:    #12121e;
+  --bg-dark:      #1a1a2e;
+  --bg-surface:   #16213e;
+  --bg-border:    #2a2a4a;
+  --accent:       #C9A84C;
+  --accent-dim:   #8B6914;
+  --accent-hover: #e8c060;
+  --text:         #e2e8f0;
+  --text-dim:     #94a3b8;
+  --text-faint:   #4a5568;
+  --danger:       #8B0000;
+  --danger-hover: #a00000;
+  --positive:     #22c55e;
+  --warning:      #f59e0b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: var(--bg-darker);
+  color: var(--text);
+  font-family: Georgia, serif;
+  min-height: 100vh;
+}
+
+#root { min-height: 100vh; }
+
+@layer components {
+  .btn-primary {
+    @apply font-bold py-2 px-6 rounded transition-colors duration-200;
+    background-color: var(--danger);
+    color: var(--text);
+    border: 1px solid var(--accent);
+  }
+  .btn-primary:hover { background-color: var(--danger-hover); }
+
+  .btn-secondary {
+    @apply font-bold py-2 px-6 rounded transition-colors duration-200;
+    background-color: var(--bg-surface);
+    color: var(--accent);
+    border: 1px solid var(--bg-border);
+  }
+  .btn-secondary:hover { background-color: var(--bg-border); }
+
+  .btn-accent {
+    @apply font-bold py-2 px-6 rounded transition-colors duration-200;
+    background-color: var(--accent-dim);
+    color: var(--text);
+    border: 1px solid var(--accent);
+  }
+  .btn-accent:hover { background-color: var(--accent); color: var(--bg-darker); }
+
+  .card {
+    @apply rounded-lg p-4;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--bg-border);
+  }
+
+  .section-title {
+    @apply font-bold text-lg pb-1 mb-3;
+    color: var(--accent);
+    border-bottom: 1px solid var(--accent);
+    font-family: Georgia, serif;
+  }
+
+  .stat-box {
+    @apply rounded text-center p-2;
+    background-color: var(--bg-darker);
+    border: 1px solid var(--bg-border);
+  }
+
+  .input-field {
+    @apply rounded px-3 py-1 w-full focus:outline-none;
+    background-color: var(--bg-darker);
+    border: 1px solid var(--bg-border);
+    color: var(--text);
+  }
+  .input-field:focus { border-color: var(--accent); }
+
+  .tab-bar {
+    border-bottom: 1px solid var(--bg-border);
+    background-color: var(--bg-surface);
+  }
+
+  .tab-btn {
+    @apply px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors;
+    border-color: transparent;
+    color: var(--text-dim);
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .top-bar {
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--bg-border);
+  }
+
+  .page-bg { background-color: var(--bg-darker); }
+}
