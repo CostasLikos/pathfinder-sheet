@@ -186,7 +186,7 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                           placeholder={skill.custom ? 'Skill name...' : '(specialty)'}
                           className="text-xs px-1 py-0 rounded focus:outline-none flex-1 min-w-0"
                           style={{
-                            backgroundColor: 'var(--bg-darker)',
+                            backgroundColor: isEven ? 'var(--bg-darker)' : 'var(--bg-surface)',
                             border: '1px solid var(--bg-border)',
                             color: 'var(--text)',
                           }}
