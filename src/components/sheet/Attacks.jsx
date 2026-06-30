@@ -204,6 +204,7 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
                 </button>
               ))}
             </div>
+            <div className="h-4" />
           </div>
 
           {/* Damage column */}
@@ -216,6 +217,7 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
             >
               {weapon.dmgDice}{totalDmgBonus !== 0 ? formatMod(totalDmgBonus) : ''}
             </button>
+            <div className="h-4" />
           </div>
 
           {/* Buff column */}
