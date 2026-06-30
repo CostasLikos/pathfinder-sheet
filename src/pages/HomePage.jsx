@@ -349,11 +349,11 @@ export default function HomePage() {
                 onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bg-border)'}
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded border flex items-center justify-center flex-shrink-0 overflow-hidden"
+                  <div className="w-20 h-20 rounded border flex items-center justify-center flex-shrink-0 overflow-hidden"
                     style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
                     {char.portrait
                       ? <img src={char.portrait} alt="" className="w-full h-full object-cover" />
-                      : <span className="text-3xl">🧙</span>}
+                      : <span className="text-4xl">🧙</span>}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-lg truncate" style={{ color: 'var(--text)' }}>

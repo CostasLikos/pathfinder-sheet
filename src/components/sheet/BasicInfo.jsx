@@ -39,19 +39,28 @@ export default function BasicInfo({ character, onChange }) {
     <div className="card">
       <div className="flex gap-4">
         {/* Portrait */}
-        <div className="flex flex-col items-center gap-2 flex-shrink-0">
+        <div className="relative flex-shrink-0 self-stretch" style={{ width: '120px' }}>
           <div
             onClick={() => portraitRef.current.click()}
-            className="w-24 h-24 rounded border-2 border-dashed border-pf-border hover:border-pf-gold cursor-pointer overflow-hidden flex items-center justify-center bg-pf-darker transition-colors"
+            className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-colors group"
+            style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-darker)', minHeight: '100%' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bg-border)'}
           >
             {character.portrait
               ? <img src={character.portrait} alt="" className="w-full h-full object-cover" />
               : <span className="text-4xl">🧙</span>
             }
+            {/* overlay label */}
+            <div className="absolute bottom-0 left-0 right-0 text-center py-0.5" style={{
+              backgroundColor: 'rgba(0,0,0,0.55)',
+              fontSize: '0.6rem',
+              color: 'var(--text-dim)',
+              letterSpacing: '0.05em',
+            }}>
+              {character.portrait ? 'change' : 'add photo'}
+            </div>
           </div>
-          <button onClick={() => portraitRef.current.click()} className="text-xs text-gray-400 hover:text-pf-gold transition-colors">
-            {character.portrait ? 'Change' : 'Add Photo'}
-          </button>
           <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={handlePortrait} />
         </div>
 

@@ -64,6 +64,8 @@ const defaultCharacter = () => ({
   experience: 0,
   // Dashboard pins
   pins: { sections: [], skills: [] },
+  // Session spell list (spell names saved for quick access)
+  sessionSpells: [],
 })
 
 export const useCharacterStore = create(
