@@ -51,18 +51,22 @@ function rollDice(expr) {
   return { rolls, total: rolls.reduce((a, b) => a + b, 0) }
 }
 
-function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove }) {
+function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {} }) {
   const [expanded, setExpanded] = useState(false)
   const [rollResult, setRollResult] = useState(null)
 
   const strMod = abilityMod(abilities.str ?? 10)
   const dexMod = abilityMod(abilities.dex ?? 10)
 
-  const abilityModForAttack = abilityMod(abilities[weapon.ability] ?? 10)
-  const abilityModForDmg   = abilityMod(abilities[weapon.dmgAbility] ?? 10)
+  // apply ability score buffs
+  const effAbilities = Object.fromEntries(
+    Object.entries(abilities).map(([k, v]) => [k, v + (buffTotals[k] ?? 0)])
+  )
+  const abilityModForAttack = abilityMod(effAbilities[weapon.ability] ?? 10)
+  const abilityModForDmg   = abilityMod(effAbilities[weapon.dmgAbility] ?? 10)
 
-  // Build attack bonus string (BAB + ability + misc + temp)
-  const baseAttackBonus = (bab ?? 0) + abilityModForAttack + (weapon.attackMisc ?? 0) + (weapon.tempAttack ?? 0)
+  // Build attack bonus string (BAB + ability + misc + temp + buff)
+  const baseAttackBonus = (bab ?? 0) + abilityModForAttack + (weapon.attackMisc ?? 0) + (weapon.tempAttack ?? 0) + (buffTotals.attackRoll ?? 0)
 
   // Generate all attacks from BAB (every 5 points = extra attack at -5)
   const attackBonuses = []
@@ -73,7 +77,7 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove }) {
   if (babVal >= 11) attackBonuses.push(current - 10)
   if (babVal >= 16) attackBonuses.push(current - 15)
 
-  const totalDmgBonus = abilityModForDmg + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0)
+  const totalDmgBonus = abilityModForDmg + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0)
 
   const rollAttack = (bonus) => {
     const d20 = Math.floor(Math.random() * 20) + 1
@@ -201,14 +205,34 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove }) {
       </div>
 
       {/* Breakdown Bar */}
-      <div className="px-3 pb-2 flex gap-4 text-xs text-gray-500 border-t border-pf-border/30 pt-2">
+      <div className="px-3 pb-2 flex flex-wrap gap-3 text-xs text-gray-500 border-t border-pf-border/30 pt-2 items-center">
         <span>BAB {formatMod(bab ?? 0)}</span>
         <span>+ {weapon.ability.toUpperCase()} {formatMod(abilityModForAttack)}</span>
-        {weapon.attackMisc !== 0 && <span>+ Misc {formatMod(weapon.attackMisc)}</span>}
+        <span className="flex items-center gap-1">
+          + Misc
+          <input
+            type="number"
+            value={weapon.attackMisc ?? 0}
+            onChange={e => onUpdate('attackMisc', Number(e.target.value))}
+            className="w-12 text-center rounded focus:outline-none text-xs"
+            style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${(weapon.attackMisc ?? 0) < 0 ? '#ef4444' : (weapon.attackMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--bg-border)'}`, color: (weapon.attackMisc ?? 0) < 0 ? '#ef4444' : (weapon.attackMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--text-faint)' }}
+            title="Misc attack modifier — use negative for penalties (Power Attack, TWF, etc.)"
+          />
+        </span>
         {weapon.tempAttack !== 0 && <span className="text-yellow-500">+ Buff {formatMod(weapon.tempAttack)}</span>}
         <span className="text-pf-border">|</span>
         <span>Dmg {weapon.dmgAbility.toUpperCase()} {formatMod(abilityModForDmg)}</span>
-        {weapon.dmgMisc !== 0 && <span>+ Misc {formatMod(weapon.dmgMisc)}</span>}
+        <span className="flex items-center gap-1">
+          + Misc
+          <input
+            type="number"
+            value={weapon.dmgMisc ?? 0}
+            onChange={e => onUpdate('dmgMisc', Number(e.target.value))}
+            className="w-12 text-center rounded focus:outline-none text-xs"
+            style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${(weapon.dmgMisc ?? 0) < 0 ? '#ef4444' : (weapon.dmgMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--bg-border)'}`, color: (weapon.dmgMisc ?? 0) < 0 ? '#ef4444' : (weapon.dmgMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--text-faint)' }}
+            title="Misc damage modifier — use negative for penalties"
+          />
+        </span>
         {weapon.tempDamage !== 0 && <span className="text-yellow-500">+ Buff {formatMod(weapon.tempDamage)}</span>}
       </div>
 
@@ -534,7 +558,7 @@ function SpellRow({ spell, dmgInfo, kind, dc, isOpen, spellAtk, casterLevel, onR
   )
 }
 
-export default function Attacks({ character, onChange, pinned, onTogglePin }) {
+export default function Attacks({ character, onChange, pinned, onTogglePin, buffTotals = {} }) {
   const { weapons = [], bab, abilities } = character
 
   const addWeapon = () => onChange('weapons', [...weapons, emptyWeapon()])
@@ -585,6 +609,7 @@ export default function Attacks({ character, onChange, pinned, onTogglePin }) {
             abilities={abilities}
             onUpdate={(key, value) => updateWeapon(i, key, value)}
             onRemove={() => removeWeapon(i)}
+            buffTotals={buffTotals}
           />
         ))}
       </div>
