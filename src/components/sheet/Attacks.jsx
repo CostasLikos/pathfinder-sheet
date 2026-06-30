@@ -186,18 +186,16 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
           </div>
         </div>
 
-        {/* Attack / Damage / Buff — labels row then boxes row */}
+        {/* Attack / Damage / Buff */}
         <div className="flex flex-col gap-1">
-          {/* Labels */}
+          {/* Top labels */}
           <div className="flex gap-1 text-xs">
             <div style={{ minWidth: attackBonuses.length * 44 + 'px' }} className="text-center text-gray-400">Attack</div>
             <div className="w-16 text-center text-gray-400">Damage</div>
-            <div className="w-10 text-center text-yellow-500">atk</div>
-            <div className="w-10 text-center text-yellow-500">dmg</div>
+            <div className="w-[84px] text-center text-yellow-500">Buff</div>
           </div>
-          {/* Boxes */}
+          {/* Boxes row */}
           <div className="flex gap-1 items-center">
-            {/* Attack buttons */}
             {attackBonuses.map((bonus, i) => (
               <button
                 key={i}
@@ -208,7 +206,6 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
                 {formatMod(bonus)}
               </button>
             ))}
-            {/* Damage button */}
             <button
               onClick={rollDamage}
               className="bg-amber-800 hover:bg-amber-700 text-white text-xs font-bold rounded px-2 border border-amber-700 transition-colors w-16 h-7"
@@ -216,7 +213,6 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
             >
               {weapon.dmgDice}{totalDmgBonus !== 0 ? formatMod(totalDmgBonus) : ''}
             </button>
-            {/* Buff inputs */}
             <input
               type="number"
               value={weapon.tempAttack ?? 0}
@@ -231,6 +227,13 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
               className="w-10 h-7 text-center bg-pf-surface border border-yellow-700 rounded text-yellow-400 text-xs focus:outline-none"
               title="Temporary damage bonus"
             />
+          </div>
+          {/* Bottom sub-labels for buff */}
+          <div className="flex gap-1 text-xs">
+            <div style={{ minWidth: attackBonuses.length * 44 + 'px' }}></div>
+            <div className="w-16"></div>
+            <div className="w-10 text-center text-gray-600">atk</div>
+            <div className="w-10 text-center text-gray-600">dmg</div>
           </div>
         </div>
 
