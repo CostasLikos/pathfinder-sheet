@@ -71,12 +71,12 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
               <SpinnerInput value={hp.nonlethal ?? 0} onChange={v => onChange('hp', { ...hp, nonlethal: Math.max(0, v) })} min={0} width="w-14" />
             </div>
           </div>
-          {hp.max > 0 && (
+          {effectiveMaxHP > 0 && (
             <div className="flex-1 min-w-32">
               <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-border)' }}>
                 <div className="h-full rounded-full transition-all" style={{ width: `${hpPct}%`, backgroundColor: hpColor }} />
               </div>
-              <div className="text-xs mt-1 text-center" style={{ color: hpColor }}>{hp.current}/{hp.max} HP</div>
+              <div className="text-xs mt-1 text-center" style={{ color: hpColor }}>{hp.current}/{effectiveMaxHP} HP</div>
             </div>
           )}
         </div>
