@@ -179,7 +179,12 @@ function resolveTable(castingClass) {
 
 // ─── Spells Per Day Reference Panel ──────────────────────────────────────────
 
-function SpellsPerDayPanel({ castingClass, currentLevel }) {
+const bonusSpells = (mod, spellLevel) => {
+  if (spellLevel === 0 || mod < spellLevel) return 0
+  return Math.floor((mod - spellLevel) / 4) + 1
+}
+
+function SpellsPerDayPanel({ castingClass, currentLevel, abilityModVal = 0 }) {
   const [open, setOpen] = useState(false)
   const tableKey = resolveTable(castingClass)
   const table = tableKey ? SPD[tableKey] : null
@@ -231,21 +236,31 @@ function SpellsPerDayPanel({ castingClass, currentLevel }) {
                         <td className="px-3 py-1.5 font-bold" style={{ color: isCurrentLevel ? 'var(--accent)' : 'var(--text-dim)' }}>
                           {i + 1}{isCurrentLevel && ' ◀'}
                         </td>
-                        {row.map((slots, j) => (
-                          <td key={j} className="px-2 py-1.5 text-center" style={{
-                            color: slots === null ? 'var(--text-faint)' : slots === '∞' ? 'var(--positive)' : isCurrentLevel ? 'var(--text)' : 'var(--text-dim)',
-                            fontWeight: isCurrentLevel && slots !== null ? 'bold' : 'normal',
-                          }}>
-                            {slots === null ? '—' : slots === '∞' ? '∞' : slots}
-                          </td>
-                        ))}
+                        {row.map((slots, j) => {
+                          const spellLvl = parseInt(headers[j])
+                          const bonus = isCurrentLevel && slots !== null && slots !== '∞' ? bonusSpells(abilityModVal, spellLvl) : 0
+                          const total = slots !== null && slots !== '∞' ? slots + bonus : slots
+                          return (
+                            <td key={j} className="px-2 py-1.5 text-center" style={{
+                              color: slots === null ? 'var(--text-faint)' : slots === '∞' ? 'var(--positive)' : isCurrentLevel ? 'var(--text)' : 'var(--text-dim)',
+                              fontWeight: isCurrentLevel && slots !== null ? 'bold' : 'normal',
+                            }}>
+                              {slots === null ? '—' : slots === '∞' ? '∞' : isCurrentLevel ? (
+                                <span>
+                                  {total}
+                                  {bonus > 0 && <span className="text-xs ml-0.5" style={{ color: 'var(--positive)' }}>({slots}+{bonus})</span>}
+                                </span>
+                              ) : slots}
+                            </td>
+                          )
+                        })}
                       </tr>
                     )
                   })}
                 </tbody>
               </table>
               <div className="px-3 py-2 text-xs" style={{ color: 'var(--text-faint)', borderTop: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-surface)' }}>
-                Base slots only · Add bonus spells for high {castingClass?.toLowerCase() === 'wizard' || castingClass?.toLowerCase() === 'witch' || castingClass?.toLowerCase() === 'magus' ? 'Intelligence' : castingClass?.toLowerCase() === 'cleric' || castingClass?.toLowerCase() === 'druid' || castingClass?.toLowerCase() === 'inquisitor' || castingClass?.toLowerCase() === 'paladin' || castingClass?.toLowerCase() === 'ranger' || castingClass?.toLowerCase() === 'warpriest' ? 'Wisdom' : 'Charisma'} · Cleric/Druid: +1 domain spell per level
+                Your level row shows base + bonus from ability modifier ({formatMod(abilityModVal)}) · Cleric/Druid add +1 domain spell per level on top
               </div>
             </div>
           )}
@@ -769,7 +784,7 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
         </div>
         <DCBonusManager dcBonuses={dcBonuses} onUpdate={v => updateSC('dcBonuses', v)} />
         <div className="mt-3">
-          <SpellsPerDayPanel castingClass={spellcasting.class} currentLevel={casterLevel} />
+          <SpellsPerDayPanel castingClass={spellcasting.class} currentLevel={casterLevel} abilityModVal={abilityModVal} />
         </div>
         <div className="mt-4">
           <div className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--text-dim)' }}>Spell Slots</div>
