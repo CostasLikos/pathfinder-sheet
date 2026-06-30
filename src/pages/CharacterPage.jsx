@@ -13,7 +13,7 @@ import Equipment from '../components/sheet/Equipment'
 import Dashboard from '../components/sheet/Dashboard'
 import SettingsPanel from '../components/SettingsPanel'
 
-const TABS = ['📌 Dashboard', 'Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Buff & Debuff', 'Notes']
+const TABS = ['Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Buff & Debuff', 'Notes', '📌 Dashboard']
 
 export default function CharacterPage() {
   const { id } = useParams()
