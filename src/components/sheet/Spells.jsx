@@ -560,9 +560,98 @@ function SpellLibrary({ castingClass, onAdd, onClose }) {
   )
 }
 
+// ─── Spell Card Popup ─────────────────────────────────────────────────────────
+
+const SCHOOL_COLORS = {
+  Abjuration:    '#60a5fa', Conjuration:   '#a78bfa', Divination:    '#34d399',
+  Enchantment:   '#f472b6', Evocation:     '#fb923c', Illusion:      '#c084fc',
+  Necromancy:    '#4ade80', Transmutation: '#facc15', Universal:     '#94a3b8',
+}
+
+function SpellCardPopup({ spellName, onClose }) {
+  const data = useMemo(() => SPELL_LIBRARY.find(s => s.name.toLowerCase() === spellName.toLowerCase()), [spellName])
+  const color = SCHOOL_COLORS[data?.school] ?? 'var(--accent)'
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75" onClick={onClose}>
+      <div
+        className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-xl shadow-2xl overflow-hidden"
+        style={{ backgroundColor: 'var(--bg-surface)', border: `2px solid ${color}` }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${color}33`, background: `linear-gradient(135deg, var(--bg-darker) 0%, ${color}18 100%)` }}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="font-bold text-xl leading-tight" style={{ color, fontFamily: 'Georgia,serif' }}>
+                {data?.name ?? spellName}
+              </h2>
+              {data && (
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${color}25`, color, border: `1px solid ${color}55` }}>
+                    {data.school}
+                  </span>
+                  <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{data.source}</span>
+                </div>
+              )}
+            </div>
+            <button onClick={onClose} className="text-lg flex-shrink-0 mt-0.5" style={{ color: 'var(--text-dim)' }}>✕</button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          {!data ? (
+            <div className="text-center py-8">
+              <div className="text-4xl mb-3">📜</div>
+              <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{spellName}</p>
+              <p className="text-xs mt-2" style={{ color: 'var(--text-faint)' }}>No database entry found for this spell.</p>
+            </div>
+          ) : (
+            <>
+              {/* Stat grid */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs rounded-lg p-3" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
+                {[
+                  ['Casting Time', data.casting_time],
+                  ['Components',   data.components],
+                  ['Range',        data.range],
+                  ['Targets',      data.targets],
+                  ['Duration',     data.duration],
+                  ['Saving Throw', data.saving_throw],
+                ].filter(([, v]) => v).map(([label, val]) => (
+                  <div key={label}>
+                    <span className="font-bold" style={{ color }}>{label}: </span>
+                    <span style={{ color: 'var(--text-dim)' }}>{val}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Spell levels */}
+              {data.spell_level && (
+                <div className="text-xs rounded-lg p-3" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
+                  <span className="font-bold" style={{ color }}>Spell Level: </span>
+                  <span style={{ color: 'var(--text-dim)' }}>{data.spell_level}</span>
+                </div>
+              )}
+
+              {/* Description */}
+              {data.description && (
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--text-faint)' }}>Description</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text)' }}>{data.description}</p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Spell Row ────────────────────────────────────────────────────────────────
 
-function SpellRow({ spell, abilityModVal, dcBonuses, onUpdate, onRemove, onCast, isEven }) {
+function SpellRow({ spell, abilityModVal, dcBonuses, onUpdate, onRemove, onCast, onShowCard, isEven }) {
   const [expanded, setExpanded] = useState(false)
   const canCast = spell.level === 0 || (spell.used ?? 0) < (spell.prepared ?? 1)
 
@@ -579,16 +668,24 @@ function SpellRow({ spell, abilityModVal, dcBonuses, onUpdate, onRemove, onCast,
 
         {/* Name */}
         <div className="flex-1 min-w-0">
-          <input
-            type="text"
-            value={spell.name}
-            onChange={e => onUpdate('name', e.target.value)}
-            placeholder="Spell name..."
-            className="bg-transparent font-semibold text-sm focus:outline-none w-full"
-            style={{ color: 'var(--text)', borderBottom: '1px solid transparent' }}
-            onFocus={e => e.target.style.borderBottomColor = 'var(--accent)'}
-            onBlur={e => e.target.style.borderBottomColor = 'transparent'}
-          />
+          <div className="flex items-center gap-1">
+            <input
+              type="text"
+              value={spell.name}
+              onChange={e => onUpdate('name', e.target.value)}
+              placeholder="Spell name..."
+              className="bg-transparent font-semibold text-sm focus:outline-none flex-1 min-w-0"
+              style={{ color: 'var(--text)', borderBottom: '1px solid transparent' }}
+              onFocus={e => e.target.style.borderBottomColor = 'var(--accent)'}
+              onBlur={e => e.target.style.borderBottomColor = 'transparent'}
+            />
+            {spell.name && (
+              <button onClick={() => onShowCard(spell.name)} title="View spell card" className="text-xs flex-shrink-0 leading-none" style={{ color: 'var(--accent)', opacity: 0.7 }}
+                onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                onMouseLeave={e => e.currentTarget.style.opacity = 0.7}
+              >📖</button>
+            )}
+          </div>
           <div className="text-xs truncate" style={{ color: 'var(--text-dim)' }}>
             {spell.school} · {spell.castingTime || '—'} {spell.savingThrow ? `· Save: ${spell.savingThrow}` : ''}
           </div>
@@ -686,9 +783,10 @@ function SpellRow({ spell, abilityModVal, dcBonuses, onUpdate, onRemove, onCast,
 
 export default function Spells({ character, onChange, pins = {}, onTogglePin }) {
   const { spellcasting = {}, abilities } = character
-  const [filterLevel, setFilterLevel] = useState('all')
-  const [castResult, setCastResult]   = useState(null)
-  const [showLibrary, setShowLibrary] = useState(false)
+  const [filterLevel, setFilterLevel]   = useState('all')
+  const [castResult, setCastResult]     = useState(null)
+  const [showLibrary, setShowLibrary]   = useState(false)
+  const [spellCard, setSpellCard]       = useState(null)
 
   const spells         = spellcasting.spells    ?? []
   const slots          = spellcasting.slots     ?? {}
@@ -740,6 +838,9 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
     <div className="space-y-4">
       {/* Library modal */}
       {showLibrary && <SpellLibrary castingClass={spellcasting.class} onAdd={addSpell} onClose={() => setShowLibrary(false)} />}
+
+      {/* Spell card popup */}
+      {spellCard && <SpellCardPopup spellName={spellCard} onClose={() => setSpellCard(null)} />}
 
       {/* Cast popup */}
       {castResult && (
@@ -846,7 +947,7 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
                   {lvlSpells.map((spell, i) => {
                     const ri = spells.findIndex(s => s.id === spell.id)
                     return <SpellRow key={spell.id} spell={spell} abilityModVal={abilityModVal} dcBonuses={dcBonuses} isEven={i % 2 === 0}
-                      onUpdate={(k, v) => updateSpell(ri, k, v)} onRemove={() => removeSpell(ri)} onCast={() => castSpell(ri)} />
+                      onUpdate={(k, v) => updateSpell(ri, k, v)} onRemove={() => removeSpell(ri)} onCast={() => castSpell(ri)} onShowCard={setSpellCard} />
                   })}
                 </div>
               )
@@ -854,7 +955,7 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
           : filtered.map((spell, i) => {
               const ri = spells.findIndex(s => s.id === spell.id)
               return <SpellRow key={spell.id} spell={spell} abilityModVal={abilityModVal} dcBonuses={dcBonuses} isEven={i % 2 === 0}
-                onUpdate={(k, v) => updateSpell(ri, k, v)} onRemove={() => removeSpell(ri)} onCast={() => castSpell(ri)} />
+                onUpdate={(k, v) => updateSpell(ri, k, v)} onRemove={() => removeSpell(ri)} onCast={() => castSpell(ri)} onShowCard={setSpellCard} />
             })
         }
       </div>
