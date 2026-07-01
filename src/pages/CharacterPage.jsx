@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useCharacterStore } from '../store/characterStore'
 import { computeClassTotals } from '../data/pf1eData'
 import SigilBackground from '../components/SigilBackground'
+import PinButton from '../components/PinButton'
 import BasicInfo from '../components/sheet/BasicInfo'
 import AbilityScores from '../components/sheet/AbilityScores'
 import CombatStats from '../components/sheet/CombatStats'
@@ -140,7 +141,7 @@ export default function CharacterPage() {
 
         {activeTab === 'Overview' && (
           <>
-            <BasicInfo character={character} onChange={update} />
+            <BasicInfo character={character} onChange={update} pinned={pinnedMap.basicInfo} onTogglePin={() => toggleSectionPin('basicInfo')} />
             <AbilityScores
               abilities={character.abilities}
               onChange={updateAbility}
@@ -220,7 +221,10 @@ export default function CharacterPage() {
 
         {activeTab === 'Notes' && (
           <div className="card">
-            <h2 className="section-title">Notes</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="section-title mb-0">Notes</h2>
+              <PinButton pinned={pinnedMap.notes} onToggle={() => toggleSectionPin('notes')} />
+            </div>
             <textarea
               value={character.notes || ''}
               onChange={e => update('notes', e.target.value)}

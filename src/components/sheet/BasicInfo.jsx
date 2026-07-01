@@ -1,5 +1,6 @@
 import { ALIGNMENTS, RACES, CLASSES, CLASS_DATA, computeClassTotals } from '../../data/pf1eData'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import PinButton from '../PinButton'
 
 const emptyClassEntry = (isFavored = false) => ({
   id: crypto.randomUUID(),
@@ -107,8 +108,9 @@ function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored 
   )
 }
 
-export default function BasicInfo({ character, onChange }) {
+export default function BasicInfo({ character, onChange, pinned, onTogglePin }) {
   const portraitRef = useRef()
+  const [classesOpen, setClassesOpen] = useState(true)
 
   const handlePortrait = (e) => {
     const file = e.target.files[0]
@@ -174,6 +176,11 @@ export default function BasicInfo({ character, onChange }) {
 
   return (
     <div className="card">
+      {onTogglePin && (
+        <div className="flex justify-end mb-2">
+          <PinButton pinned={pinned} onToggle={onTogglePin} />
+        </div>
+      )}
       <div className="flex gap-4">
         {/* Portrait */}
         <div className="relative flex-shrink-0 self-stretch" style={{ width: '120px' }}>
@@ -220,19 +227,31 @@ export default function BasicInfo({ character, onChange }) {
       {/* ── Multiclass Manager ── */}
       <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--bg-border)' }}>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--accent)' }}>
-            Classes {totals.totalLevel > 0 && <span style={{ color: 'var(--text-dim)' }}>— Total Level {totals.totalLevel}</span>}
-          </h3>
-          <button onClick={addClass} className="btn-primary text-xs py-1 px-3">+ Add Class</button>
+          <button
+            onClick={() => setClassesOpen(o => !o)}
+            className="flex items-center gap-2 text-left"
+          >
+            <span className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--accent)' }}>
+              {classesOpen ? '▾' : '▸'} Classes
+            </span>
+            {totals.totalLevel > 0 && (
+              <span className="text-xs font-normal" style={{ color: 'var(--text-dim)' }}>
+                {(character.classes ?? []).map(c => `${c.className} ${c.level}`).join(' / ')} — Lvl {totals.totalLevel}
+              </span>
+            )}
+          </button>
+          <div className="flex gap-2">
+            {classesOpen && <button onClick={addClass} className="btn-primary text-xs py-1 px-3">+ Add Class</button>}
+          </div>
         </div>
 
-        {classes.length === 0 && (
+        {classesOpen && classes.length === 0 && (
           <div className="text-center py-4 text-sm" style={{ color: 'var(--text-faint)' }}>
             No classes yet. Click <strong>+ Add Class</strong> to get started.
           </div>
         )}
 
-        <div className="space-y-2">
+        {classesOpen && <div className="space-y-2">
           {classes.map((entry, i) => (
             <ClassEntry
               key={entry.id}
@@ -243,10 +262,10 @@ export default function BasicInfo({ character, onChange }) {
               onRemove={classes.length > 1 ? () => removeClass(i) : null}
             />
           ))}
-        </div>
+        </div>}
 
         {/* Computed totals */}
-        {totals.totalLevel > 0 && (
+        {classesOpen && totals.totalLevel > 0 && (
           <div className="mt-3 pt-3 rounded-lg p-3" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">

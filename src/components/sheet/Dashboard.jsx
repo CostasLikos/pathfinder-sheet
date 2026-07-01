@@ -1,10 +1,11 @@
-import { useState } from 'react'
-import { abilityMod, formatMod, SKILLS, DEFAULT_SKILL_ORDER, ABILITY_NAMES } from '../../data/pf1eData'
+import { useState, useRef } from 'react'
+import { abilityMod, formatMod, SKILLS, computeClassTotals } from '../../data/pf1eData'
 import SpinnerInput from '../SpinnerInput'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const SECTION_LABELS = {
+  basicInfo:    { icon: '🧙',  label: 'Character Info' },
   hp:           { icon: '❤️',  label: 'Hit Points' },
   abilities:    { icon: '💪',  label: 'Ability Scores' },
   ac:           { icon: '🛡️',  label: 'Armor Class' },
@@ -13,20 +14,30 @@ const SECTION_LABELS = {
   attacks:      { icon: '🗡️',  label: 'Attacks' },
   spellcasting: { icon: '✨',  label: 'Spellcasting' },
   spells:       { icon: '📖',  label: 'Spell List' },
+  statBuffs:    { icon: '⚡',  label: 'Stat Buffs' },
   buffs:        { icon: '⏱️',  label: 'Buffs & Tracking' },
   bardic:       { icon: '🎶',  label: 'Bardic Performance' },
-  feats:        { icon: '⚔️',  label: 'Feats' },
+  feats:        { icon: '🏅',  label: 'Feats' },
   traits:       { icon: '🌟',  label: 'Traits' },
   equipment:    { icon: '🎒',  label: 'Equipment' },
   currency:     { icon: '💰',  label: 'Currency' },
   notes:        { icon: '📝',  label: 'Notes' },
 }
 
-function WidgetCard({ id, label, icon, onUnpin, children }) {
+function WidgetCard({ id, label, icon, onUnpin, children, isDragging, onDragStart, onDragOver, onDrop, onDragEnd }) {
   return (
-    <div className="card" style={{ position: 'relative' }}>
+    <div
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+      className="card"
+      style={{ position: 'relative', opacity: isDragging ? 0.4 : 1, cursor: 'grab', transition: 'opacity 0.15s' }}
+    >
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-sm flex items-center gap-2" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>
+        <h3 className="font-bold text-sm flex items-center gap-2 select-none" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>
+          <span className="text-xs" style={{ color: 'var(--text-faint)' }}>☰</span>
           <span>{icon}</span> {label}
         </h3>
         <button onClick={() => onUnpin(id)} title="Unpin"
@@ -335,6 +346,84 @@ function NotesWidget({ character, onChange }) {
   )
 }
 
+function BasicInfoWidget({ character }) {
+  const classes = character.classes ?? []
+  const totals  = computeClassTotals(classes)
+  const classStr = classes.length > 0
+    ? classes.map(c => `${c.className} ${c.level}`).join(' / ')
+    : character.class || '—'
+  const level = classes.length > 0 ? totals.totalLevel : (character.level ?? '—')
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3">
+        {character.portrait
+          ? <img src={character.portrait} alt="" className="w-12 h-12 rounded object-cover flex-shrink-0" style={{ border: '1px solid var(--bg-border)' }} />
+          : <div className="w-12 h-12 rounded flex items-center justify-center flex-shrink-0 text-2xl" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>🧙</div>
+        }
+        <div className="min-w-0">
+          <div className="font-bold truncate" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>{character.name || 'Unnamed Hero'}</div>
+          <div className="text-xs truncate" style={{ color: 'var(--text-dim)' }}>{classStr} · Lvl {level}</div>
+          {character.race && <div className="text-xs" style={{ color: 'var(--text-faint)' }}>{character.race}{character.alignment ? ` · ${character.alignment}` : ''}</div>}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        {[
+          ['Deity',      character.deity],
+          ['Homeland',   character.homeland],
+          ['Background', character.background],
+          ['Size',       character.size],
+          ['Height',     character.height],
+          ['Weight',     character.weight],
+          ['Age',        character.age],
+          ['XP',         character.experience],
+        ].filter(([,v]) => v).map(([lbl, val]) => (
+          <div key={lbl} className="flex flex-col">
+            <span style={{ color: 'var(--text-faint)' }}>{lbl}</span>
+            <span style={{ color: 'var(--text-dim)' }}>{val}</span>
+          </div>
+        ))}
+      </div>
+      {character.languages && (
+        <div className="text-xs" style={{ color: 'var(--text-faint)' }}>
+          <span style={{ color: 'var(--text-dim)' }}>Languages: </span>{character.languages}
+        </div>
+      )}
+      {classes.length > 0 && (
+        <div className="pt-2 flex gap-3 text-xs justify-center" style={{ borderTop: '1px solid var(--bg-border)' }}>
+          <span style={{ color: 'var(--text-faint)' }}>BAB <strong style={{ color: 'var(--text)' }}>+{totals.totalBAB}</strong></span>
+          <span style={{ color: 'var(--text-faint)' }}>Fort <strong style={{ color: 'var(--text)' }}>+{totals.totalFort}</strong></span>
+          <span style={{ color: 'var(--text-faint)' }}>Ref <strong style={{ color: 'var(--text)' }}>+{totals.totalRef}</strong></span>
+          <span style={{ color: 'var(--text-faint)' }}>Will <strong style={{ color: 'var(--text)' }}>+{totals.totalWill}</strong></span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function StatBuffsWidget({ character, onChange }) {
+  const buffs = character.statBuffs ?? []
+  if (!buffs.length) return <p className="text-xs text-center py-2" style={{ color: 'var(--text-faint)' }}>No stat buffs added.</p>
+  const toggle = (id) => onChange('statBuffs', buffs.map(b => b.id === id ? { ...b, active: !b.active } : b))
+  const STAT_KEYS = ['str','dex','con','int','wis','cha','ac','fort','ref','will','attackRoll','damage','hp']
+  return (
+    <div className="space-y-1">
+      {buffs.map(b => {
+        const activeMods = STAT_KEYS.filter(k => (b.mods?.[k] ?? 0) !== 0)
+        return (
+          <div key={b.id} className="flex items-center gap-2 p-2 rounded text-xs" style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid ${b.active ? 'var(--accent)' : 'var(--bg-border)'}`, opacity: b.active ? 1 : 0.5 }}>
+            <button onClick={() => toggle(b.id)} className="w-4 h-4 rounded-full flex-shrink-0 border" style={{ backgroundColor: b.active ? 'var(--accent)' : 'transparent', borderColor: 'var(--accent)' }} />
+            <span className="flex-1 font-semibold truncate" style={{ color: 'var(--text)' }}>{b.name}</span>
+            <span style={{ color: 'var(--text-faint)' }}>
+              {activeMods.map(k => `${(b.mods[k]>0?'+':'')}${b.mods[k]} ${k}`).join(', ')}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ─── Pinned Skills Widget ─────────────────────────────────────────────────────
 
 function PinnedSkillsWidget({ character, onUnpin }) {
@@ -389,6 +478,7 @@ function PinnedSkillsWidget({ character, onUnpin }) {
 
 function renderWidget(id, character, onChange) {
   switch (id) {
+    case 'basicInfo':    return <BasicInfoWidget character={character} />
     case 'hp':           return <HPWidget character={character} onChange={onChange} />
     case 'abilities':    return <AbilitiesWidget character={character} onChange={onChange} />
     case 'ac':           return <ACWidget character={character} />
@@ -397,6 +487,7 @@ function renderWidget(id, character, onChange) {
     case 'attacks':      return <AttacksWidget character={character} />
     case 'spellcasting': return <SpellcastingWidget character={character} />
     case 'spells':       return <SpellsWidget character={character} />
+    case 'statBuffs':    return <StatBuffsWidget character={character} onChange={onChange} />
     case 'buffs':        return <BuffsWidget character={character} onChange={onChange} />
     case 'bardic':       return <BardicWidget character={character} onChange={onChange} />
     case 'feats':        return <FeatsWidget character={character} />
@@ -415,6 +506,10 @@ export default function Dashboard({ character, onChange }) {
   const pinnedSections = pins.sections ?? []
   const hasPinnedSkills = (pins.skills ?? []).length > 0
 
+  const dragId    = useRef(null)
+  const dragOverId = useRef(null)
+  const [dragging, setDragging] = useState(null)
+
   const unpin = (id) => {
     onChange('pins', { ...pins, sections: pinnedSections.filter(s => s !== id) })
   }
@@ -422,6 +517,27 @@ export default function Dashboard({ character, onChange }) {
   const unpinSkill = (key) => {
     onChange('pins', { ...pins, skills: (pins.skills ?? []).filter(k => k !== key) })
   }
+
+  const onDragStart = (id) => { dragId.current = id; setDragging(id) }
+  const onDragOver  = (e, id) => { e.preventDefault(); dragOverId.current = id }
+  const onDrop      = (e) => {
+    e.preventDefault()
+    const from = dragId.current
+    const to   = dragOverId.current
+    if (!from || !to || from === to) return
+    const next = [...pinnedSections]
+    const fi = next.indexOf(from), ti = next.indexOf(to)
+    if (fi === -1 || ti === -1) return
+    next.splice(fi, 1)
+    next.splice(ti, 0, from)
+    onChange('pins', { ...pins, sections: next })
+    dragId.current = null; dragOverId.current = null; setDragging(null)
+  }
+  const onDragEnd = () => { dragId.current = null; dragOverId.current = null; setDragging(null) }
+
+  // Skills card gets a virtual id for drag
+  const SKILLS_ID = '__skills__'
+  const allIds = hasPinnedSkills ? [SKILLS_ID, ...pinnedSections] : pinnedSections
 
   const isEmpty = pinnedSections.length === 0 && !hasPinnedSkills
 
@@ -432,15 +548,23 @@ export default function Dashboard({ character, onChange }) {
         <h2 className="font-bold text-xl mb-2" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>Dashboard Empty</h2>
         <p className="text-sm mb-1" style={{ color: 'var(--text-dim)' }}>Pin sections using the 📌 icon on any card header across all tabs.</p>
         <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Pin individual skills from the Skills tab.</p>
+        <p className="text-xs mt-2" style={{ color: 'var(--text-faint)' }}>Drag cards to reorder them once pinned.</p>
       </div>
     )
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
-      {/* Pinned Skills always first */}
       {hasPinnedSkills && (
-        <WidgetCard id="skills" label="Pinned Skills" icon="🎯" onUnpin={() => {}}>
+        <WidgetCard
+          id={SKILLS_ID} label="Pinned Skills" icon="🎯"
+          onUnpin={() => {}}
+          isDragging={dragging === SKILLS_ID}
+          onDragStart={() => onDragStart(SKILLS_ID)}
+          onDragOver={e => onDragOver(e, SKILLS_ID)}
+          onDrop={onDrop}
+          onDragEnd={onDragEnd}
+        >
           <PinnedSkillsWidget character={character} onUnpin={unpinSkill} />
           <div className="mt-2 pt-2 flex justify-end" style={{ borderTop: '1px solid var(--bg-border)' }}>
             <button
@@ -458,7 +582,15 @@ export default function Dashboard({ character, onChange }) {
         const info = SECTION_LABELS[id]
         if (!info) return null
         return (
-          <WidgetCard key={id} id={id} label={info.label} icon={info.icon} onUnpin={unpin}>
+          <WidgetCard
+            key={id} id={id} label={info.label} icon={info.icon}
+            onUnpin={unpin}
+            isDragging={dragging === id}
+            onDragStart={() => onDragStart(id)}
+            onDragOver={e => onDragOver(e, id)}
+            onDrop={onDrop}
+            onDragEnd={onDragEnd}
+          >
             {renderWidget(id, character, onChange)}
           </WidgetCard>
         )
