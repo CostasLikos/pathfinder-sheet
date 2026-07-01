@@ -724,8 +724,13 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
   }
 
   const resetAll = () => {
-    updateSC('spells', spells.map(s => ({ ...s, used: 0 })))
-    const r = {}; Object.keys(slots).forEach(k => { r[k] = { ...slots[k], used: 0 } }); updateSC('slots', r)
+    const resetSlots = {}
+    Object.keys(slots).forEach(k => { resetSlots[k] = { ...slots[k], used: 0 } })
+    onChange('spellcasting', {
+      ...spellcasting,
+      spells: spells.map(s => ({ ...s, used: 0 })),
+      slots: resetSlots,
+    })
   }
 
   const spellLevels = [0,1,2,3,4,5,6,7,8,9]
