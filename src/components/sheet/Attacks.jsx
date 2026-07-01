@@ -415,8 +415,12 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
 
 // ── helpers to extract damage & attack type from description ──
 function extractDamage(desc = '') {
-  const m = desc.match(/(\d+d\d+(?:\+\d+)?(?:\s*(?:points?|damage))?(?:\s+(?:of\s+)?[\w\s]+damage)?)/i)
-  return m ? m[1].replace(/points? of /i, '').replace(/points? /i, '').trim() : null
+  // Only match dice that appear in an explicit damage context
+  const m = desc.match(/(\d+d\d+(?:[+-]\d+)?)\s*(?:points?\s+of\s+[\w\s]+damage|points?\s+damage|(?:fire|cold|acid|electricity|sonic|force|negative|positive|piercing|slashing|bludgeoning|untyped)?\s*damage)/i)
+  if (m) return m[1].trim()
+  // Also match "Xd6 + Y damage" style without a damage type word right after the dice
+  const m2 = desc.match(/deals?\s+(\d+d\d+(?:[+-]\d+)?)\b/i)
+  return m2 ? m2[1].trim() : null
 }
 
 function scaledDamage(desc = '', casterLevel = 1) {
