@@ -1,0 +1,200 @@
+[
+  {
+    "category": "Simple Weapons — Melee",
+    "items": [
+      { "name": "Dagger",            "cost": "2 gp",   "dmg": "1d4",  "crit": "19–20/×2", "weight": "1 lb",   "type": "P or S", "properties": "" },
+      { "name": "Gauntlet",          "cost": "2 gp",   "dmg": "1d3",  "crit": "×2",       "weight": "1 lb",   "type": "B",      "properties": "Can't be disarmed" },
+      { "name": "Light Mace",        "cost": "5 gp",   "dmg": "1d6",  "crit": "×2",       "weight": "4 lbs",  "type": "B",      "properties": "" },
+      { "name": "Sickle",            "cost": "6 gp",   "dmg": "1d6",  "crit": "×2",       "weight": "2 lbs",  "type": "S",      "properties": "Trip" },
+      { "name": "Club",              "cost": "—",      "dmg": "1d6",  "crit": "×2",       "weight": "3 lbs",  "type": "B",      "properties": "Thrown 10 ft" },
+      { "name": "Heavy Mace",        "cost": "12 gp",  "dmg": "1d8",  "crit": "×2",       "weight": "8 lbs",  "type": "B",      "properties": "" },
+      { "name": "Morningstar",       "cost": "8 gp",   "dmg": "1d8",  "crit": "×2",       "weight": "6 lbs",  "type": "B and P","properties": "" },
+      { "name": "Quarterstaff",      "cost": "—",      "dmg": "1d6/1d6","crit":"×2",      "weight": "4 lbs",  "type": "B",      "properties": "Double, Two-handed" },
+      { "name": "Shortspear",        "cost": "1 gp",   "dmg": "1d6",  "crit": "×2",       "weight": "3 lbs",  "type": "P",      "properties": "Thrown 20 ft" },
+      { "name": "Spear",             "cost": "2 gp",   "dmg": "1d8",  "crit": "×3",       "weight": "6 lbs",  "type": "P",      "properties": "Thrown 20 ft, Two-handed" },
+      { "name": "Punching Dagger",   "cost": "2 gp",   "dmg": "1d4",  "crit": "×3",       "weight": "1 lb",   "type": "P",      "properties": "" },
+      { "name": "Unarmed Strike",    "cost": "—",      "dmg": "1d3",  "crit": "×2",       "weight": "—",      "type": "B",      "properties": "Nonlethal" }
+    ]
+  },
+  {
+    "category": "Simple Weapons — Ranged",
+    "items": [
+      { "name": "Light Crossbow",    "cost": "35 gp",  "dmg": "1d8",  "crit": "19–20/×2", "weight": "4 lbs",  "type": "P", "range": "80 ft",  "properties": "" },
+      { "name": "Heavy Crossbow",    "cost": "50 gp",  "dmg": "1d10", "crit": "19–20/×2", "weight": "8 lbs",  "type": "P", "range": "120 ft", "properties": "Full-round reload" },
+      { "name": "Hand Crossbow",     "cost": "100 gp", "dmg": "1d4",  "crit": "19–20/×2", "weight": "2 lbs",  "type": "P", "range": "30 ft",  "properties": "Exotic" },
+      { "name": "Dart",              "cost": "5 sp",   "dmg": "1d4",  "crit": "×2",       "weight": "0.5 lb", "type": "P", "range": "20 ft",  "properties": "" },
+      { "name": "Sling",             "cost": "—",      "dmg": "1d4",  "crit": "×2",       "weight": "—",      "type": "B", "range": "50 ft",  "properties": "" },
+      { "name": "Javelin",           "cost": "1 gp",   "dmg": "1d6",  "crit": "×2",       "weight": "2 lbs",  "type": "P", "range": "30 ft",  "properties": "" }
+    ]
+  },
+  {
+    "category": "Martial Weapons — Melee",
+    "items": [
+      { "name": "Handaxe",           "cost": "6 gp",   "dmg": "1d6",  "crit": "×3",       "weight": "3 lbs",  "type": "S",      "properties": "Thrown 10 ft" },
+      { "name": "Light Hammer",      "cost": "1 gp",   "dmg": "1d4",  "crit": "×2",       "weight": "2 lbs",  "type": "B",      "properties": "Thrown 20 ft" },
+      { "name": "Light Pick",        "cost": "4 gp",   "dmg": "1d4",  "crit": "×4",       "weight": "3 lbs",  "type": "P",      "properties": "" },
+      { "name": "Shortsword",        "cost": "10 gp",  "dmg": "1d6",  "crit": "19–20/×2", "weight": "2 lbs",  "type": "P or S", "properties": "" },
+      { "name": "Sap",               "cost": "1 gp",   "dmg": "1d6",  "crit": "×2",       "weight": "2 lbs",  "type": "B",      "properties": "Nonlethal" },
+      { "name": "Battleaxe",         "cost": "10 gp",  "dmg": "1d8",  "crit": "×3",       "weight": "6 lbs",  "type": "S",      "properties": "" },
+      { "name": "Flail",             "cost": "8 gp",   "dmg": "1d8",  "crit": "×2",       "weight": "5 lbs",  "type": "B",      "properties": "Disarm, Trip" },
+      { "name": "Heavy Pick",        "cost": "8 gp",   "dmg": "1d6",  "crit": "×4",       "weight": "6 lbs",  "type": "P",      "properties": "" },
+      { "name": "Longsword",         "cost": "15 gp",  "dmg": "1d8",  "crit": "19–20/×2", "weight": "4 lbs",  "type": "S",      "properties": "" },
+      { "name": "Rapier",            "cost": "20 gp",  "dmg": "1d6",  "crit": "18–20/×2", "weight": "2 lbs",  "type": "P",      "properties": "Finesse" },
+      { "name": "Scimitar",          "cost": "15 gp",  "dmg": "1d6",  "crit": "18–20/×2", "weight": "4 lbs",  "type": "S",      "properties": "" },
+      { "name": "Trident",           "cost": "15 gp",  "dmg": "1d8",  "crit": "×2",       "weight": "4 lbs",  "type": "P",      "properties": "Thrown 10 ft, Brace" },
+      { "name": "Warhammer",         "cost": "12 gp",  "dmg": "1d8",  "crit": "×3",       "weight": "5 lbs",  "type": "B",      "properties": "" },
+      { "name": "Falchion",          "cost": "75 gp",  "dmg": "2d4",  "crit": "18–20/×2", "weight": "8 lbs",  "type": "S",      "properties": "" },
+      { "name": "Glaive",            "cost": "8 gp",   "dmg": "1d10", "crit": "×3",       "weight": "10 lbs", "type": "S",      "properties": "Reach, Two-handed" },
+      { "name": "Greataxe",          "cost": "20 gp",  "dmg": "1d12", "crit": "×3",       "weight": "12 lbs", "type": "S",      "properties": "Two-handed" },
+      { "name": "Greatclub",         "cost": "5 gp",   "dmg": "1d10", "crit": "×2",       "weight": "8 lbs",  "type": "B",      "properties": "Two-handed" },
+      { "name": "Greatsword",        "cost": "50 gp",  "dmg": "2d6",  "crit": "19–20/×2", "weight": "8 lbs",  "type": "S",      "properties": "Two-handed" },
+      { "name": "Guisarme",          "cost": "9 gp",   "dmg": "2d4",  "crit": "×3",       "weight": "12 lbs", "type": "S",      "properties": "Reach, Trip, Two-handed" },
+      { "name": "Halberd",           "cost": "10 gp",  "dmg": "1d10", "crit": "×3",       "weight": "12 lbs", "type": "P or S", "properties": "Brace, Trip, Two-handed" },
+      { "name": "Heavy Flail",       "cost": "15 gp",  "dmg": "1d10", "crit": "19–20/×2", "weight": "10 lbs", "type": "B",      "properties": "Disarm, Trip, Two-handed" },
+      { "name": "Lance",             "cost": "10 gp",  "dmg": "1d8",  "crit": "×3",       "weight": "10 lbs", "type": "P",      "properties": "Reach, Two-handed (mounted ×2 dmg)" },
+      { "name": "Ranseur",           "cost": "10 gp",  "dmg": "2d4",  "crit": "×3",       "weight": "12 lbs", "type": "P",      "properties": "Disarm, Reach, Two-handed" },
+      { "name": "Scythe",            "cost": "18 gp",  "dmg": "2d4",  "crit": "×4",       "weight": "10 lbs", "type": "P or S", "properties": "Trip, Two-handed" }
+    ]
+  },
+  {
+    "category": "Martial Weapons — Ranged",
+    "items": [
+      { "name": "Shortbow",          "cost": "30 gp",  "dmg": "1d6",  "crit": "×3",       "weight": "2 lbs",  "type": "P", "range": "60 ft",  "properties": "" },
+      { "name": "Composite Shortbow","cost": "75 gp",  "dmg": "1d6",  "crit": "×3",       "weight": "2 lbs",  "type": "P", "range": "70 ft",  "properties": "STR bonus applies" },
+      { "name": "Longbow",           "cost": "75 gp",  "dmg": "1d8",  "crit": "×3",       "weight": "3 lbs",  "type": "P", "range": "100 ft", "properties": "Min STR 0" },
+      { "name": "Composite Longbow", "cost": "100 gp", "dmg": "1d8",  "crit": "×3",       "weight": "3 lbs",  "type": "P", "range": "110 ft", "properties": "STR bonus applies" },
+      { "name": "Throwing Axe",      "cost": "8 gp",   "dmg": "1d6",  "crit": "×2",       "weight": "2 lbs",  "type": "S", "range": "10 ft",  "properties": "" }
+    ]
+  },
+  {
+    "category": "Exotic Weapons — Melee",
+    "items": [
+      { "name": "Kama",              "cost": "2 gp",   "dmg": "1d6",  "crit": "×2",       "weight": "2 lbs",  "type": "S",      "properties": "Monk, Trip" },
+      { "name": "Nunchaku",          "cost": "2 gp",   "dmg": "1d6",  "crit": "×2",       "weight": "2 lbs",  "type": "B",      "properties": "Disarm, Monk" },
+      { "name": "Siangham",          "cost": "3 gp",   "dmg": "1d6",  "crit": "×2",       "weight": "1 lb",   "type": "P",      "properties": "Monk" },
+      { "name": "Sai",               "cost": "1 gp",   "dmg": "1d4",  "crit": "×2",       "weight": "1 lb",   "type": "B",      "properties": "Disarm, Monk" },
+      { "name": "Bastard Sword",     "cost": "35 gp",  "dmg": "1d10", "crit": "19–20/×2", "weight": "6 lbs",  "type": "S",      "properties": "Can be used two-handed as martial" },
+      { "name": "Dwarven Waraxe",    "cost": "30 gp",  "dmg": "1d10", "crit": "×3",       "weight": "8 lbs",  "type": "S",      "properties": "Can be used two-handed as martial" },
+      { "name": "Whip",              "cost": "1 gp",   "dmg": "1d3",  "crit": "×2",       "weight": "2 lbs",  "type": "S",      "properties": "Disarm, Nonlethal, Reach, Trip" },
+      { "name": "Elven Curve Blade", "cost": "80 gp",  "dmg": "1d10", "crit": "18–20/×2", "weight": "7 lbs",  "type": "S",      "properties": "Finesse, Two-handed" },
+      { "name": "Gnome Hooked Hammer","cost":"20 gp",  "dmg": "1d6/1d4","crit":"×3/×4",   "weight": "6 lbs",  "type": "B/P",    "properties": "Double, Trip" },
+      { "name": "Two-Bladed Sword",  "cost": "100 gp", "dmg": "1d8/1d8","crit":"19–20/×2","weight": "10 lbs", "type": "S",      "properties": "Double" },
+      { "name": "Orc Double Axe",    "cost": "60 gp",  "dmg": "1d8/1d8","crit":"×3",      "weight": "15 lbs", "type": "S",      "properties": "Double" },
+      { "name": "Dire Flail",        "cost": "90 gp",  "dmg": "1d8/1d8","crit":"×2",      "weight": "10 lbs", "type": "B",      "properties": "Disarm, Double, Trip" },
+      { "name": "Spiked Chain",      "cost": "25 gp",  "dmg": "2d4",  "crit": "×2",       "weight": "10 lbs", "type": "P",      "properties": "Disarm, Reach, Trip" },
+      { "name": "Kusarigama",        "cost": "12 gp",  "dmg": "1d3/1d6","crit":"×2",      "weight": "3 lbs",  "type": "S/B",    "properties": "Disarm, Double, Monk, Reach, Trip" }
+    ]
+  },
+  {
+    "category": "Armor — Light",
+    "items": [
+      { "name": "Padded",            "cost": "5 gp",   "acBonus": 1,  "maxDex": 8,  "acp": 0,  "spellFailure": "5%",  "speed30": "30 ft", "weight": "10 lbs" },
+      { "name": "Leather",           "cost": "10 gp",  "acBonus": 2,  "maxDex": 6,  "acp": 0,  "spellFailure": "10%", "speed30": "30 ft", "weight": "15 lbs" },
+      { "name": "Studded Leather",   "cost": "25 gp",  "acBonus": 3,  "maxDex": 5,  "acp": -1, "spellFailure": "15%", "speed30": "30 ft", "weight": "20 lbs" },
+      { "name": "Chain Shirt",       "cost": "100 gp", "acBonus": 4,  "maxDex": 4,  "acp": -2, "spellFailure": "20%", "speed30": "30 ft", "weight": "25 lbs" }
+    ]
+  },
+  {
+    "category": "Armor — Medium",
+    "items": [
+      { "name": "Hide",              "cost": "15 gp",  "acBonus": 4,  "maxDex": 4,  "acp": -3, "spellFailure": "20%", "speed30": "20 ft", "weight": "25 lbs" },
+      { "name": "Scale Mail",        "cost": "50 gp",  "acBonus": 5,  "maxDex": 3,  "acp": -4, "spellFailure": "25%", "speed30": "20 ft", "weight": "30 lbs" },
+      { "name": "Chainmail",         "cost": "150 gp", "acBonus": 6,  "maxDex": 2,  "acp": -5, "spellFailure": "30%", "speed30": "20 ft", "weight": "40 lbs" },
+      { "name": "Breastplate",       "cost": "200 gp", "acBonus": 6,  "maxDex": 3,  "acp": -4, "spellFailure": "25%", "speed30": "20 ft", "weight": "30 lbs" }
+    ]
+  },
+  {
+    "category": "Armor — Heavy",
+    "items": [
+      { "name": "Splint Mail",       "cost": "200 gp", "acBonus": 7,  "maxDex": 0,  "acp": -7, "spellFailure": "40%", "speed30": "20 ft", "weight": "45 lbs" },
+      { "name": "Banded Mail",       "cost": "250 gp", "acBonus": 7,  "maxDex": 1,  "acp": -6, "spellFailure": "35%", "speed30": "20 ft", "weight": "35 lbs" },
+      { "name": "Half-Plate",        "cost": "600 gp", "acBonus": 8,  "maxDex": 0,  "acp": -7, "spellFailure": "40%", "speed30": "20 ft", "weight": "50 lbs" },
+      { "name": "Full Plate",        "cost": "1500 gp","acBonus": 9,  "maxDex": 1,  "acp": -6, "spellFailure": "35%", "speed30": "20 ft", "weight": "50 lbs" }
+    ]
+  },
+  {
+    "category": "Shields",
+    "items": [
+      { "name": "Buckler",           "cost": "5 gp",   "acBonus": 1,  "acp": -1, "spellFailure": "5%",  "weight": "5 lbs",  "properties": "−1 to attacks with shield arm" },
+      { "name": "Light Wooden",      "cost": "3 gp",   "acBonus": 1,  "acp": -1, "spellFailure": "5%",  "weight": "5 lbs",  "properties": "" },
+      { "name": "Light Steel",       "cost": "9 gp",   "acBonus": 1,  "acp": -1, "spellFailure": "5%",  "weight": "6 lbs",  "properties": "" },
+      { "name": "Heavy Wooden",      "cost": "7 gp",   "acBonus": 2,  "acp": -2, "spellFailure": "15%", "weight": "10 lbs", "properties": "" },
+      { "name": "Heavy Steel",       "cost": "20 gp",  "acBonus": 2,  "acp": -2, "spellFailure": "15%", "weight": "15 lbs", "properties": "" },
+      { "name": "Tower Shield",      "cost": "30 gp",  "acBonus": 4,  "acp": -10,"spellFailure": "50%", "weight": "45 lbs", "properties": "Cover action: +4 cover AC; max DEX +2" }
+    ]
+  },
+  {
+    "category": "Adventuring Gear",
+    "items": [
+      { "name": "Backpack",          "cost": "2 gp",   "weight": "2 lbs",  "properties": "Holds 1 cubic ft / 2 lbs per Str 10" },
+      { "name": "Bedroll",           "cost": "1 sp",   "weight": "5 lbs",  "properties": "" },
+      { "name": "Blanket",           "cost": "5 sp",   "weight": "3 lbs",  "properties": "" },
+      { "name": "Caltrops",          "cost": "1 gp",   "weight": "2 lbs",  "properties": "Covers 5-ft square; DC 15 Ref or speed halved for 24 hr" },
+      { "name": "Candle",            "cost": "1 cp",   "weight": "—",      "properties": "Dim light 5 ft, 1 hr" },
+      { "name": "Canvas (sq. yd.)",  "cost": "1 sp",   "weight": "1 lb",   "properties": "" },
+      { "name": "Chain (10 ft.)",    "cost": "30 gp",  "weight": "2 lbs",  "properties": "Break DC 26" },
+      { "name": "Chalk",             "cost": "1 cp",   "weight": "—",      "properties": "" },
+      { "name": "Crowbar",           "cost": "2 gp",   "weight": "5 lbs",  "properties": "+2 Str to open doors" },
+      { "name": "Flint & Steel",     "cost": "1 gp",   "weight": "—",      "properties": "Light fire (full-round)" },
+      { "name": "Grappling Hook",    "cost": "1 gp",   "weight": "4 lbs",  "properties": "DC 10 to catch on surface" },
+      { "name": "Hammer",            "cost": "5 sp",   "weight": "2 lbs",  "properties": "" },
+      { "name": "Lantern, Bullseye", "cost": "12 gp",  "weight": "3 lbs",  "properties": "Bright 60-ft cone, dim 120 ft; 6 hr/pint" },
+      { "name": "Lantern, Hooded",   "cost": "7 gp",   "weight": "2 lbs",  "properties": "Bright 30 ft, dim 60 ft; 6 hr/pint" },
+      { "name": "Lock (average)",    "cost": "40 gp",  "weight": "1 lb",   "properties": "DC 25 Open Lock" },
+      { "name": "Lock (good)",       "cost": "80 gp",  "weight": "1 lb",   "properties": "DC 30 Open Lock" },
+      { "name": "Lock (superior)",   "cost": "150 gp", "weight": "1 lb",   "properties": "DC 40 Open Lock" },
+      { "name": "Manacles",          "cost": "15 gp",  "weight": "2 lbs",  "properties": "DC 30 break, DC 35 Escape Artist" },
+      { "name": "Oil (1 pint)",      "cost": "1 sp",   "weight": "1 lb",   "properties": "Fuel 6 hr; can be used as splash weapon" },
+      { "name": "Piton",             "cost": "1 sp",   "weight": "0.5 lb", "properties": "" },
+      { "name": "Pole (10 ft.)",     "cost": "5 cp",   "weight": "8 lbs",  "properties": "" },
+      { "name": "Rope, Hemp (50 ft.)","cost":"1 gp",   "weight": "10 lbs", "properties": "Break DC 23; Climb DC 10" },
+      { "name": "Rope, Silk (50 ft.)","cost":"10 gp",  "weight": "5 lbs",  "properties": "Break DC 24; Climb DC 5" },
+      { "name": "Sack",              "cost": "1 sp",   "weight": "0.5 lb", "properties": "Holds 1 cubic ft / 30 lbs" },
+      { "name": "Signet Ring",       "cost": "5 gp",   "weight": "—",      "properties": "" },
+      { "name": "Tent",              "cost": "10 gp",  "weight": "20 lbs", "properties": "Shelters 2 people" },
+      { "name": "Torch",             "cost": "1 cp",   "weight": "1 lb",   "properties": "Bright 20 ft, dim 40 ft; 1 hr" },
+      { "name": "Waterskin",         "cost": "1 gp",   "weight": "4 lbs",  "properties": "1 gallon" },
+      { "name": "Whetstone",         "cost": "2 cp",   "weight": "1 lb",   "properties": "" }
+    ]
+  },
+  {
+    "category": "Tools & Skill Kits",
+    "items": [
+      { "name": "Artisan's Tools",       "cost": "5 gp",   "weight": "5 lbs",  "properties": "Required for Craft checks" },
+      { "name": "Artisan's Tools (masterwork)", "cost": "55 gp", "weight": "5 lbs", "properties": "+2 Craft checks" },
+      { "name": "Climber's Kit",         "cost": "80 gp",  "weight": "5 lbs",  "properties": "+2 Climb checks" },
+      { "name": "Disguise Kit",          "cost": "50 gp",  "weight": "8 lbs",  "properties": "+2 Disguise checks, 10 uses" },
+      { "name": "Healer's Kit",          "cost": "50 gp",  "weight": "1 lb",   "properties": "+2 Heal checks, 10 uses" },
+      { "name": "Holly & Mistletoe",     "cost": "—",      "weight": "—",      "properties": "Druid divine focus" },
+      { "name": "Holy Symbol (wooden)",  "cost": "1 gp",   "weight": "—",      "properties": "Divine focus" },
+      { "name": "Holy Symbol (silver)",  "cost": "25 gp",  "weight": "1 lb",   "properties": "Divine focus" },
+      { "name": "Magnifying Glass",      "cost": "100 gp", "weight": "—",      "properties": "+2 Appraise (fine detail); fire focus" },
+      { "name": "Musical Instrument",    "cost": "5 gp",   "weight": "3 lbs",  "properties": "Required for Perform (instrument)" },
+      { "name": "Spell Component Pouch", "cost": "5 gp",   "weight": "2 lbs",  "properties": "All non-costly material components" },
+      { "name": "Spellbook (blank)",     "cost": "15 gp",  "weight": "3 lbs",  "properties": "100 pages" },
+      { "name": "Thieves' Tools",        "cost": "30 gp",  "weight": "1 lb",   "properties": "Required for Disable Device/Open Lock" },
+      { "name": "Thieves' Tools (mw)",   "cost": "100 gp", "weight": "2 lbs",  "properties": "+2 Disable Device/Open Lock" },
+      { "name": "Alchemist's Lab",       "cost": "200 gp", "weight": "40 lbs", "properties": "+2 Craft (alchemy); required for some checks" },
+      { "name": "Antitoxin",             "cost": "50 gp",  "weight": "—",      "properties": "+5 Fort vs. poison for 1 hr" },
+      { "name": "Smokestick",            "cost": "20 gp",  "weight": "0.5 lb", "properties": "20-ft smoke cloud for 1 round" },
+      { "name": "Sunrod",                "cost": "2 gp",   "weight": "1 lb",   "properties": "Bright 30 ft, dim 60 ft; 6 hr" },
+      { "name": "Tanglefoot Bag",        "cost": "50 gp",  "weight": "4 lbs",  "properties": "Entangle target; DC 15 Ref or stuck to floor" },
+      { "name": "Thunderstone",          "cost": "30 gp",  "weight": "1 lb",   "properties": "DC 15 Fort or deafened 1 hr; creatures in 10 ft must save" }
+    ]
+  },
+  {
+    "category": "Vehicles & Transport",
+    "items": [
+      { "name": "Horse (light)",     "cost": "75 gp",   "weight": "—", "properties": "Speed 60 ft" },
+      { "name": "Horse (heavy)",     "cost": "200 gp",  "weight": "—", "properties": "Speed 50 ft" },
+      { "name": "Pony",              "cost": "30 gp",   "weight": "—", "properties": "Speed 40 ft" },
+      { "name": "Warhorse (light)",  "cost": "150 gp",  "weight": "—", "properties": "Speed 60 ft, combat trained" },
+      { "name": "Warhorse (heavy)",  "cost": "400 gp",  "weight": "—", "properties": "Speed 50 ft, combat trained" },
+      { "name": "Saddle (riding)",   "cost": "10 gp",   "weight": "25 lbs", "properties": "" },
+      { "name": "Saddle (military)", "cost": "20 gp",   "weight": "30 lbs", "properties": "+2 Ride checks" },
+      { "name": "Saddle (pack)",     "cost": "5 gp",    "weight": "15 lbs", "properties": "" },
+      { "name": "Cart",              "cost": "15 gp",   "weight": "200 lbs","properties": "Carries 2 tons" },
+      { "name": "Wagon",             "cost": "35 gp",   "weight": "400 lbs","properties": "Carries 4 tons" }
+    ]
+  }
+]

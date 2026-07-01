@@ -1,0 +1,383 @@
+[
+  {
+    "category": "Armor & Shield Enhancements",
+    "items": [
+      { "name": "+1 Enhancement",    "cost": "1,000 gp",    "slot": "armor/shield", "cl": 5,  "aura": "Faint abjuration",    "description": "+1 to armor/shield AC bonus." },
+      { "name": "+2 Enhancement",    "cost": "4,000 gp",    "slot": "armor/shield", "cl": 8,  "aura": "Moderate abjuration", "description": "+2 to armor/shield AC bonus." },
+      { "name": "+3 Enhancement",    "cost": "9,000 gp",    "slot": "armor/shield", "cl": 11, "aura": "Moderate abjuration", "description": "+3 to armor/shield AC bonus." },
+      { "name": "+4 Enhancement",    "cost": "16,000 gp",   "slot": "armor/shield", "cl": 14, "aura": "Strong abjuration",   "description": "+4 to armor/shield AC bonus." },
+      { "name": "+5 Enhancement",    "cost": "25,000 gp",   "slot": "armor/shield", "cl": 17, "aura": "Strong abjuration",   "description": "+5 to armor/shield AC bonus." },
+      { "name": "Bashing",           "cost": "+1 bonus",    "slot": "shield",        "cl": 8,  "aura": "Moderate transmutation", "description": "Shield can be used as a +1 weapon (size up for damage)." },
+      { "name": "Blinding",          "cost": "+1 bonus",    "slot": "shield",        "cl": 5,  "aura": "Faint evocation",    "description": "On a successful shield bash, target is blinded for 1d4 rounds (Fort DC 14 negates)." },
+      { "name": "Fortification (Light)", "cost": "+1 bonus","slot": "armor",         "cl": 13, "aura": "Strong abjuration",  "description": "25% chance to negate critical hits and sneak attacks." },
+      { "name": "Fortification (Moderate)","cost":"+3 bonus","slot":"armor",         "cl": 13, "aura": "Strong abjuration",  "description": "75% chance to negate critical hits and sneak attacks." },
+      { "name": "Fortification (Heavy)", "cost": "+5 bonus","slot": "armor",         "cl": 13, "aura": "Strong abjuration",  "description": "100% chance to negate critical hits and sneak attacks." },
+      { "name": "Glamered",          "cost": "+2,700 gp",   "slot": "armor",         "cl": 10, "aura": "Moderate illusion",  "description": "On command, armor appears as normal clothing." },
+      { "name": "Invulnerability",   "cost": "+3 bonus",    "slot": "armor",         "cl": 18, "aura": "Strong abjuration",  "description": "DR 5/magic." },
+      { "name": "Reflecting",        "cost": "+5 bonus",    "slot": "shield",        "cl": 14, "aura": "Strong abjuration",  "description": "Once per day, reflect a spell back at caster (as spell turning)." },
+      { "name": "Shadow",            "cost": "+3,750 gp",   "slot": "armor",         "cl": 5,  "aura": "Faint illusion",     "description": "+5 competence bonus to Stealth checks." },
+      { "name": "Slick",             "cost": "+3,750 gp",   "slot": "armor",         "cl": 4,  "aura": "Faint conjuration",  "description": "+5 competence bonus to Escape Artist checks." },
+      { "name": "Spell Resistance 13","cost":"+2 bonus",    "slot": "armor",         "cl": 15, "aura": "Strong abjuration",  "description": "SR 13." },
+      { "name": "Spell Resistance 15","cost":"+3 bonus",    "slot": "armor",         "cl": 15, "aura": "Strong abjuration",  "description": "SR 15." },
+      { "name": "Spell Resistance 17","cost":"+4 bonus",    "slot": "armor",         "cl": 15, "aura": "Strong abjuration",  "description": "SR 17." },
+      { "name": "Spell Resistance 19","cost":"+5 bonus",    "slot": "armor",         "cl": 15, "aura": "Strong abjuration",  "description": "SR 19." },
+      { "name": "Wild",              "cost": "+3 bonus",    "slot": "armor",         "cl": 9,  "aura": "Moderate transmutation","description": "Armor moves with wild shape; does not interfere with polymorph." }
+    ]
+  },
+  {
+    "category": "Weapon Enhancements",
+    "items": [
+      { "name": "+1 Enhancement",    "cost": "2,000 gp",    "slot": "weapon", "cl": 5,  "aura": "Faint evocation",    "description": "+1 attack and damage." },
+      { "name": "+2 Enhancement",    "cost": "8,000 gp",    "slot": "weapon", "cl": 8,  "aura": "Moderate evocation", "description": "+2 attack and damage." },
+      { "name": "+3 Enhancement",    "cost": "18,000 gp",   "slot": "weapon", "cl": 11, "aura": "Moderate evocation", "description": "+3 attack and damage." },
+      { "name": "+4 Enhancement",    "cost": "32,000 gp",   "slot": "weapon", "cl": 14, "aura": "Strong evocation",   "description": "+4 attack and damage." },
+      { "name": "+5 Enhancement",    "cost": "50,000 gp",   "slot": "weapon", "cl": 17, "aura": "Strong evocation",   "description": "+5 attack and damage." },
+      { "name": "Anarchic",          "cost": "+2 bonus",    "slot": "weapon", "cl": 7,  "aura": "Moderate evocation", "description": "+2d6 damage vs. lawful creatures. Chaotic-aligned." },
+      { "name": "Axiomatic",         "cost": "+2 bonus",    "slot": "weapon", "cl": 7,  "aura": "Moderate evocation", "description": "+2d6 damage vs. chaotic creatures. Lawful-aligned." },
+      { "name": "Bane",              "cost": "+1 bonus",    "slot": "weapon", "cl": 8,  "aura": "Moderate conjuration","description": "+2 attack and +2d6 damage vs. chosen creature type." },
+      { "name": "Brilliant Energy",  "cost": "+4 bonus",    "slot": "weapon", "cl": 16, "aura": "Strong transmutation","description": "Passes through non-living matter; ignores armor and shield AC. Doesn't affect undead or constructs." },
+      { "name": "Dancing",           "cost": "+4 bonus",    "slot": "weapon", "cl": 15, "aura": "Strong transmutation","description": "Flies and attacks on its own for 4 rounds as a swift action (once per 4 rounds)." },
+      { "name": "Defending",         "cost": "+1 bonus",    "slot": "weapon", "cl": 8,  "aura": "Moderate abjuration","description": "Transfer enhancement bonus to AC (up to +5) each round as a free action." },
+      { "name": "Disruption",        "cost": "+2 bonus",    "slot": "weapon", "cl": 14, "aura": "Strong conjuration", "description": "Undead struck must pass DC 14 Will save or be destroyed." },
+      { "name": "Distance",          "cost": "+1 bonus",    "slot": "weapon", "cl": 6,  "aura": "Moderate divination","description": "Ranged weapon doubles its range increment." },
+      { "name": "Flaming",           "cost": "+1 bonus",    "slot": "weapon", "cl": 10, "aura": "Moderate evocation", "description": "+1d6 fire damage on a hit." },
+      { "name": "Flaming Burst",     "cost": "+2 bonus",    "slot": "weapon", "cl": 12, "aura": "Strong evocation",   "description": "+1d6 fire damage; on a crit +1d10 (×2) or +2d10 (×3) fire." },
+      { "name": "Frost",             "cost": "+1 bonus",    "slot": "weapon", "cl": 8,  "aura": "Moderate evocation", "description": "+1d6 cold damage on a hit." },
+      { "name": "Ghost Touch",       "cost": "+1 bonus",    "slot": "weapon", "cl": 15, "aura": "Strong transmutation","description": "Can strike incorporeal creatures as if it had ghost touch property." },
+      { "name": "Holy",              "cost": "+2 bonus",    "slot": "weapon", "cl": 7,  "aura": "Moderate evocation", "description": "+2d6 damage vs. evil creatures. Good-aligned." },
+      { "name": "Keen",              "cost": "+1 bonus",    "slot": "weapon", "cl": 10, "aura": "Moderate transmutation","description": "Doubles the threat range (keen edge effect)." },
+      { "name": "Merciful",          "cost": "+1 bonus",    "slot": "weapon", "cl": 5,  "aura": "Faint conjuration",  "description": "+1d6 nonlethal damage; all damage becomes nonlethal (on command)." },
+      { "name": "Mighty Cleaving",   "cost": "+1 bonus",    "slot": "weapon", "cl": 8,  "aura": "Moderate transmutation","description": "Allows an additional Cleave attempt per round." },
+      { "name": "Returning",         "cost": "+1 bonus",    "slot": "weapon", "cl": 7,  "aura": "Moderate transmutation","description": "Thrown weapon returns to hand immediately after attack." },
+      { "name": "Seeking",           "cost": "+1 bonus",    "slot": "weapon", "cl": 12, "aura": "Strong divination",  "description": "Ranged weapon ignores miss chance due to concealment (not total concealment)." },
+      { "name": "Shock",             "cost": "+1 bonus",    "slot": "weapon", "cl": 8,  "aura": "Moderate evocation", "description": "+1d6 electricity damage on a hit." },
+      { "name": "Speed",             "cost": "+3 bonus",    "slot": "weapon", "cl": 7,  "aura": "Moderate transmutation","description": "One extra attack per round at the highest attack bonus (haste)." },
+      { "name": "Thundering",        "cost": "+1 bonus",    "slot": "weapon", "cl": 5,  "aura": "Faint necromancy",   "description": "+1d8 sonic on a crit; target must DC 14 Fort or be deafened." },
+      { "name": "Unholy",            "cost": "+2 bonus",    "slot": "weapon", "cl": 7,  "aura": "Moderate evocation", "description": "+2d6 damage vs. good creatures. Evil-aligned." },
+      { "name": "Vicious",           "cost": "+1 bonus",    "slot": "weapon", "cl": 9,  "aura": "Moderate necromancy","description": "+2d6 damage but wielder also takes 1d6 damage on a hit." },
+      { "name": "Vorpal",            "cost": "+5 bonus",    "slot": "weapon", "cl": 18, "aura": "Strong necromancy and transmutation","description": "On a natural 20 that deals damage, severs the target's head." },
+      { "name": "Wounding",          "cost": "+2 bonus",    "slot": "weapon", "cl": 10, "aura": "Moderate evocation", "description": "Each hit causes 1 point of bleed (stacks)." }
+    ]
+  },
+  {
+    "category": "Potions",
+    "items": [
+      { "name": "Potion of Cure Light Wounds",    "cost": "50 gp",   "cl": 1,  "aura": "Faint conjuration",    "description": "Cures 1d8+1 HP." },
+      { "name": "Potion of Cure Moderate Wounds", "cost": "300 gp",  "cl": 3,  "aura": "Faint conjuration",    "description": "Cures 2d8+3 HP." },
+      { "name": "Potion of Cure Serious Wounds",  "cost": "750 gp",  "cl": 5,  "aura": "Faint conjuration",    "description": "Cures 3d8+5 HP." },
+      { "name": "Potion of Enlarge Person",        "cost": "250 gp",  "cl": 1,  "aura": "Faint transmutation",  "description": "Enlarges humanoid, +2 Str, −2 Dex, −1 attack/AC. 1 min." },
+      { "name": "Potion of Reduce Person",         "cost": "250 gp",  "cl": 1,  "aura": "Faint transmutation",  "description": "Reduces humanoid, −2 Str, +2 Dex, +1 attack/AC. 1 min." },
+      { "name": "Potion of Barkskin",              "cost": "300 gp",  "cl": 3,  "aura": "Faint transmutation",  "description": "+2 natural armor bonus. 10 min." },
+      { "name": "Potion of Bull's Strength",       "cost": "300 gp",  "cl": 3,  "aura": "Faint transmutation",  "description": "+4 Str. 3 min." },
+      { "name": "Potion of Cat's Grace",           "cost": "300 gp",  "cl": 3,  "aura": "Faint transmutation",  "description": "+4 Dex. 3 min." },
+      { "name": "Potion of Bear's Endurance",      "cost": "300 gp",  "cl": 3,  "aura": "Faint transmutation",  "description": "+4 Con. 3 min." },
+      { "name": "Potion of Eagle's Splendor",      "cost": "300 gp",  "cl": 3,  "aura": "Faint transmutation",  "description": "+4 Cha. 3 min." },
+      { "name": "Potion of Fox's Cunning",         "cost": "300 gp",  "cl": 3,  "aura": "Faint transmutation",  "description": "+4 Int. 3 min." },
+      { "name": "Potion of Owl's Wisdom",          "cost": "300 gp",  "cl": 3,  "aura": "Faint transmutation",  "description": "+4 Wis. 3 min." },
+      { "name": "Potion of Invisibility",          "cost": "300 gp",  "cl": 3,  "aura": "Faint illusion",       "description": "Invisible for 3 min or until attack." },
+      { "name": "Potion of Jump",                  "cost": "50 gp",   "cl": 1,  "aura": "Faint transmutation",  "description": "+10 Acrobatics (jump). 1 min." },
+      { "name": "Potion of Levitate",              "cost": "300 gp",  "cl": 3,  "aura": "Faint transmutation",  "description": "Levitate self. 3 min." },
+      { "name": "Potion of Mage Armor",            "cost": "50 gp",   "cl": 1,  "aura": "Faint conjuration",    "description": "+4 armor AC. 1 hr." },
+      { "name": "Potion of Pass Without Trace",    "cost": "50 gp",   "cl": 1,  "aura": "Faint transmutation",  "description": "No tracks or scent. 1 hr." },
+      { "name": "Potion of Protection from Evil",  "cost": "50 gp",   "cl": 1,  "aura": "Faint abjuration",     "description": "+2 deflection to AC & resistance to saves vs. evil. 1 min." },
+      { "name": "Potion of Shield of Faith",       "cost": "50 gp",   "cl": 1,  "aura": "Faint abjuration",     "description": "+2 deflection AC. 1 min." },
+      { "name": "Potion of Spider Climb",          "cost": "300 gp",  "cl": 3,  "aura": "Faint transmutation",  "description": "Climb at 20 ft, no Climb checks needed. 3 min." },
+      { "name": "Potion of Haste",                 "cost": "750 gp",  "cl": 5,  "aura": "Faint transmutation",  "description": "Extra attack, +1 attack/AC/Ref, +30 ft speed. 5 rounds." },
+      { "name": "Potion of Heroism",               "cost": "700 gp",  "cl": 5,  "aura": "Faint enchantment",    "description": "+2 morale to attacks, saves, skill checks. 50 min." },
+      { "name": "Potion of Gaseous Form",          "cost": "750 gp",  "cl": 5,  "aura": "Faint transmutation",  "description": "Becomes gas cloud. Fly 10 ft. 5 min." },
+      { "name": "Potion of Displacement",          "cost": "750 gp",  "cl": 5,  "aura": "Faint illusion",       "description": "50% miss chance. 5 rounds." },
+      { "name": "Potion of Remove Disease",        "cost": "750 gp",  "cl": 5,  "aura": "Faint conjuration",    "description": "Cures all diseases afflicting the drinker." },
+      { "name": "Potion of Fly",                   "cost": "750 gp",  "cl": 5,  "aura": "Faint transmutation",  "description": "Fly at 60 ft (good). 5 min." }
+    ]
+  },
+  {
+    "category": "Rings",
+    "items": [
+      { "name": "Ring of Protection +1",        "cost": "2,000 gp",  "slot": "ring", "cl": 5,  "aura": "Faint abjuration",    "description": "+1 deflection bonus to AC." },
+      { "name": "Ring of Protection +2",        "cost": "8,000 gp",  "slot": "ring", "cl": 8,  "aura": "Moderate abjuration", "description": "+2 deflection bonus to AC." },
+      { "name": "Ring of Protection +3",        "cost": "18,000 gp", "slot": "ring", "cl": 11, "aura": "Moderate abjuration", "description": "+3 deflection bonus to AC." },
+      { "name": "Ring of Protection +4",        "cost": "32,000 gp", "slot": "ring", "cl": 16, "aura": "Strong abjuration",   "description": "+4 deflection bonus to AC." },
+      { "name": "Ring of Protection +5",        "cost": "50,000 gp", "slot": "ring", "cl": 20, "aura": "Strong abjuration",   "description": "+5 deflection bonus to AC." },
+      { "name": "Ring of Feather Falling",      "cost": "2,200 gp",  "slot": "ring", "cl": 1,  "aura": "Faint transmutation", "description": "Feather fall effect, constant." },
+      { "name": "Ring of Force Shield",         "cost": "8,500 gp",  "slot": "ring", "cl": 9,  "aura": "Moderate evocation",  "description": "On command: +2 shield bonus to AC." },
+      { "name": "Ring of Jumping",              "cost": "2,500 gp",  "slot": "ring", "cl": 2,  "aura": "Faint transmutation", "description": "Continuous jump spell; +5 competence to Acrobatics (jump)." },
+      { "name": "Ring of Jumping, Improved",    "cost": "10,000 gp", "slot": "ring", "cl": 7,  "aura": "Moderate transmutation","description": "+10 competence to Acrobatics (jump)." },
+      { "name": "Ring of Sustenance",           "cost": "2,500 gp",  "slot": "ring", "cl": 5,  "aura": "Faint conjuration",   "description": "Need only 2 hr sleep; no food or water required." },
+      { "name": "Ring of Swimming",             "cost": "2,500 gp",  "slot": "ring", "cl": 2,  "aura": "Faint transmutation", "description": "+5 competence to Swim checks." },
+      { "name": "Ring of Climbing",             "cost": "2,500 gp",  "slot": "ring", "cl": 5,  "aura": "Faint transmutation", "description": "+5 competence to Climb checks." },
+      { "name": "Ring of Counterspells",        "cost": "4,000 gp",  "slot": "ring", "cl": 11, "aura": "Moderate evocation",  "description": "Absorbs one specific spell; automatically counterspells it once." },
+      { "name": "Ring of Invisibility",         "cost": "20,000 gp", "slot": "ring", "cl": 3,  "aura": "Faint illusion",      "description": "Continuous invisibility (breaks on attack)." },
+      { "name": "Ring of Mind Shielding",       "cost": "8,000 gp",  "slot": "ring", "cl": 3,  "aura": "Faint abjuration",    "description": "Immune to detect thoughts, discern lies, alignment detection." },
+      { "name": "Ring of Evasion",              "cost": "25,000 gp", "slot": "ring", "cl": 7,  "aura": "Moderate transmutation","description": "Evasion ability (as rogue class feature)." },
+      { "name": "Ring of Spell Storing (Minor)","cost": "18,000 gp", "slot": "ring", "cl": 9,  "aura": "Moderate evocation",  "description": "Stores up to 3 spell levels; can be released by wearer." },
+      { "name": "Ring of Spell Storing",        "cost": "50,000 gp", "slot": "ring", "cl": 9,  "aura": "Moderate evocation",  "description": "Stores up to 5 spell levels." },
+      { "name": "Ring of Spell Turning",        "cost": "98,280 gp", "slot": "ring", "cl": 13, "aura": "Strong abjuration",   "description": "Constant spell turning (reflects 1d4+6 spell levels/day)." },
+      { "name": "Ring of Regeneration",         "cost": "90,000 gp", "slot": "ring", "cl": 15, "aura": "Strong conjuration",  "description": "Regenerate 1 HP/round; regrow lost limbs in 1d6×10 min." },
+      { "name": "Ring of Freedom of Movement",  "cost": "40,000 gp", "slot": "ring", "cl": 7,  "aura": "Moderate abjuration", "description": "Continuous freedom of movement." },
+      { "name": "Ring of Blinking",             "cost": "27,000 gp", "slot": "ring", "cl": 7,  "aura": "Moderate transmutation","description": "Continuous blink effect." },
+      { "name": "Ring of Wizardry I",           "cost": "20,000 gp", "slot": "ring", "cl": 17, "aura": "Strong (no school)",  "description": "Doubles 1st-level spell slots." },
+      { "name": "Ring of Wizardry II",          "cost": "40,000 gp", "slot": "ring", "cl": 17, "aura": "Strong (no school)",  "description": "Doubles 2nd-level spell slots." },
+      { "name": "Ring of Wizardry III",         "cost": "70,000 gp", "slot": "ring", "cl": 17, "aura": "Strong (no school)",  "description": "Doubles 3rd-level spell slots." },
+      { "name": "Ring of Wizardry IV",          "cost": "100,000 gp","slot": "ring", "cl": 17, "aura": "Strong (no school)",  "description": "Doubles 4th-level spell slots." },
+      { "name": "Ring of Three Wishes",         "cost": "97,950 gp", "slot": "ring", "cl": 20, "aura": "Strong (universal)", "description": "3 charges; each grants a wish spell." }
+    ]
+  },
+  {
+    "category": "Rods",
+    "items": [
+      { "name": "Rod of Absorption",            "cost": "50,000 gp", "slot": "none", "cl": 15, "aura": "Strong abjuration",   "description": "Absorbs spells as they are cast; can expend absorbed levels as spell slots (max 50 levels)." },
+      { "name": "Rod of Alertness",             "cost": "85,000 gp", "slot": "none", "cl": 11, "aura": "Moderate abjuration", "description": "+1 perception, +1 initiative. Creates alarm and anticipate teleportation in 20-ft radius on command." },
+      { "name": "Rod of Cancellation",          "cost": "11,000 gp", "slot": "none", "cl": 17, "aura": "Strong abjuration",   "description": "Touch drains an item of all magical properties (Will DC 23 negates for attended items). Single use." },
+      { "name": "Rod of Enemy Detection",       "cost": "23,500 gp", "slot": "none", "cl": 10, "aura": "Moderate divination", "description": "3 charges/day; detect enemies within 60 ft." },
+      { "name": "Rod of Extend Metamagic (Lesser)","cost":"3,000 gp","slot":"none", "cl": 17, "aura": "Strong (no school)",  "description": "3 charges/day; metamagic: Extend on spells of 3rd level or lower." },
+      { "name": "Rod of Extend Metamagic",      "cost": "11,000 gp", "slot": "none", "cl": 17, "aura": "Strong (no school)",  "description": "3 charges/day; Extend on spells of 6th level or lower." },
+      { "name": "Rod of Extend Metamagic (Greater)","cost":"24,500 gp","slot":"none","cl":17, "aura": "Strong (no school)",  "description": "3 charges/day; Extend on any spell." },
+      { "name": "Rod of Empower Metamagic (Lesser)","cost":"9,000 gp","slot":"none","cl": 17, "aura": "Strong (no school)",  "description": "3 charges/day; Empower on spells 3rd level or lower." },
+      { "name": "Rod of Maximize Metamagic (Lesser)","cost":"14,000 gp","slot":"none","cl":17,"aura":"Strong (no school)", "description": "3 charges/day; Maximize on spells 3rd level or lower." },
+      { "name": "Rod of Quicken Metamagic (Lesser)","cost":"35,000 gp","slot":"none","cl":17,"aura":"Strong (no school)", "description": "3 charges/day; Quicken on spells 3rd level or lower." },
+      { "name": "Rod of Flailing",              "cost": "50,000 gp", "slot": "none", "cl": 9,  "aura": "Moderate enchantment","description": "On command: free action extra attack with full attack bonus; used as a +3 flail/dire flail. 50 charges." },
+      { "name": "Rod of Lordly Might",          "cost": "70,000 gp", "slot": "none", "cl": 19, "aura": "Strong enchantment and transmutation","description": "Functions as +2 through +6 weapon depending on mode; six combat functions plus detect evil, fear, light." },
+      { "name": "Rod of Metamagic, Heighten",   "cost": "12,250 gp", "slot": "none", "cl": 17, "aura": "Strong (no school)",  "description": "3 charges/day; Heighten on spells of 3rd level or lower." },
+      { "name": "Rod of Security",              "cost": "61,000 gp", "slot": "none", "cl": 20, "aura": "Strong conjuration",  "description": "Transport up to 199 creatures to a paradise demiplane; 200 days max stay." },
+      { "name": "Rod of Splendor",              "cost": "25,000 gp", "slot": "none", "cl": 12, "aura": "Strong conjuration and transmutation","description": "Raiment of noble splendor +4 Cha. Summons magnificent pavilion. 1 use/day each." },
+      { "name": "Rod of Thunder & Lightning",   "cost": "33,000 gp", "slot": "none", "cl": 9,  "aura": "Moderate evocation",  "description": "5 special functions: lightning, thunder, thunderclap, lightning strike, thunderstorm. 50 charges." },
+      { "name": "Rod of the Python",            "cost": "13,000 gp", "slot": "none", "cl": 10, "aura": "Moderate transmutation","description": "Becomes a giant constrictor snake on command; 50 charges." },
+      { "name": "Rod of the Viper",             "cost": "19,000 gp", "slot": "none", "cl": 10, "aura": "Moderate necromancy", "description": "+2 heavy mace; on command head becomes viper—bite deals 1d4+2 plus poison (DC 14, 1d4 Con)." },
+      { "name": "Rod of Withering",             "cost": "25,000 gp", "slot": "none", "cl": 13, "aura": "Strong necromancy",   "description": "Deals 1d4 Str and 1d4 Con on touch attack (Fort DC 17 negates). 50 charges." },
+      { "name": "Rod of Wonder",                "cost": "12,000 gp", "slot": "none", "cl": 10, "aura": "Moderate enchantment","description": "Fires random effect (d100 table). 50 charges." }
+    ]
+  },
+  {
+    "category": "Staves",
+    "items": [
+      { "name": "Staff of Charming",            "cost": "17,600 gp", "slot": "none", "cl": 8,  "aura": "Moderate enchantment","charges": 10, "description": "Charm person (1 charge), charm monster (2 charges)." },
+      { "name": "Staff of Fire",                "cost": "18,950 gp", "slot": "none", "cl": 8,  "aura": "Moderate evocation",  "charges": 10, "description": "Burning hands (1), fireball (2), wall of fire (3)." },
+      { "name": "Staff of Frost",               "cost": "41,400 gp", "slot": "none", "cl": 10, "aura": "Moderate evocation",  "charges": 10, "description": "Ice storm (2), cone of cold (4), wall of ice (4)." },
+      { "name": "Staff of Healing",             "cost": "29,600 gp", "slot": "none", "cl": 8,  "aura": "Moderate conjuration","charges": 10, "description": "Cure light (1), cure serious (2), cure critical (3), lesser restoration (2), CMW (2)." },
+      { "name": "Staff of Illumination",        "cost": "51,500 gp", "slot": "none", "cl": 9,  "aura": "Moderate evocation",  "charges": 10, "description": "Dancing lights (1), daylight (2), sunburst (4), light (free)." },
+      { "name": "Staff of Necromancy",          "cost": "32,000 gp", "slot": "none", "cl": 8,  "aura": "Moderate necromancy", "charges": 10, "description": "Cause fear (1), ghoul touch (1), halt undead (1), enervation (3), waves of fatigue (3)." },
+      { "name": "Staff of Power",               "cost": "235,000 gp","slot": "none", "cl": 15, "aura": "Strong varied",       "charges": 10, "description": "+2 quarterstaff. Fireball, lightning bolt, magic missile, cone of cold, levitate, dispel magic, globe of invuln. (varied charges). Retributive strike on breaking." },
+      { "name": "Staff of Size Alteration",     "cost": "26,150 gp", "slot": "none", "cl": 8,  "aura": "Moderate transmutation","charges":10, "description": "Enlarge person (1), reduce person (1), mass enlarge (3), mass reduce (3)." },
+      { "name": "Staff of Swarming Insects",    "cost": "24,750 gp", "slot": "none", "cl": 9,  "aura": "Moderate conjuration","charges": 10, "description": "Summon swarm (1), insect plague (3)." },
+      { "name": "Staff of the Magi",            "cost": "238,000 gp","slot": "none", "cl": 20, "aura": "Strong varied",       "charges": 10, "description": "+2 quarterstaff. 22 spells (varied charges); absorbs spells targeted at wielder. Retributive strike on breaking." },
+      { "name": "Staff of Thunder & Lightning", "cost": "49,500 gp", "slot": "none", "cl": 9,  "aura": "Moderate evocation",  "charges": 10, "description": "+2 quarterstaff. Shout (2), lightning bolt (2), both (5)." },
+      { "name": "Staff of Transmutation",       "cost": "67,100 gp", "slot": "none", "cl": 11, "aura": "Moderate transmutation","charges":10, "description": "Alter self (2), blink (2), polymorph (3), disintegrate (4)." },
+      { "name": "Staff of Woodlands",           "cost": "101,250 gp","slot": "none", "cl": 13, "aura": "Strong varied",       "charges": 10, "description": "+2 quarterstaff. Barkskin (2), speak with animals (1), wall of thorns (3), animate plants (5), summon nature's ally VI (6)." }
+    ]
+  },
+  {
+    "category": "Wands",
+    "items": [
+      { "name": "Wand of Magic Missiles (CL1)",    "cost": "750 gp",   "slot": "none", "cl": 1,  "aura": "Faint evocation",    "charges": 50, "description": "1d4+1 force damage." },
+      { "name": "Wand of Magic Missiles (CL3)",    "cost": "2,250 gp", "slot": "none", "cl": 3,  "aura": "Faint evocation",    "charges": 50, "description": "2 missiles, 2d4+2 force damage." },
+      { "name": "Wand of Cure Light Wounds",       "cost": "750 gp",   "slot": "none", "cl": 1,  "aura": "Faint conjuration",  "charges": 50, "description": "Cures 1d8+1 HP." },
+      { "name": "Wand of Cure Moderate Wounds",    "cost": "4,500 gp", "slot": "none", "cl": 3,  "aura": "Faint conjuration",  "charges": 50, "description": "Cures 2d8+3 HP." },
+      { "name": "Wand of Fireball (CL5)",          "cost": "11,250 gp","slot": "none", "cl": 5,  "aura": "Moderate evocation", "charges": 50, "description": "5d6 fire, 20-ft radius, Ref DC 14." },
+      { "name": "Wand of Lightning Bolt (CL5)",    "cost": "11,250 gp","slot": "none", "cl": 5,  "aura": "Moderate evocation", "charges": 50, "description": "5d6 electricity, 120-ft line, Ref DC 14." },
+      { "name": "Wand of Invisibility",            "cost": "4,500 gp", "slot": "none", "cl": 3,  "aura": "Faint illusion",     "charges": 50, "description": "Invisible until attack." },
+      { "name": "Wand of Hold Person",             "cost": "4,500 gp", "slot": "none", "cl": 3,  "aura": "Faint enchantment",  "charges": 50, "description": "Paralyze humanoid, Will DC 14. 3 rounds." },
+      { "name": "Wand of Web",                     "cost": "4,500 gp", "slot": "none", "cl": 3,  "aura": "Faint conjuration",  "charges": 50, "description": "20-ft radius web; Ref DC 14 or entangled." },
+      { "name": "Wand of Slow",                    "cost": "11,250 gp","slot": "none", "cl": 5,  "aura": "Moderate transmutation","charges":50,"description": "Slows up to 6 creatures, Will DC 14." },
+      { "name": "Wand of Haste",                   "cost": "11,250 gp","slot": "none", "cl": 5,  "aura": "Moderate transmutation","charges":50,"description": "Haste on one creature for 5 rounds." },
+      { "name": "Wand of Neutralize Poison",       "cost": "11,250 gp","slot": "none", "cl": 5,  "aura": "Moderate conjuration","charges":50,"description": "Neutralizes poison." },
+      { "name": "Wand of Remove Curse",            "cost": "11,250 gp","slot": "none", "cl": 5,  "aura": "Moderate abjuration","charges":50,"description": "Removes one curse." },
+      { "name": "Wand of See Invisibility",        "cost": "4,500 gp", "slot": "none", "cl": 3,  "aura": "Faint divination",   "charges": 50, "description": "See invisible creatures for 30 min." },
+      { "name": "Wand of Enervation",              "cost": "17,850 gp","slot": "none", "cl": 7,  "aura": "Moderate necromancy","charges": 50, "description": "1d4 negative levels on touch (ranged touch)." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Head",
+    "items": [
+      { "name": "Circlet of Persuasion",         "cost": "4,500 gp",  "slot": "head", "cl": 5,  "aura": "Faint transmutation", "description": "+3 competence to Cha-based checks." },
+      { "name": "Hat of Disguise",               "cost": "1,800 gp",  "slot": "head", "cl": 1,  "aura": "Faint illusion",      "description": "Alter self at will." },
+      { "name": "Headband of Alluring Charisma +2","cost":"4,000 gp", "slot": "head", "cl": 8,  "aura": "Moderate transmutation","description": "+2 enhancement to Cha." },
+      { "name": "Headband of Alluring Charisma +4","cost":"16,000 gp","slot": "head", "cl": 8,  "aura": "Moderate transmutation","description": "+4 enhancement to Cha." },
+      { "name": "Headband of Alluring Charisma +6","cost":"36,000 gp","slot": "head", "cl": 8,  "aura": "Moderate transmutation","description": "+6 enhancement to Cha." },
+      { "name": "Headband of Inspired Wisdom +2","cost": "4,000 gp",  "slot": "head", "cl": 8,  "aura": "Moderate transmutation","description": "+2 enhancement to Wis." },
+      { "name": "Headband of Inspired Wisdom +4","cost": "16,000 gp", "slot": "head", "cl": 8,  "aura": "Moderate transmutation","description": "+4 enhancement to Wis." },
+      { "name": "Headband of Vast Intelligence +2","cost":"4,000 gp", "slot": "head", "cl": 8,  "aura": "Moderate transmutation","description": "+2 enhancement to Int. Grants bonus language or skill ranks." },
+      { "name": "Headband of Vast Intelligence +4","cost":"16,000 gp","slot": "head", "cl": 8,  "aura": "Moderate transmutation","description": "+4 enhancement to Int." },
+      { "name": "Helm of Comprehend Languages",  "cost": "5,200 gp",  "slot": "head", "cl": 4,  "aura": "Faint divination",    "description": "Comprehend languages at will." },
+      { "name": "Helm of Telepathy",             "cost": "27,000 gp", "slot": "head", "cl": 5,  "aura": "Faint divination and enchantment","description": "Detect thoughts and telepathy at will; 1/day suggestion." },
+      { "name": "Helm of Teleportation",         "cost": "73,500 gp", "slot": "head", "cl": 9,  "aura": "Moderate conjuration","description": "3/day teleport." },
+      { "name": "Helm of Underwater Action",     "cost": "24,000 gp", "slot": "head", "cl": 5,  "aura": "Faint transmutation", "description": "Breathe underwater; vision 60 ft through water." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Neck",
+    "items": [
+      { "name": "Amulet of Natural Armor +1",   "cost": "2,000 gp",  "slot": "neck", "cl": 5,  "aura": "Faint transmutation", "description": "+1 natural armor bonus." },
+      { "name": "Amulet of Natural Armor +2",   "cost": "8,000 gp",  "slot": "neck", "cl": 5,  "aura": "Faint transmutation", "description": "+2 natural armor bonus." },
+      { "name": "Amulet of Natural Armor +3",   "cost": "18,000 gp", "slot": "neck", "cl": 10, "aura": "Moderate transmutation","description": "+3 natural armor bonus." },
+      { "name": "Amulet of Natural Armor +4",   "cost": "32,000 gp", "slot": "neck", "cl": 10, "aura": "Moderate transmutation","description": "+4 natural armor bonus." },
+      { "name": "Amulet of Natural Armor +5",   "cost": "50,000 gp", "slot": "neck", "cl": 15, "aura": "Moderate transmutation","description": "+5 natural armor bonus." },
+      { "name": "Amulet of Mighty Fists +1",    "cost": "5,000 gp",  "slot": "neck", "cl": 5,  "aura": "Faint evocation",    "description": "+1 enhancement to unarmed/natural attacks." },
+      { "name": "Amulet of Mighty Fists +2",    "cost": "20,000 gp", "slot": "neck", "cl": 10, "aura": "Moderate evocation", "description": "+2 enhancement to unarmed/natural attacks." },
+      { "name": "Amulet of Proof against Detection","cost":"35,000 gp","slot":"neck","cl":8,  "aura": "Strong abjuration",   "description": "Immune to all detect spells, scrying, location effects." },
+      { "name": "Necklace of Adaptation",       "cost": "9,000 gp",  "slot": "neck", "cl": 7,  "aura": "Moderate transmutation","description": "Breathe in any environment; immune to airborne toxins and gases." },
+      { "name": "Necklace of Fireballs (Type I)","cost": "1,650 gp", "slot": "neck", "cl": 10, "aura": "Moderate evocation",  "description": "2× 5d6, 1× 3d6 fireballs (Ref DC 14)." },
+      { "name": "Periapt of Health",            "cost": "7,500 gp",  "slot": "neck", "cl": 5,  "aura": "Faint conjuration",   "description": "Immune to disease and filth fever." },
+      { "name": "Periapt of Proof against Poison","cost":"27,000 gp","slot":"neck",  "cl": 13, "aura": "Strong conjuration",  "description": "Immune to all poisons." },
+      { "name": "Periapt of Wound Closure",     "cost": "15,000 gp", "slot": "neck", "cl": 10, "aura": "Moderate conjuration","description": "Automatically stabilize, immune to bleed. Double natural healing." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Belt",
+    "items": [
+      { "name": "Belt of Giant Strength +2",     "cost": "4,000 gp",  "slot": "belt", "cl": 8,  "aura": "Moderate transmutation","description": "+2 enhancement to Str." },
+      { "name": "Belt of Giant Strength +4",     "cost": "16,000 gp", "slot": "belt", "cl": 8,  "aura": "Moderate transmutation","description": "+4 enhancement to Str." },
+      { "name": "Belt of Giant Strength +6",     "cost": "36,000 gp", "slot": "belt", "cl": 8,  "aura": "Moderate transmutation","description": "+6 enhancement to Str." },
+      { "name": "Belt of Incredible Dexterity +2","cost":"4,000 gp",  "slot": "belt", "cl": 8,  "aura": "Moderate transmutation","description": "+2 enhancement to Dex." },
+      { "name": "Belt of Incredible Dexterity +4","cost":"16,000 gp", "slot": "belt", "cl": 8,  "aura": "Moderate transmutation","description": "+4 enhancement to Dex." },
+      { "name": "Belt of Mighty Constitution +2","cost": "4,000 gp",  "slot": "belt", "cl": 8,  "aura": "Moderate transmutation","description": "+2 enhancement to Con." },
+      { "name": "Belt of Mighty Constitution +4","cost": "16,000 gp", "slot": "belt", "cl": 8,  "aura": "Moderate transmutation","description": "+4 enhancement to Con." },
+      { "name": "Belt of Physical Might +2 (Str/Dex)","cost":"10,000 gp","slot":"belt","cl":8, "aura": "Moderate transmutation","description": "+2 enhancement to Str and Dex." },
+      { "name": "Belt of Physical Perfection +2","cost":"16,000 gp",  "slot": "belt", "cl": 8,  "aura": "Moderate transmutation","description": "+2 enhancement to Str, Dex, and Con." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Body",
+    "items": [
+      { "name": "Robe of Bones",               "cost": "2,400 gp",  "slot": "body", "cl": 6,  "aura": "Moderate necromancy", "description": "6 hidden undead (skeletons/zombies); animates when removed from robe." },
+      { "name": "Robe of Eyes",                "cost": "120,000 gp","slot": "body", "cl": 11, "aura": "Moderate divination",  "description": "All-around vision, darkvision 120 ft, see invisible, see through darkness." },
+      { "name": "Robe of Blending",            "cost": "40,000 gp", "slot": "body", "cl": 10, "aura": "Moderate illusion",    "description": "Change appearance to look like another creature type." },
+      { "name": "Robe of Useful Items",        "cost": "7,000 gp",  "slot": "body", "cl": 9,  "aura": "Moderate transmutation","description": "Various useful patches that can be torn off and activated." },
+      { "name": "Robe of the Archmagi (White)","cost":"75,000 gp",  "slot": "body", "cl": 14, "aura": "Strong varied",        "description": "AC +5 armor, SR 18, +4 saving throws, +2 CL. Good-aligned arcane casters." },
+      { "name": "Robe of the Archmagi (Gray)", "cost": "75,000 gp", "slot": "body", "cl": 14, "aura": "Strong varied",        "description": "Same as white. Neutral arcane casters." },
+      { "name": "Robe of the Archmagi (Black)","cost":"75,000 gp",  "slot": "body", "cl": 14, "aura": "Strong varied",        "description": "Same as white. Evil arcane casters." },
+      { "name": "Robe of Scintillating Colors","cost":"27,000 gp",  "slot": "body", "cl": 11, "aura": "Moderate illusion",    "description": "On command: hypnotize creatures in 30 ft (Will DC 19 negates)." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Chest",
+    "items": [
+      { "name": "Bead of Force",               "cost": "3,000 gp",  "slot": "none", "cl": 10, "aura": "Moderate evocation",  "description": "Thrown; creates 10-ft sphere of force on target (5d6 dmg, Ref DC 16). Lasts 10 min." },
+      { "name": "Brooch of Shielding",         "cost": "1,500 gp",  "slot": "chest","cl": 1,  "aura": "Faint abjuration",    "description": "Absorbs up to 101 HP of magic missiles." },
+      { "name": "Mantle of Spell Resistance",  "cost": "90,000 gp", "slot": "chest","cl": 9,  "aura": "Moderate abjuration", "description": "SR 21." },
+      { "name": "Vest of Escape",              "cost": "5,200 gp",  "slot": "chest","cl": 4,  "aura": "Faint conjuration and transmutation","description": "+6 Escape Artist; 1/day open locks (picks any lock)." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Eyes",
+    "items": [
+      { "name": "Eyes of Charming",            "cost": "56,000 gp", "slot": "eyes", "cl": 7,  "aura": "Moderate enchantment","description": "3/day charm person (DC 16)." },
+      { "name": "Eyes of Doom",                "cost": "25,000 gp", "slot": "eyes", "cl": 9,  "aura": "Moderate necromancy", "description": "2/day: one creature shaken, 2 creatures frightened, or 3 panicked (Will DC varies)." },
+      { "name": "Eyes of the Eagle",           "cost": "2,500 gp",  "slot": "eyes", "cl": 3,  "aura": "Faint divination",    "description": "+5 competence to Perception." },
+      { "name": "Goggles of Night",            "cost": "12,000 gp", "slot": "eyes", "cl": 3,  "aura": "Faint transmutation", "description": "60 ft darkvision." },
+      { "name": "Goggles of Minute Seeing",    "cost": "2,500 gp",  "slot": "eyes", "cl": 1,  "aura": "Faint divination",    "description": "+5 competence to Craft checks and Perception (fine detail)." },
+      { "name": "Lenses of Detection",         "cost": "3,500 gp",  "slot": "eyes", "cl": 3,  "aura": "Faint divination",    "description": "+5 competence to Perception; find tracks as per find traps." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Feet",
+    "items": [
+      { "name": "Boots of Elvenkind",          "cost": "2,500 gp",  "slot": "feet", "cl": 5,  "aura": "Faint transmutation", "description": "+5 competence to Stealth." },
+      { "name": "Boots of Levitation",         "cost": "7,500 gp",  "slot": "feet", "cl": 9,  "aura": "Moderate transmutation","description": "Levitate at will." },
+      { "name": "Boots of Speed",              "cost": "12,000 gp", "slot": "feet", "cl": 10, "aura": "Moderate transmutation","description": "Haste for up to 10 rounds/day (free action to activate)." },
+      { "name": "Boots of Striding & Springing","cost":"5,500 gp",  "slot": "feet", "cl": 3,  "aura": "Faint transmutation", "description": "+10 ft base speed; +5 Acrobatics (jump)." },
+      { "name": "Boots of Teleportation",      "cost": "49,000 gp", "slot": "feet", "cl": 9,  "aura": "Moderate conjuration","description": "3/day teleport." },
+      { "name": "Boots of the Winterlands",    "cost": "2,500 gp",  "slot": "feet", "cl": 5,  "aura": "Faint abjuration and transmutation","description": "Endure cold; move at full speed on ice/snow; resist cold 10." },
+      { "name": "Winged Boots",                "cost": "16,000 gp", "slot": "feet", "cl": 5,  "aura": "Faint transmutation", "description": "Fly (good) for 5 min/day, usable in 1-minute increments." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Hands",
+    "items": [
+      { "name": "Gauntlets of Ogre Power",     "cost": "4,000 gp",  "slot": "hands","cl": 6,  "aura": "Moderate transmutation","description": "+2 enhancement to Str." },
+      { "name": "Gloves of Arrow Snaring",     "cost": "4,000 gp",  "slot": "hands","cl": 3,  "aura": "Faint abjuration",    "description": "2/day catch an arrow, bolt, or thrown weapon targeting you." },
+      { "name": "Gloves of Reconnaissance",   "cost": "2,000 gp",  "slot": "hands","cl": 3,  "aura": "Faint divination",    "description": "10 min/day: view through solid surfaces up to 1 ft thick." },
+      { "name": "Gloves of Swimming & Climbing","cost":"6,250 gp",  "slot": "hands","cl": 5,  "aura": "Faint transmutation", "description": "+5 competence to Swim and Climb." },
+      { "name": "Sniper Goggles",              "cost": "20,000 gp", "slot": "hands","cl": 5,  "aura": "Faint divination",    "description": "No range penalty on ranged sneak attacks; range penalty halved." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Shoulders",
+    "items": [
+      { "name": "Cloak of Elvenkind",          "cost": "2,500 gp",  "slot": "shoulders","cl":3,"aura":"Faint illusion",       "description": "+5 competence to Stealth." },
+      { "name": "Cloak of Resistance +1",      "cost": "1,000 gp",  "slot": "shoulders","cl":5,"aura":"Faint abjuration",    "description": "+1 resistance to all saving throws." },
+      { "name": "Cloak of Resistance +2",      "cost": "4,000 gp",  "slot": "shoulders","cl":5,"aura":"Faint abjuration",    "description": "+2 resistance to all saving throws." },
+      { "name": "Cloak of Resistance +3",      "cost": "9,000 gp",  "slot": "shoulders","cl":5,"aura":"Moderate abjuration","description": "+3 resistance to all saving throws." },
+      { "name": "Cloak of Resistance +4",      "cost": "16,000 gp", "slot": "shoulders","cl":5,"aura":"Moderate abjuration","description": "+4 resistance to all saving throws." },
+      { "name": "Cloak of Resistance +5",      "cost": "25,000 gp", "slot": "shoulders","cl":5,"aura":"Strong abjuration",  "description": "+5 resistance to all saving throws." },
+      { "name": "Cloak of Displacement (Minor)","cost":"24,000 gp", "slot": "shoulders","cl":7,"aura":"Moderate illusion",   "description": "20% miss chance (displacement). 15 min/day." },
+      { "name": "Cloak of Displacement (Major)","cost":"50,000 gp", "slot": "shoulders","cl":7,"aura":"Moderate illusion",   "description": "50% miss chance (major image). Continuous." },
+      { "name": "Cloak of Arachnida",          "cost": "14,000 gp", "slot": "shoulders","cl":6,"aura":"Moderate conjuration and transmutation","description": "Climb 20 ft, web 1/day, poison immunity, resist cold 5." },
+      { "name": "Cloak of the Bat",            "cost": "26,000 gp", "slot": "shoulders","cl":7,"aura":"Moderate illusion and transmutation","description": "+5 Stealth; blindsense 20 ft; become bat at will." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Wrist",
+    "items": [
+      { "name": "Bracers of Armor +1",         "cost": "1,000 gp",  "slot": "wrists","cl":7, "aura": "Faint conjuration",   "description": "+1 armor bonus to AC." },
+      { "name": "Bracers of Armor +2",         "cost": "4,000 gp",  "slot": "wrists","cl":7, "aura": "Faint conjuration",   "description": "+2 armor bonus to AC." },
+      { "name": "Bracers of Armor +3",         "cost": "9,000 gp",  "slot": "wrists","cl":7, "aura": "Moderate conjuration","description": "+3 armor bonus to AC." },
+      { "name": "Bracers of Armor +4",         "cost": "16,000 gp", "slot": "wrists","cl":7, "aura": "Moderate conjuration","description": "+4 armor bonus to AC." },
+      { "name": "Bracers of Armor +5",         "cost": "25,000 gp", "slot": "wrists","cl":7, "aura": "Moderate conjuration","description": "+5 armor bonus to AC." },
+      { "name": "Bracers of Armor +6",         "cost": "36,000 gp", "slot": "wrists","cl":7, "aura": "Strong conjuration",  "description": "+6 armor bonus to AC." },
+      { "name": "Bracers of Armor +7",         "cost": "49,000 gp", "slot": "wrists","cl":7, "aura": "Strong conjuration",  "description": "+7 armor bonus to AC." },
+      { "name": "Bracers of Armor +8",         "cost": "64,000 gp", "slot": "wrists","cl":7, "aura": "Strong conjuration",  "description": "+8 armor bonus to AC." },
+      { "name": "Bracers of Archery (Lesser)", "cost": "5,000 gp",  "slot": "wrists","cl":4, "aura": "Faint transmutation", "description": "+1 attack with bows." },
+      { "name": "Bracers of Archery (Greater)","cost": "25,000 gp", "slot": "wrists","cl":4, "aura": "Moderate transmutation","description": "+2 attack and +1 damage with bows." }
+    ]
+  },
+  {
+    "category": "Wondrous Items — Slotless",
+    "items": [
+      { "name": "Bag of Holding (Type I)",      "cost": "2,500 gp",  "slot": "none", "cl": 9,  "aura": "Moderate conjuration","description": "Extradimensional space; 250 lbs / 30 cu ft." },
+      { "name": "Bag of Holding (Type II)",     "cost": "5,000 gp",  "slot": "none", "cl": 9,  "aura": "Moderate conjuration","description": "500 lbs / 70 cu ft." },
+      { "name": "Bag of Holding (Type III)",    "cost": "7,400 gp",  "slot": "none", "cl": 9,  "aura": "Moderate conjuration","description": "1,000 lbs / 150 cu ft." },
+      { "name": "Bag of Holding (Type IV)",     "cost": "10,000 gp", "slot": "none", "cl": 9,  "aura": "Moderate conjuration","description": "1,500 lbs / 250 cu ft." },
+      { "name": "Bag of Tricks (Tan)",          "cost": "900 gp",    "slot": "none", "cl": 3,  "aura": "Faint conjuration",  "description": "3/day draw out a random small animal (d% table)." },
+      { "name": "Bag of Tricks (Gray)",         "cost": "3,400 gp",  "slot": "none", "cl": 6,  "aura": "Moderate conjuration","description": "3/day draw out a random medium animal." },
+      { "name": "Bag of Tricks (Rust)",         "cost": "8,500 gp",  "slot": "none", "cl": 11, "aura": "Moderate conjuration","description": "3/day draw out a random large animal." },
+      { "name": "Candle of Invocation",         "cost": "8,400 gp",  "slot": "none", "cl": 17, "aura": "Strong conjuration", "description": "Aligned casters in 30 ft: +2 CL, gate 1/day while burning. 4-hr duration." },
+      { "name": "Carpet of Flying (5×5)",       "cost": "20,000 gp", "slot": "none", "cl": 10, "aura": "Moderate transmutation","description": "Fly 40 ft, 200 lbs capacity." },
+      { "name": "Carpet of Flying (5×10)",      "cost": "35,000 gp", "slot": "none", "cl": 10, "aura": "Moderate transmutation","description": "Fly 40 ft, 400 lbs capacity." },
+      { "name": "Crystal Ball",                 "cost": "42,000 gp", "slot": "none", "cl": 17, "aura": "Strong divination",  "description": "Scrying as the spell at will." },
+      { "name": "Crystal Ball with See Invisibility","cost":"50,000 gp","slot":"none","cl":17, "aura": "Strong divination",  "description": "Scrying; see invisible creatures." },
+      { "name": "Crystal Ball with Telepathy",  "cost": "70,000 gp", "slot": "none", "cl": 17, "aura": "Strong divination",  "description": "Scrying; telepathic communication with scried target." },
+      { "name": "Cube of Force",                "cost": "62,000 gp", "slot": "none", "cl": 10, "aura": "Moderate evocation",  "description": "36 charges; creates force wall/cube with various options." },
+      { "name": "Cube of Frost Resistance",     "cost": "27,000 gp", "slot": "none", "cl": 5,  "aura": "Faint abjuration",   "description": "Creates 10-ft radius, −50°F-proof area." },
+      { "name": "Daern's Instant Fortress",     "cost": "55,000 gp", "slot": "none", "cl": 13, "aura": "Strong conjuration", "description": "On command becomes a 20-ft high iron tower (10 ft wide)." },
+      { "name": "Decanter of Endless Water",    "cost": "9,000 gp",  "slot": "none", "cl": 9,  "aura": "Moderate conjuration","description": "Produces 1 gallon (stream) to 30 gallons/round (geyser)." },
+      { "name": "Deck of Illusions",            "cost": "8,100 gp",  "slot": "none", "cl": 6,  "aura": "Moderate illusion",  "description": "34 cards; each creates a major image of a specific creature." },
+      { "name": "Deck of Many Things",          "cost": "8,000 gp",  "slot": "none", "cl": 20, "aura": "Strong (varied)",    "description": "22 cards with wildly varied effects (XP, wishes, allies, doom)." },
+      { "name": "Efreeti Bottle",               "cost": "145,000 gp","slot": "none", "cl": 14, "aura": "Strong conjuration", "description": "Summons an efreeti who grants 3 wishes (1,001 service days)." },
+      { "name": "Figurine of Wondrous Power (Silver Raven)","cost":"3,800 gp","slot":"none","cl":11,"aura":"Moderate transmutation","description": "Becomes a raven 1/day; delivers messages." },
+      { "name": "Figurine of Wondrous Power (Golden Lions)","cost":"16,500 gp","slot":"none","cl":11,"aura":"Moderate transmutation","description": "Two lion figurines; 1/week each, for up to 1 hr." },
+      { "name": "Figurine of Wondrous Power (Obsidian Steed)","cost":"28,500 gp","slot":"none","cl":15,"aura":"Strong conjuration","description": "Nightmare; 3/month for up to 24 hr. Carries rider to ethereal plane." },
+      { "name": "Folding Boat",                 "cost": "7,200 gp",  "slot": "none", "cl": 6,  "aura": "Moderate transmutation","description": "Folds to a box (12 in); opens to small boat or large ship." },
+      { "name": "Handy Haversack",              "cost": "2,000 gp",  "slot": "none", "cl": 9,  "aura": "Moderate conjuration","description": "80 lbs / 12 cu ft; always produces desired item." },
+      { "name": "Horn of Blasting",             "cost": "20,000 gp", "slot": "none", "cl": 7,  "aura": "Moderate evocation",  "description": "Sonic shout: 30-ft cone, 5d6 sonic, DC 15 Fort or stunned 1 round, deafened 2d6 rounds." },
+      { "name": "Horn of Fog",                  "cost": "2,000 gp",  "slot": "none", "cl": 3,  "aura": "Faint conjuration",   "description": "10-ft diameter fog cloud, lasts 10 min." },
+      { "name": "Horn of Goodness/Evil",        "cost": "6,500 gp",  "slot": "none", "cl": 7,  "aura": "Moderate transmutation","description": "3/day change alignment of weapon for 7 minutes." },
+      { "name": "Horn of Valhalla (Silver)",    "cost": "50,000 gp", "slot": "none", "cl": 13, "aura": "Strong conjuration",  "description": "Summons 2d4+2 barbarians. 7 days between uses." },
+      { "name": "Horn of Valhalla (Brass)",     "cost": "35,000 gp", "slot": "none", "cl": 10, "aura": "Moderate conjuration","description": "Summons 2d4 barbarians." },
+      { "name": "Horseshoes of Speed",          "cost": "3,000 gp",  "slot": "none", "cl": 3,  "aura": "Faint transmutation", "description": "+30 ft to horse's speed." },
+      { "name": "Horseshoes of the Zephyr",     "cost": "6,000 gp",  "slot": "none", "cl": 7,  "aura": "Moderate transmutation","description": "Horse floats 4 in above ground; no difficult terrain; speed +30 ft." },
+      { "name": "Ioun Stone (Dusty Rose Prism)","cost":"5,000 gp",   "slot": "none", "cl": 12, "aura": "Strong varied",       "description": "+1 insight to AC." },
+      { "name": "Ioun Stone (Pale Blue Rhomboid)","cost":"8,000 gp", "slot": "none", "cl": 12, "aura": "Strong varied",       "description": "+2 enhancement to Str." },
+      { "name": "Ioun Stone (Pink Rhomboid)",   "cost": "8,000 gp",  "slot": "none", "cl": 12, "aura": "Strong varied",       "description": "+2 enhancement to Con." },
+      { "name": "Ioun Stone (Scarlet & Blue Sphere)","cost":"8,000 gp","slot":"none","cl":12, "aura": "Strong varied",       "description": "+2 enhancement to Int." },
+      { "name": "Ioun Stone (Dark Blue Rhomboid)","cost":"10,000 gp","slot": "none", "cl": 12, "aura": "Strong varied",       "description": "Alertness feat while active." },
+      { "name": "Ioun Stone (Vibrant Purple Prism)","cost":"36,000 gp","slot":"none","cl":12,"aura":"Strong varied",         "description": "Stores 3 spell levels (as ring of spell storing)." },
+      { "name": "Iron Flask",                   "cost": "170,000 gp","slot": "none", "cl": 20, "aura": "Strong conjuration",  "description": "Trap outsiders; command them as servant." },
+      { "name": "Lantern of Revealing",         "cost": "30,000 gp", "slot": "none", "cl": 5,  "aura": "Faint illusion",      "description": "Reveals invisible creatures in its light; 30 ft." },
+      { "name": "Lyre of Building",             "cost": "13,000 gp", "slot": "none", "cl": 6,  "aura": "Moderate transmutation","description": "Negates damage from battering for 30 min; 100 workers for 3 days." },
+      { "name": "Manual of Bodily Health +1",   "cost": "27,500 gp", "slot": "none", "cl": 17, "aura": "Strong transmutation","description": "+1 permanent Con after studying." },
+      { "name": "Manual of Gainful Exercise +1","cost":"27,500 gp",  "slot": "none", "cl": 17, "aura": "Strong transmutation","description": "+1 permanent Str after studying." },
+      { "name": "Manual of Quickness in Action +1","cost":"27,500 gp","slot":"none", "cl": 17, "aura": "Strong transmutation","description": "+1 permanent Dex after studying." },
+      { "name": "Mirror of Life Trapping",      "cost": "200,000 gp","slot": "none", "cl": 17, "aura": "Strong abjuration",   "description": "Traps creatures in extradimensional cells (max 12). Will DC 23 negates." },
+      { "name": "Necklace of Fireballs (Type IV)","cost":"8,100 gp", "slot": "none", "cl": 10, "aura": "Moderate evocation",  "description": "Contains fireballs of various sizes." },
+      { "name": "Portable Hole",                "cost": "20,000 gp", "slot": "none", "cl": 12, "aura": "Strong conjuration",  "description": "Circular cloth opens 10-ft deep extradimensional hole, 6 ft diameter." },
+      { "name": "Rope of Climbing",             "cost": "3,000 gp",  "slot": "none", "cl": 3,  "aura": "Faint transmutation", "description": "Animates; 50 ft rope moves and knots on command." },
+      { "name": "Rope of Entanglement",         "cost": "21,000 gp", "slot": "none", "cl": 8,  "aura": "Moderate conjuration","description": "On command entangles up to 6 creatures (Ref DC 15 or entangled)." },
+      { "name": "Scarab of Protection",         "cost": "38,000 gp", "slot": "none", "cl": 18, "aura": "Strong abjuration",   "description": "SR 20; absorbs up to 12 death or negative energy spells." },
+      { "name": "Stone of Good Luck (Luckstone)","cost":"20,000 gp", "slot": "none", "cl": 5,  "aura": "Faint evocation",     "description": "+1 luck to ability checks and saving throws." },
+      { "name": "Tome of Clear Thought +1",     "cost": "27,500 gp", "slot": "none", "cl": 17, "aura": "Strong transmutation","description": "+1 permanent Int after studying." },
+      { "name": "Tome of Leadership and Influence +1","cost":"27,500 gp","slot":"none","cl":17,"aura":"Strong transmutation","description": "+1 permanent Cha after studying." },
+      { "name": "Tome of Understanding +1",     "cost": "27,500 gp", "slot": "none", "cl": 17, "aura": "Strong transmutation","description": "+1 permanent Wis after studying." },
+      { "name": "Well of Many Worlds",          "cost": "82,000 gp", "slot": "none", "cl": 17, "aura": "Strong conjuration",  "description": "3 ft cloth; opens a two-way gate to a random plane. 1/day for 1 min." }
+    ]
+  }
+]
