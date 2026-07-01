@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCharacterStore } from '../store/characterStore'
 import { computeClassTotals } from '../data/pf1eData'
 import SigilBackground from '../components/SigilBackground'
@@ -21,10 +21,21 @@ const TABS = ['Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equi
 export default function CharacterPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { getCharacter, updateCharacter, exportCharacter } = useCharacterStore()
+  const { getCharacter, updateCharacter, exportCharacter, touchCharacter } = useCharacterStore()
   const character = getCharacter(id)
   const [activeTab, setActiveTab] = useState('Overview')
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [sigilSpinning, setSigilSpinning] = useState(false)
+
+  useEffect(() => { touchCharacter(id) }, [id])
+  const spinTimer = useRef(null)
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    setSigilSpinning(true)
+    clearTimeout(spinTimer.current)
+    spinTimer.current = setTimeout(() => setSigilSpinning(false), 700)
+  }
 
   if (!character) {
     return (
@@ -86,12 +97,9 @@ export default function CharacterPage() {
       {/* Sticky header: topbar + tabs */}
       <div className="sticky top-0 z-20">
         <div className="top-bar px-4 py-3 flex items-center justify-between relative overflow-hidden">
-          <SigilBackground
-            size={null}
-            opacity={0.18}
-            className="absolute"
-            style={{ width: '33%', height: 'auto', top: '50%', left: '0', transform: 'translateY(-50%)', zIndex: 0 }}
-          />
+          <div className="absolute" style={{ width: '33%', height: 'auto', top: '50%', left: '0', transform: 'translateY(-50%)', zIndex: 0 }}>
+            <SigilBackground size={null} opacity={0.18} pulse rotate spinning={sigilSpinning} />
+          </div>
           <div className="flex items-center gap-3 min-w-0 relative z-10">
             <button onClick={() => navigate('/')} className="text-sm flex-shrink-0" style={{ color: 'var(--text-dim)' }}>← Back</button>
             <div className="w-px h-5 flex-shrink-0" style={{ backgroundColor: 'var(--bg-border)' }} />
@@ -117,7 +125,7 @@ export default function CharacterPage() {
 
         <div className="tab-bar px-4 flex gap-0 overflow-x-auto">
           {TABS.map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)} className={`tab-btn ${activeTab === tab ? 'active' : ''}`}>
+            <button key={tab} onClick={() => handleTabChange(tab)} className={`tab-btn ${activeTab === tab ? 'active' : ''}`}>
               {tab}
               {tab === 'Buff & Debuff' && character.class?.toLowerCase() === 'bard' && (
                 <span className="ml-1 text-xs px-1 rounded" style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)' }}>🎶</span>
@@ -133,7 +141,7 @@ export default function CharacterPage() {
       </div>
 
       {/* Page Content */}
-      <div className="max-w-6xl mx-auto p-4 space-y-4">
+      <div key={activeTab} className="tab-content max-w-6xl mx-auto p-4 space-y-4">
 
         {activeTab === '📌 Dashboard' && (
           <Dashboard character={character} onChange={update} />

@@ -1,6 +1,22 @@
+import { useEffect, useRef } from 'react'
 import { abilityMod, formatMod } from '../../data/pf1eData'
 import PinButton from '../PinButton'
 import SpinnerInput from '../SpinnerInput'
+
+function useFlash(value) {
+  const prevRef = useRef(value)
+  const elRef   = useRef(null)
+  useEffect(() => {
+    const prev = prevRef.current
+    prevRef.current = value
+    if (!elRef.current || value === prev) return
+    const cls = value > prev ? 'flash-positive' : 'flash-negative'
+    elRef.current.classList.remove('flash-positive', 'flash-negative')
+    void elRef.current.offsetWidth // reflow
+    elRef.current.classList.add(cls)
+  }, [value])
+  return elRef
+}
 
 export default function CombatStats({ character, onChange, pins = {}, onTogglePin, buffTotals = {}, armorProps = {}, computedBAB = null, computedSaveBases = null, favoredHP = 0 }) {
   const { abilities, hp, ac, saves, bab, initiative, speed } = character
@@ -39,8 +55,27 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
   const buffed = (key) => (bt[key] ?? 0) !== 0
 
   const effectiveMaxHP = (hp.max ?? 0) + (bt.hp ?? 0) + favoredHP
-  const hpPct   = effectiveMaxHP > 0 ? Math.max(0, Math.min(100, (hp.current / effectiveMaxHP) * 100)) : 0
-  const hpColor = hpPct > 50 ? '#22c55e' : hpPct > 25 ? '#f59e0b' : '#ef4444'
+  const hpPct      = effectiveMaxHP > 0 ? Math.max(0, Math.min(100, (hp.current / effectiveMaxHP) * 100)) : 0
+  const hpDanger   = hpPct <= 25 && effectiveMaxHP > 0
+
+  // PF1e HP status: death at negative CON score
+  const deathThreshold = -(effCon)   // e.g. CON 14 → dies at -14
+  const hpStatus = (() => {
+    const cur = hp.current ?? 0
+    if (cur <= deathThreshold)  return 'DEAD'
+    if (cur < 0)                return 'Unconscious'
+    if (cur === 0)              return 'Staggered'
+    return null
+  })()
+  const hpStatusColor = hpStatus === 'DEAD' ? '#ef4444' : hpStatus === 'Unconscious' ? '#f97316' : '#f59e0b'
+  const hpColor    = hpStatus === 'DEAD' ? '#ef4444' : hpPct > 50 ? '#22c55e' : hpPct > 25 ? '#f59e0b' : '#ef4444'
+
+  // Flash refs for key derived stats
+  const acFlashRef   = useFlash(totalAC)
+  const fortFlashRef = useFlash(totalFort)
+  const refFlashRef  = useFlash(totalRef)
+  const willFlashRef = useFlash(totalWill)
+  const hpFlashRef   = useFlash(effectiveMaxHP)
 
   const BuffBadge = ({ val }) => val !== 0 ? (
     <span className="text-xs ml-1 px-1 rounded" style={{ backgroundColor: val > 0 ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)', color: val > 0 ? 'var(--positive)' : '#ef4444', border: `1px solid ${val > 0 ? 'var(--positive)' : '#ef4444'}` }}>
@@ -78,14 +113,35 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
               <SpinnerInput value={hp.nonlethal ?? 0} onChange={v => onChange('hp', { ...hp, nonlethal: Math.max(0, v) })} min={0} width="w-14" />
             </div>
           </div>
-          {effectiveMaxHP > 0 && (
-            <div className="flex-1 min-w-32">
-              <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-border)' }}>
-                <div className="h-full rounded-full transition-all" style={{ width: `${hpPct}%`, backgroundColor: hpColor }} />
+          <div className="flex-1 min-w-32" ref={hpFlashRef} style={{ borderRadius: '4px' }}>
+            {effectiveMaxHP > 0 && (
+              <>
+                <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-border)' }}>
+                  <div
+                    className={`h-full rounded-full transition-all${hpDanger ? ' hp-bar-danger' : ''}`}
+                    style={{ width: `${Math.max(0, hpPct)}%`, backgroundColor: hpColor }}
+                  />
+                </div>
+                <div className="text-xs mt-1 text-center font-bold" style={{ color: hpColor }}>
+                  {hp.current}/{effectiveMaxHP} HP{hpDanger && !hpStatus ? ' ⚠' : ''}
+                </div>
+              </>
+            )}
+            {hpStatus && (
+              <div
+                className="mt-2 text-center font-bold tracking-widest"
+                style={{
+                  color: hpStatusColor,
+                  fontSize: hpStatus === 'DEAD' ? '1.4rem' : '1rem',
+                  textShadow: `0 0 12px ${hpStatusColor}`,
+                  animation: hpStatus === 'DEAD' ? 'hp-danger 1.4s ease-in-out infinite' : hpStatus === 'Unconscious' ? 'hp-danger 2.5s ease-in-out infinite' : 'none',
+                  letterSpacing: hpStatus === 'DEAD' ? '0.25em' : '0.1em',
+                }}
+              >
+                {hpStatus}
               </div>
-              <div className="text-xs mt-1 text-center" style={{ color: hpColor }}>{hp.current}/{effectiveMaxHP} HP</div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -101,8 +157,8 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
           </div>
         )}
         <div className="grid grid-cols-3 gap-3 mb-4">
-          {[['Total AC', totalAC], ['Touch', touchAC], ['Flat-Footed', flatFooted]].map(([lbl, val]) => (
-            <div key={lbl} className="stat-box text-center">
+          {[['Total AC', totalAC, acFlashRef], ['Touch', touchAC, null], ['Flat-Footed', flatFooted, null]].map(([lbl, val, ref]) => (
+            <div key={lbl} ref={ref} className="stat-box text-center" style={{ borderRadius: '6px' }}>
               <div className="text-xs mb-1 flex items-center justify-center gap-1" style={{ color: 'var(--text-dim)' }}>
                 {lbl} <BuffBadge val={bt.ac ?? 0} />
               </div>
@@ -167,11 +223,11 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
         {/* Saving Throws */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { key: 'fort', label: 'Fortitude', mod: conMod, total: totalFort, buffVal: bt.fort ?? 0 },
-            { key: 'ref',  label: 'Reflex',    mod: dexMod, total: totalRef,  buffVal: bt.ref  ?? 0 },
-            { key: 'will', label: 'Will',       mod: wisMod, total: totalWill, buffVal: bt.will ?? 0 },
-          ].map(({ key, label, mod, total, buffVal }) => (
-            <div key={key} className="stat-box text-center">
+            { key: 'fort', label: 'Fortitude', mod: conMod, total: totalFort, buffVal: bt.fort ?? 0, flashRef: fortFlashRef },
+            { key: 'ref',  label: 'Reflex',    mod: dexMod, total: totalRef,  buffVal: bt.ref  ?? 0, flashRef: refFlashRef  },
+            { key: 'will', label: 'Will',       mod: wisMod, total: totalWill, buffVal: bt.will ?? 0, flashRef: willFlashRef },
+          ].map(({ key, label, mod, total, buffVal, flashRef }) => (
+            <div key={key} ref={flashRef} className="stat-box text-center" style={{ borderRadius: '6px' }}>
               <div className="text-xs font-bold mb-1 flex items-center justify-center gap-1" style={{ color: 'var(--accent)' }}>
                 {label} <BuffBadge val={buffVal} />
               </div>

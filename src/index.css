@@ -111,3 +111,58 @@ body {
 
   .page-bg { background-color: var(--bg-darker); }
 }
+
+/* ── Sigil animations ────────────────────────────────────── */
+@keyframes sigil-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes sigil-pulse-opacity {
+  0%   { opacity: var(--sigil-opacity-low, 0.05); }
+  50%  { opacity: var(--sigil-opacity-high, 0.12); }
+  100% { opacity: var(--sigil-opacity-low, 0.05); }
+}
+.sigil-pulse {
+  animation:
+    sigil-spin            var(--sigil-spin-dur, 40s) linear infinite,
+    sigil-pulse-opacity   6s ease-in-out infinite;
+}
+.sigil-pulse-fast {
+  animation:
+    sigil-spin            var(--sigil-spin-dur, 40s) linear infinite,
+    sigil-pulse-opacity   2.4s ease-in-out infinite;
+}
+/* No rotation — opacity pulse only, safe with positional transforms */
+.sigil-pulse-static {
+  animation: sigil-pulse-opacity 6s ease-in-out infinite;
+}
+
+/* ── Tab content entrance ────────────────────────────────── */
+@keyframes tab-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tab-content {
+  animation: tab-enter 0.22s ease-out both;
+}
+
+/* ── HP danger pulse ─────────────────────────────────────── */
+@keyframes hp-danger {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+.hp-bar-danger {
+  animation: hp-danger 1.4s ease-in-out infinite;
+}
+
+/* ── Stat flash ──────────────────────────────────────────── */
+@keyframes flash-positive {
+  0%   { background-color: rgba(34,197,94,0.35); }
+  100% { background-color: transparent; }
+}
+@keyframes flash-negative {
+  0%   { background-color: rgba(239,68,68,0.35); }
+  100% { background-color: transparent; }
+}
+.flash-positive { animation: flash-positive 0.7s ease-out; }
+.flash-negative { animation: flash-negative 0.7s ease-out; }

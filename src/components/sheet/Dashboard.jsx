@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { abilityMod, formatMod, SKILLS, computeClassTotals } from '../../data/pf1eData'
 import SpinnerInput from '../SpinnerInput'
 
@@ -27,17 +27,22 @@ const SECTION_LABELS = {
 function WidgetCard({ id, label, icon, onUnpin, children, isDragging, onDragStart, onDragOver, onDrop, onDragEnd }) {
   return (
     <div
-      draggable
-      onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDrop={onDrop}
-      onDragEnd={onDragEnd}
       className="card"
-      style={{ position: 'relative', opacity: isDragging ? 0.4 : 1, cursor: 'grab', transition: 'opacity 0.15s' }}
+      style={{ position: 'relative', opacity: isDragging ? 0.4 : 1, transition: 'opacity 0.15s', outline: isDragging ? '2px dashed var(--accent)' : 'none' }}
     >
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-bold text-sm flex items-center gap-2 select-none" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>
-          <span className="text-xs" style={{ color: 'var(--text-faint)' }}>☰</span>
+          {/* Only the handle is draggable */}
+          <span
+            draggable
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            title="Drag to reorder"
+            className="text-xs px-1 rounded cursor-grab select-none"
+            style={{ color: 'var(--text-faint)', border: '1px solid var(--bg-border)', lineHeight: 1.6 }}
+          >☰</span>
           <span>{icon}</span> {label}
         </h3>
         <button onClick={() => onUnpin(id)} title="Unpin"
@@ -506,8 +511,6 @@ export default function Dashboard({ character, onChange }) {
   const pinnedSections = pins.sections ?? []
   const hasPinnedSkills = (pins.skills ?? []).length > 0
 
-  const dragId    = useRef(null)
-  const dragOverId = useRef(null)
   const [dragging, setDragging] = useState(null)
 
   const unpin = (id) => {
@@ -518,26 +521,39 @@ export default function Dashboard({ character, onChange }) {
     onChange('pins', { ...pins, skills: (pins.skills ?? []).filter(k => k !== key) })
   }
 
-  const onDragStart = (id) => { dragId.current = id; setDragging(id) }
-  const onDragOver  = (e, id) => { e.preventDefault(); dragOverId.current = id }
-  const onDrop      = (e) => {
-    e.preventDefault()
-    const from = dragId.current
-    const to   = dragOverId.current
-    if (!from || !to || from === to) return
-    const next = [...pinnedSections]
-    const fi = next.indexOf(from), ti = next.indexOf(to)
-    if (fi === -1 || ti === -1) return
-    next.splice(fi, 1)
-    next.splice(ti, 0, from)
-    onChange('pins', { ...pins, sections: next })
-    dragId.current = null; dragOverId.current = null; setDragging(null)
-  }
-  const onDragEnd = () => { dragId.current = null; dragOverId.current = null; setDragging(null) }
-
   // Skills card gets a virtual id for drag
   const SKILLS_ID = '__skills__'
-  const allIds = hasPinnedSkills ? [SKILLS_ID, ...pinnedSections] : pinnedSections
+  // Full ordered list including skills card
+  const allOrderedIds = hasPinnedSkills ? [SKILLS_ID, ...pinnedSections] : pinnedSections
+
+  const makeDragHandlers = (id) => ({
+    onDragStart: (e) => {
+      e.dataTransfer.setData('text/plain', id)
+      e.dataTransfer.effectAllowed = 'move'
+      setDragging(id)
+    },
+    onDragOver: (e) => {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
+    },
+    onDrop: (e) => {
+      e.preventDefault()
+      const fromId = e.dataTransfer.getData('text/plain')
+      if (!fromId || fromId === id) { setDragging(null); return }
+      // Build ordered list, swap positions
+      const next = [...allOrderedIds]
+      const fi = next.indexOf(fromId)
+      const ti = next.indexOf(id)
+      if (fi === -1 || ti === -1) { setDragging(null); return }
+      next.splice(fi, 1)
+      next.splice(ti, 0, fromId)
+      // Skills card may be in next; strip it back out for sections array
+      const nextSections = next.filter(x => x !== SKILLS_ID)
+      onChange('pins', { ...pins, sections: nextSections })
+      setDragging(null)
+    },
+    onDragEnd: () => setDragging(null),
+  })
 
   const isEmpty = pinnedSections.length === 0 && !hasPinnedSkills
 
@@ -560,10 +576,7 @@ export default function Dashboard({ character, onChange }) {
           id={SKILLS_ID} label="Pinned Skills" icon="🎯"
           onUnpin={() => {}}
           isDragging={dragging === SKILLS_ID}
-          onDragStart={() => onDragStart(SKILLS_ID)}
-          onDragOver={e => onDragOver(e, SKILLS_ID)}
-          onDrop={onDrop}
-          onDragEnd={onDragEnd}
+          {...makeDragHandlers(SKILLS_ID)}
         >
           <PinnedSkillsWidget character={character} onUnpin={unpinSkill} />
           <div className="mt-2 pt-2 flex justify-end" style={{ borderTop: '1px solid var(--bg-border)' }}>
@@ -586,10 +599,7 @@ export default function Dashboard({ character, onChange }) {
             key={id} id={id} label={info.label} icon={info.icon}
             onUnpin={unpin}
             isDragging={dragging === id}
-            onDragStart={() => onDragStart(id)}
-            onDragOver={e => onDragOver(e, id)}
-            onDrop={onDrop}
-            onDragEnd={onDragEnd}
+            {...makeDragHandlers(id)}
           >
             {renderWidget(id, character, onChange)}
           </WidgetCard>

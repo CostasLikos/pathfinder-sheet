@@ -1,4 +1,25 @@
-export default function SigilBackground({ size = 400, opacity = 0.07, color = 'var(--accent)', className = '', style = {} }) {
+export default function SigilBackground({
+  size = 400,
+  opacity = 0.07,
+  color = 'var(--accent)',
+  className = '',
+  style = {},
+  pulse = false,
+  pulseFast = false,
+  rotate = false,     // enable rotation animation
+  spinning = false,   // true = fast spin burst (tab change)
+}) {
+  const pulseClass = pulseFast
+    ? 'sigil-pulse-fast'
+    : pulse && rotate
+      ? 'sigil-pulse'
+      : pulse
+        ? 'sigil-pulse-static'
+        : ''
+  const opacityLow    = opacity
+  const opacityHigh   = Math.min(1, opacity * 2.2)
+  // Strip transform out of style so it doesn't override the rotation animation.
+  // We pass it as --sigil-base-transform so the keyframe can include it.
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -6,8 +27,15 @@ export default function SigilBackground({ size = 400, opacity = 0.07, color = 'v
       width={size ?? undefined}
       height={size ?? undefined}
       aria-hidden="true"
-      className={`pointer-events-none select-none ${className}`}
-      style={{ opacity, ...style }}
+      className={`pointer-events-none select-none ${pulseClass} ${className}`}
+      style={{
+        opacity,
+        '--sigil-opacity-low':  opacityLow,
+        '--sigil-opacity-high': opacityHigh,
+        '--sigil-spin-dur':     spinning ? '0.6s' : '40s',
+        transformOrigin:        'center center',
+        ...style,
+      }}
     >
       <circle cx="256" cy="256" r="226" fill="none" stroke={color} strokeWidth="6"/>
       <circle cx="256" cy="256" r="198" fill="none" stroke={color} strokeWidth="3"/>

@@ -37,6 +37,41 @@ export default function HomePage() {
     e.target.value = ''
   }
 
+  const formatLastSeen = (ts) => {
+    if (!ts) return { text: 'never opened', funny: false }
+    const diff = Date.now() - ts
+    const mins  = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    const days  = Math.floor(diff / 86400000)
+    const months = Math.floor(days / 30.44)
+    const years  = Math.floor(days / 365.25)
+
+    const parts = []
+    if (years  > 0) parts.push(`${years} year${years > 1 ? 's' : ''}`)
+    const remMonths = months - years * 12
+    if (remMonths > 0) parts.push(`${remMonths} month${remMonths > 1 ? 's' : ''}`)
+    const remDays = days - Math.floor(months * 30.44)
+    if (remDays > 0 && years === 0) parts.push(`${remDays} day${remDays > 1 ? 's' : ''}`)
+    const remMins = mins - hours * 60
+    if (hours === 0 && days === 0) parts.push(`${mins < 1 ? 'less than a' : mins} minute${mins !== 1 ? 's' : ''}`)
+    else if (days === 0) { parts.push(`${hours} hour${hours > 1 ? 's' : ''}`); if (remMins > 0) parts.push(`${remMins} minute${remMins > 1 ? 's' : ''}`) }
+
+    const text = (parts.length ? parts.join(', ') : 'just now') + ' since last view'
+    const funny = months >= 1
+
+    const funnyLines = [
+      'Dead campaign?',
+      'Your DM has moved on.',
+      'The tavern closed down.',
+      'Your character died of old age.',
+      'The dragon won.',
+      'Roll for abandonment.',
+    ]
+    const funnyMsg = funnyLines[(Math.floor(ts / 1000)) % funnyLines.length]
+
+    return { text, funny, funnyMsg }
+  }
+
   const getClassColor = (cls) => {
     const colors = {
       Fighter: 'text-red-400', Wizard: 'text-blue-400', Rogue: 'text-yellow-400',
@@ -67,6 +102,7 @@ export default function HomePage() {
         size={null}
         opacity={0.07}
         color={accentHex}
+        pulse
         className="absolute"
         style={{ width: '100vmin', height: '100vmin', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 0 }}
       />
@@ -390,6 +426,14 @@ export default function HomePage() {
                     </div>
                   </div>
                 )}
+
+                {(() => { const ls = formatLastSeen(char.lastAccessedAt); return (
+                  <div className="mt-2 text-xs" style={{ color: ls.funny ? hex2rgba(accentHex, 0.5) : 'var(--text-faint)' }}>
+                    {ls.funny
+                      ? <><span style={{ color: '#f59e0b', fontStyle: 'italic' }}>{ls.funnyMsg}</span> · {ls.text}</>
+                      : ls.text}
+                  </div>
+                )})()}
 
                 <div className="flex gap-2 mt-3 pt-3" style={{ borderTop: '1px solid var(--bg-border)' }}>
                   <button onClick={e => { e.stopPropagation(); navigate(`/character/${char.id}`) }}

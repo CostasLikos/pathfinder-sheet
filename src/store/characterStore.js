@@ -114,6 +114,14 @@ export const useCharacterStore = create(
         }
       },
 
+      touchCharacter: (id) => {
+        set(state => ({
+          characters: state.characters.map(c =>
+            c.id === id ? { ...c, lastAccessedAt: Date.now() } : c
+          )
+        }))
+      },
+
       exportCharacter: (id) => {
         const char = get().characters.find(c => c.id === id)
         if (!char) return
