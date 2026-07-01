@@ -129,3 +129,91 @@ export const DEFAULT_SKILL_ORDER = SKILLS.map(s => s.key)
 
 export const abilityMod = (score) => Math.floor((score - 10) / 2)
 export const formatMod  = (mod)   => mod >= 0 ? `+${mod}` : `${mod}`
+
+// ─── PF1e Conditions ──────────────────────────────────────────────────────────
+// mods: applied automatically to character stats when the condition is active
+// effect: human-readable summary (includes effects we can't auto-apply)
+export const CONDITIONS = [
+  { id: 'blinded',     label: 'Blinded',     icon: '👁️', color: '#94a3b8',
+    effect: '−2 AC, lose Dex to AC, −4 Perception, 50% miss chance',
+    mods: { ac: -2 } },
+  { id: 'confused',    label: 'Confused',    icon: '💫', color: '#a78bfa',
+    effect: 'Random actions each round (d100)',
+    mods: {} },
+  { id: 'cowering',    label: 'Cowering',    icon: '😨', color: '#f87171',
+    effect: '−2 AC, lose Dex to AC, can take no actions',
+    mods: { ac: -2 } },
+  { id: 'dazed',       label: 'Dazed',       icon: '😵', color: '#94a3b8',
+    effect: 'Can take no actions, lose Dex to AC',
+    mods: {} },
+  { id: 'dazzled',     label: 'Dazzled',     icon: '✨', color: '#fbbf24',
+    effect: '−1 attack rolls, −1 Perception checks',
+    mods: { attackRoll: -1 } },
+  { id: 'deafened',    label: 'Deafened',    icon: '🔇', color: '#94a3b8',
+    effect: '−4 initiative, 20% spell failure, −4 Perception',
+    mods: { initiative: -4 } },
+  { id: 'entangled',   label: 'Entangled',   icon: '🕸️', color: '#86efac',
+    effect: '−2 attack, −4 Dex, can\'t run/charge, concentration +10 DC',
+    mods: { attackRoll: -2, dex: -4 } },
+  { id: 'exhausted',   label: 'Exhausted',   icon: '😴', color: '#f87171',
+    effect: '−6 STR, −6 DEX, half speed',
+    mods: { str: -6, dex: -6 } },
+  { id: 'fascinated',  label: 'Fascinated',  icon: '👀', color: '#a78bfa',
+    effect: 'Stands quietly, −4 Perception vs other threats, no actions',
+    mods: {} },
+  { id: 'fatigued',    label: 'Fatigued',    icon: '😓', color: '#fbbf24',
+    effect: '−2 STR, −2 DEX, can\'t run or charge',
+    mods: { str: -2, dex: -2 } },
+  { id: 'flat-footed', label: 'Flat-Footed', icon: '🦶', color: '#94a3b8',
+    effect: 'Loses Dex to AC, can\'t make attacks of opportunity',
+    mods: {} },
+  { id: 'frightened',  label: 'Frightened',  icon: '😱', color: '#fb923c',
+    effect: '−2 attack/saves/skills, must flee source of fear',
+    mods: { attackRoll: -2, fort: -2, ref: -2, will: -2 } },
+  { id: 'grappled',    label: 'Grappled',    icon: '🤼', color: '#fb923c',
+    effect: '−4 Dex, −2 attack/CMB, concentration +10 DC, can\'t move',
+    mods: { attackRoll: -2, dex: -4, cmb: -2 } },
+  { id: 'invisible',   label: 'Invisible',   icon: '👻', color: '#e2e8f0',
+    effect: '+2 attack, opponents lose Dex to AC against you',
+    mods: { attackRoll: 2 } },
+  { id: 'nauseated',   label: 'Nauseated',   icon: '🤢', color: '#86efac',
+    effect: 'Only move action per round, no attacking or casting',
+    mods: {} },
+  { id: 'panicked',    label: 'Panicked',    icon: '🏃', color: '#f87171',
+    effect: '−2 saves, must flee; can\'t cast, attack, or use skills',
+    mods: { fort: -2, ref: -2, will: -2 } },
+  { id: 'paralyzed',   label: 'Paralyzed',   icon: '🧊', color: '#60a5fa',
+    effect: 'STR/DEX treated as 0, considered helpless',
+    mods: { str: -10, dex: -10 } },
+  { id: 'petrified',   label: 'Petrified',   icon: '🗿', color: '#94a3b8',
+    effect: 'Turned to stone, unconscious',
+    mods: {} },
+  { id: 'pinned',      label: 'Pinned',      icon: '📌', color: '#f87171',
+    effect: 'Immobile, −4 AC, lose Dex to AC, only verbal/mental actions',
+    mods: { ac: -4 } },
+  { id: 'prone',       label: 'Prone',       icon: '⬇️', color: '#fbbf24',
+    effect: '+4 AC vs ranged, −4 AC vs melee, −4 melee attack',
+    mods: { attackRoll: -4 } },
+  { id: 'shaken',      label: 'Shaken',      icon: '😬', color: '#fb923c',
+    effect: '−2 attack, saves, skill checks, and ability checks',
+    mods: { attackRoll: -2, fort: -2, ref: -2, will: -2 } },
+  { id: 'sickened',    label: 'Sickened',    icon: '🤒', color: '#86efac',
+    effect: '−2 attack/damage/saves/skill/ability checks',
+    mods: { attackRoll: -2, damage: -2, fort: -2, ref: -2, will: -2 } },
+  { id: 'staggered',   label: 'Staggered',   icon: '💢', color: '#fbbf24',
+    effect: 'One standard OR move action per round (not both)',
+    mods: {} },
+  { id: 'stunned',     label: 'Stunned',     icon: '⚡', color: '#fb923c',
+    effect: '−2 AC, lose Dex to AC, drop items, can\'t act',
+    mods: { ac: -2 } },
+]
+
+export function computeConditionTotals(activeConditionIds = []) {
+  const totals = { attackRoll:0, damage:0, ac:0, initiative:0, fort:0, ref:0, will:0, hp:0, cmb:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 }
+  activeConditionIds.forEach(id => {
+    const cond = CONDITIONS.find(c => c.id === id)
+    if (!cond) return
+    Object.entries(cond.mods ?? {}).forEach(([k, v]) => { if (k in totals) totals[k] += v })
+  })
+  return totals
+}

@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { useCharacterStore } from '../store/characterStore'
-import { computeClassTotals } from '../data/pf1eData'
+import { computeClassTotals, computeConditionTotals, CONDITIONS } from '../data/pf1eData'
 import SigilBackground from '../components/SigilBackground'
 import PinButton from '../components/PinButton'
 import BasicInfo from '../components/sheet/BasicInfo'
@@ -16,7 +16,7 @@ import Equipment from '../components/sheet/Equipment'
 import Dashboard from '../components/sheet/Dashboard'
 import SettingsPanel from '../components/SettingsPanel'
 
-const TABS = ['Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Buff & Debuff', 'Notes', '📌 Dashboard']
+const TABS = ['Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Tracker', 'Notes', '📌 Dashboard']
 
 export default function CharacterPage() {
   const { id } = useParams()
@@ -51,14 +51,19 @@ export default function CharacterPage() {
   const update = (field, value) => updateCharacter(id, { [field]: value })
   const updateAbility = (ab, value) => updateCharacter(id, { abilities: { ...character.abilities, [ab]: value } })
 
-  // Compute net buff/debuff totals from all active stat buffs
+  // Compute net buff/debuff totals from all active stat buffs + active conditions
   const buffTotals = (() => {
     const t = { attackRoll:0, damage:0, ac:0, initiative:0, fort:0, ref:0, will:0, hp:0, cmb:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 }
     ;(character.statBuffs ?? []).filter(b => b.active).forEach(b => {
       Object.keys(t).forEach(k => { t[k] += (b.mods?.[k] ?? 0) * (b.type === 'debuff' ? -1 : 1) })
     })
+    const condTotals = computeConditionTotals(character.conditions ?? [])
+    Object.keys(t).forEach(k => { t[k] += condTotals[k] ?? 0 })
     return t
   })()
+
+  // Active conditions for header display
+  const activeConditions = CONDITIONS.filter(c => (character.conditions ?? []).includes(c.id))
 
   // ── Multiclass computed totals ─────────────────────────────────────────────
   const classTotals = computeClassTotals(character.classes ?? [])
@@ -104,9 +109,17 @@ export default function CharacterPage() {
             <button onClick={() => navigate('/')} className="text-sm flex-shrink-0" style={{ color: 'var(--text-dim)' }}>← Back</button>
             <div className="w-px h-5 flex-shrink-0" style={{ backgroundColor: 'var(--bg-border)' }} />
             <div className="min-w-0">
-              <span className="font-bold truncate block" style={{ color: 'var(--accent)', fontFamily: 'Georgia, serif' }}>
-                {character.name || 'Unnamed Hero'}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold truncate" style={{ color: 'var(--accent)', fontFamily: 'Georgia, serif' }}>
+                  {character.name || 'Unnamed Hero'}
+                </span>
+                {activeConditions.map(c => (
+                  <span key={c.id} className="condition-blink text-xs font-bold px-1.5 py-0.5 rounded-full"
+                    style={{ color: c.color, border: `1px solid ${c.color}`, backgroundColor: `${c.color}18`, '--blink-color': c.color }}>
+                    {c.icon} {c.label}
+                  </span>
+                ))}
+              </div>
               <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
                 {hasClasses
                   ? (character.classes ?? []).map(c => `${c.className} ${c.level}`).join(' / ')
@@ -178,6 +191,7 @@ export default function CharacterPage() {
             pinned={pinnedMap.attacks}
             onTogglePin={() => toggleSectionPin('attacks')}
             buffTotals={buffTotals}
+            computedBAB={computedBAB}
           />
         )}
 
@@ -218,7 +232,7 @@ export default function CharacterPage() {
           />
         )}
 
-        {activeTab === 'Buff & Debuff' && (
+        {activeTab === 'Tracker' && (
           <BuffTracker
             character={character}
             onChange={update}

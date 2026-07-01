@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import PinButton from '../PinButton'
+import { CONDITIONS } from '../../data/pf1eData'
 
 const DURATION_UNITS = ['rounds', 'minutes', 'hours', 'permanent']
 const BUFF_SOURCES   = ['Spell', 'Feat', 'Item', 'Class Ability', 'Racial', 'Other']
@@ -11,61 +12,49 @@ const BARD_PERFORMANCES = [
 ]
 
 const STAT_MOD_FIELDS = [
-  { key: 'attackRoll',  label: 'Attack Roll' },
-  { key: 'damage',      label: 'Damage' },
-  { key: 'ac',          label: 'AC' },
-  { key: 'initiative',  label: 'Initiative' },
-  { key: 'fort',        label: 'Fortitude' },
-  { key: 'ref',         label: 'Reflex' },
-  { key: 'will',        label: 'Will' },
-  { key: 'hp',          label: 'HP' },
-  { key: 'cmb',         label: 'CMB' },
-  { key: 'str',         label: 'STR' },
-  { key: 'dex',         label: 'DEX' },
-  { key: 'con',         label: 'CON' },
-  { key: 'int',         label: 'INT' },
-  { key: 'wis',         label: 'WIS' },
-  { key: 'cha',         label: 'CHA' },
+  { key: 'attackRoll', label: 'Attack Roll' }, { key: 'damage',    label: 'Damage' },
+  { key: 'ac',        label: 'AC' },           { key: 'initiative',label: 'Initiative' },
+  { key: 'fort',      label: 'Fortitude' },    { key: 'ref',       label: 'Reflex' },
+  { key: 'will',      label: 'Will' },         { key: 'hp',        label: 'HP' },
+  { key: 'cmb',       label: 'CMB' },          { key: 'str',       label: 'STR' },
+  { key: 'dex',       label: 'DEX' },          { key: 'con',       label: 'CON' },
+  { key: 'int',       label: 'INT' },          { key: 'wis',       label: 'WIS' },
+  { key: 'cha',       label: 'CHA' },
 ]
 
 const emptyMods = () => Object.fromEntries(STAT_MOD_FIELDS.map(f => [f.key, 0]))
 
 const emptyStatBuff = (type = 'buff') => ({
-  id: crypto.randomUUID(),
-  name: '',
-  type,   // 'buff' | 'debuff'
-  active: true,
-  source: 'Spell',
-  mods: emptyMods(),
-  notes: '',
+  id: crypto.randomUUID(), name: '', type, active: true, source: 'Spell', mods: emptyMods(), notes: '',
 })
 
 const emptyDurationBuff = () => ({
-  id: crypto.randomUUID(),
-  name: '',
-  source: 'Spell',
-  duration: 3,
-  unit: 'rounds',
-  remaining: 3,
-  notes: '',
+  id: crypto.randomUUID(), name: '', source: 'Spell', duration: 3, unit: 'rounds', remaining: 3, notes: '',
 })
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
+// ─── XP thresholds by track ───────────────────────────────────────────────────
+const XP_TRACKS = {
+  slow:   [0,3000,7500,14000,23000,35000,53000,77000,115000,160000,235000,330000,475000,665000,955000,1350000,1900000,2700000,3850000,5350000],
+  medium: [0,2000,5000,9000,15000,23000,35000,51000,75000,105000,155000,220000,315000,445000,635000,890000,1300000,1800000,2550000,3600000],
+  fast:   [0,1300,3300,6000,10000,15000,23000,34000,50000,71000,105000,145000,210000,295000,425000,600000,850000,1200000,1700000,2400000],
+}
+const XP_TRACK_LABELS = { slow: 'Slow', medium: 'Medium', fast: 'Fast' }
 
+function getThresholds(track) { return XP_TRACKS[track] ?? XP_TRACKS.medium }
+function xpForLevel(lvl, track) { return getThresholds(track)[Math.min(lvl - 1, 19)] ?? 0 }
+function xpToNext(lvl, track)   { return getThresholds(track)[Math.min(lvl, 19)] ?? null }
 function fmtMod(v) { return v > 0 ? `+${v}` : `${v}` }
 
 function activeSummary(statBuffs = []) {
   const totals = emptyMods()
   statBuffs.filter(b => b.active).forEach(b => {
-    STAT_MOD_FIELDS.forEach(({ key }) => {
-      totals[key] += (b.mods?.[key] ?? 0) * (b.type === 'debuff' ? -1 : 1)
-    })
+    STAT_MOD_FIELDS.forEach(({ key }) => { totals[key] += (b.mods?.[key] ?? 0) * (b.type === 'debuff' ? -1 : 1) })
   })
   return totals
 }
 
 // ─── Performance Picker ───────────────────────────────────────────────────────
-function PerformancePicker({ value, onChange }) {
+function PerformancePicker({ value, onChange, options = BARD_PERFORMANCES }) {
   const [open, setOpen] = useState(false)
   const ref = useRef()
   useEffect(() => {
@@ -73,7 +62,7 @@ function PerformancePicker({ value, onChange }) {
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [])
-  const filtered = value ? BARD_PERFORMANCES.filter(p => p.toLowerCase().includes(value.toLowerCase())) : BARD_PERFORMANCES
+  const filtered = value ? options.filter(p => p.toLowerCase().includes(value.toLowerCase())) : options
   return (
     <div className="relative mt-0.5" ref={ref}>
       <div className="flex gap-1">
@@ -100,8 +89,366 @@ function PerformancePicker({ value, onChange }) {
   )
 }
 
+// ─── XP Tracker ──────────────────────────────────────────────────────────────
+function XPTracker({ character, onChange, pinned, onTogglePin }) {
+  const xp    = character.experience ?? 0
+  const level = character.level ?? 1
+  const track = character.xpTrack ?? 'medium'
+  const next  = xpToNext(level, track)
+  const curr  = xpForLevel(level, track)
+  const pct   = next ? Math.min(100, ((xp - curr) / (next - curr)) * 100) : 100
+  const levelUp = next !== null && xp >= next
+  const [adding, setAdding] = useState('')
+
+  const applyXP = () => {
+    const n = parseInt(adding)
+    if (!isNaN(n)) onChange('experience', Math.max(0, xp + n))
+    setAdding('')
+  }
+
+  // Build the full level table for this track
+  const thresholds = getThresholds(track)
+
+  return (
+    <div className="card">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <h2 className="section-title mb-0">⭐ Experience</h2>
+          {onTogglePin && <PinButton pinned={pinned} onToggle={onTogglePin} />}
+        </div>
+        <div className="flex items-center gap-2">
+          {levelUp && (
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full font-bold text-sm animate-pulse"
+              style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>
+              🎉 Level Up! → Level {level + 1}
+            </div>
+          )}
+          {/* Track selector */}
+          <select value={track} onChange={e => onChange('xpTrack', e.target.value)}
+            className="text-xs px-2 py-1 rounded focus:outline-none"
+            style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--accent)', border: '1px solid var(--bg-border)' }}>
+            <option value="slow">Slow Track</option>
+            <option value="medium">Medium Track</option>
+            <option value="fast">Fast Track</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 mb-3 flex-wrap">
+        <div className="text-center">
+          <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>Current XP</div>
+          <input type="number" min={0} value={xp}
+            onChange={e => onChange('experience', Math.max(0, Number(e.target.value)))}
+            className="input-field text-center font-bold text-lg w-32" />
+        </div>
+        <div className="text-center">
+          <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>Level</div>
+          <div className="text-2xl font-bold" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>{level}</div>
+        </div>
+        {next !== null ? (
+          <div className="text-center">
+            <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>Next Level at</div>
+            <div className="text-sm font-bold" style={{ color: 'var(--text-dim)' }}>{next.toLocaleString()} XP</div>
+            <div className="text-xs" style={{ color: 'var(--text-faint)' }}>{Math.max(0, next - xp).toLocaleString()} more needed</div>
+          </div>
+        ) : (
+          <div className="text-center">
+            <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>Level</div>
+            <div className="text-sm font-bold" style={{ color: 'var(--accent)' }}>Max (20)</div>
+          </div>
+        )}
+      </div>
+
+      {/* XP progress bar */}
+      {next !== null && (
+        <div className="mb-4">
+          <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-border)' }}>
+            <div className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.max(0, pct)}%`, backgroundColor: levelUp ? 'var(--accent)' : 'var(--positive)' }} />
+          </div>
+          <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
+            <span>{curr.toLocaleString()}</span>
+            <span>{Math.round(pct)}% to level {level + 1}</span>
+            <span>{next.toLocaleString()}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Add XP */}
+      <div className="flex gap-2 items-center mb-4">
+        <input type="number" value={adding} onChange={e => setAdding(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && applyXP()}
+          placeholder="+ XP gained..." className="input-field text-sm flex-1" />
+        <button onClick={applyXP} className="text-xs px-3 py-1.5 rounded font-bold"
+          style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>Add</button>
+      </div>
+
+      {/* Level table */}
+      <details className="text-xs" style={{ color: 'var(--text-dim)' }}>
+        <summary className="cursor-pointer select-none mb-2 font-bold uppercase tracking-wide"
+          style={{ color: 'var(--text-faint)', fontSize: '0.65rem', letterSpacing: '0.1em' }}>
+          {XP_TRACK_LABELS[track]} Track — Full Table
+        </summary>
+        <div className="grid grid-cols-4 gap-x-3 gap-y-0.5 mt-2">
+          <span className="font-bold" style={{ color: 'var(--text-faint)' }}>Lvl</span>
+          <span className="font-bold col-span-2" style={{ color: 'var(--text-faint)' }}>XP Required</span>
+          <span className="font-bold" style={{ color: 'var(--text-faint)' }}>To Next</span>
+          {thresholds.map((t, i) => {
+            const lvl = i + 1
+            const isCurrentLevel = lvl === level
+            const toNext = thresholds[i + 1] ? (thresholds[i + 1] - t).toLocaleString() : '—'
+            return [
+              <span key={`l${i}`} className="font-bold" style={{ color: isCurrentLevel ? 'var(--accent)' : 'var(--text-dim)' }}>{lvl}</span>,
+              <span key={`x${i}`} className="col-span-2" style={{ color: isCurrentLevel ? 'var(--accent)' : 'var(--text-dim)' }}>{t.toLocaleString()}</span>,
+              <span key={`n${i}`} style={{ color: isCurrentLevel ? 'var(--text-dim)' : 'var(--text-faint)' }}>{toNext}</span>,
+            ]
+          })}
+        </div>
+      </details>
+    </div>
+  )
+}
+
+// ─── Condition Tracker ────────────────────────────────────────────────────────
+function ConditionTracker({ conditions = [], onChange, pinned, onTogglePin }) {
+  const [tooltip, setTooltip] = useState(null)
+  const toggle = (id) => {
+    const next = conditions.includes(id) ? conditions.filter(c => c !== id) : [...conditions, id]
+    onChange(next)
+  }
+  const active = CONDITIONS.filter(c => conditions.includes(c.id))
+
+  return (
+    <div className="card">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <h2 className="section-title mb-0">🩹 Conditions</h2>
+          {onTogglePin && <PinButton pinned={pinned} onToggle={onTogglePin} />}
+        </div>
+        {active.length > 0 && (
+          <button onClick={() => onChange([])} className="text-xs px-2 py-1 rounded border"
+            style={{ color: 'var(--text-dim)', borderColor: 'var(--bg-border)' }}>Clear All</button>
+        )}
+      </div>
+
+      {/* Active conditions summary */}
+      {active.length > 0 && (
+        <div className="mb-3 space-y-1.5">
+          {active.map(c => (
+            <div key={c.id} className="flex items-start gap-2 px-3 py-2 rounded-lg text-sm"
+              style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid ${c.color}40` }}>
+              <span>{c.icon}</span>
+              <div className="flex-1 min-w-0">
+                <span className="font-bold" style={{ color: c.color }}>{c.label} </span>
+                <span style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>{c.effect}</span>
+              </div>
+              <button onClick={() => toggle(c.id)} className="text-xs flex-shrink-0"
+                style={{ color: '#ef4444' }}>✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Condition grid */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1.5 relative">
+        {CONDITIONS.map(c => {
+          const isActive = conditions.includes(c.id)
+          return (
+            <div key={c.id} className="relative">
+              <button
+                onClick={() => toggle(c.id)}
+                onMouseEnter={() => setTooltip(c.id)}
+                onMouseLeave={() => setTooltip(null)}
+                className="w-full text-xs py-1.5 px-1 rounded-lg text-center transition-all"
+                style={{
+                  backgroundColor: isActive ? `${c.color}20` : 'var(--bg-darker)',
+                  border: `1px solid ${isActive ? c.color : 'var(--bg-border)'}`,
+                  color: isActive ? c.color : 'var(--text-faint)',
+                  fontWeight: isActive ? 700 : 400,
+                }}>
+                <div>{c.icon}</div>
+                <div style={{ fontSize: '0.6rem', lineHeight: 1.2, marginTop: '2px' }}>{c.label}</div>
+              </button>
+              {tooltip === c.id && (
+                <div className="absolute z-50 bottom-full mb-1 left-1/2 text-xs rounded-lg p-2 w-44 pointer-events-none"
+                  style={{ transform: 'translateX(-50%)', backgroundColor: 'var(--bg-darker)', border: `1px solid ${c.color}`, color: 'var(--text-dim)', boxShadow: '0 4px 16px rgba(0,0,0,0.6)' }}>
+                  <div className="font-bold mb-0.5" style={{ color: c.color }}>{c.icon} {c.label}</div>
+                  {c.effect}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Initiative Tracker ───────────────────────────────────────────────────────
+const emptyCombatant = (name = '', init = 0, isPC = false) => ({
+  id: crypto.randomUUID(), name, init, isPC, hp: '', notes: '',
+})
+
+function InitiativeTracker({ character, combatants = [], onChange, round, onRoundChange, pinned, onTogglePin }) {
+  const [nameInput, setNameInput] = useState('')
+  const [initInput, setInitInput] = useState('')
+  const sorted = [...combatants].sort((a, b) => b.init - a.init)
+  const currentIdx = sorted.findIndex(c => c.id === (character.initiativeCurrent ?? null))
+
+  const addCombatant = () => {
+    if (!nameInput.trim()) return
+    const init = parseInt(initInput) || 0
+    onChange([...combatants, emptyCombatant(nameInput.trim(), init)])
+    setNameInput(''); setInitInput('')
+  }
+
+  const addSelf = () => {
+    const dexMod = Math.floor(((character.abilities?.dex ?? 10) - 10) / 2)
+    const initMisc = character.initiative?.misc ?? 0
+    const roll = Math.floor(Math.random() * 20) + 1 + dexMod + initMisc
+    onChange([...combatants, emptyCombatant(character.name || 'PC', roll, true)])
+  }
+
+  const update = (id, key, val) => onChange(combatants.map(c => c.id === id ? { ...c, [key]: val } : c))
+  const remove = (id) => {
+    onChange(combatants.filter(c => c.id !== id))
+    if (character.initiativeCurrent === id) onCurrentChange(null)
+  }
+
+  const onCurrentChange = (id) => {
+    // stored on character via parent
+    onChange(combatants, id)
+  }
+
+  const nextTurn = () => {
+    if (sorted.length === 0) return
+    let next
+    if (currentIdx === -1 || currentIdx >= sorted.length - 1) {
+      next = sorted[0].id
+      if (currentIdx >= sorted.length - 1) onRoundChange(round + 1)
+    } else {
+      next = sorted[currentIdx + 1].id
+    }
+    onCurrentChange(next)
+  }
+
+  const resetCombat = () => {
+    onRoundChange(1)
+    onCurrentChange(null)
+  }
+
+  return (
+    <div className="card">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <h2 className="section-title mb-0">⚔️ Initiative</h2>
+          {onTogglePin && <PinButton pinned={pinned} onToggle={onTogglePin} />}
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded"
+            style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
+            <span className="text-xs" style={{ color: 'var(--text-dim)' }}>Round</span>
+            <span className="font-bold text-lg" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>{round}</span>
+          </div>
+          <button onClick={nextTurn} disabled={sorted.length === 0}
+            className="text-xs px-3 py-1.5 rounded font-bold"
+            style={{ backgroundColor: sorted.length > 0 ? 'var(--accent-dim)' : 'var(--bg-border)', color: sorted.length > 0 ? 'var(--accent)' : 'var(--text-faint)', border: `1px solid ${sorted.length > 0 ? 'var(--accent)' : 'var(--bg-border)'}` }}>
+            Next Turn →
+          </button>
+          <button onClick={resetCombat} className="text-xs px-2 py-1 rounded border"
+            style={{ color: 'var(--text-dim)', borderColor: 'var(--bg-border)' }}>↺ Reset</button>
+          {combatants.length > 0 && (
+            <button onClick={() => { onChange([]); resetCombat() }} className="text-xs px-2 py-1 rounded border"
+              style={{ color: '#ef4444', borderColor: '#7f1d1d' }}>Clear All</button>
+          )}
+        </div>
+      </div>
+
+      {/* Combatant list */}
+      {sorted.length > 0 ? (
+        <div className="space-y-1.5 mb-3">
+          {sorted.map((c, idx) => {
+            const isCurrent = c.id === (character.initiativeCurrent ?? null)
+            return (
+              <div key={c.id} className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all"
+                style={{
+                  backgroundColor: isCurrent ? 'var(--accent-dim)' : 'var(--bg-darker)',
+                  border: `1px solid ${isCurrent ? 'var(--accent)' : c.isPC ? 'rgba(201,168,76,0.3)' : 'var(--bg-border)'}`,
+                  boxShadow: isCurrent ? '0 0 12px rgba(201,168,76,0.2)' : 'none',
+                }}>
+                {/* Turn indicator */}
+                <div className="flex-shrink-0 w-5 text-center">
+                  {isCurrent
+                    ? <span className="text-xs font-bold" style={{ color: 'var(--accent)' }}>▶</span>
+                    : <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{idx + 1}</span>}
+                </div>
+
+                {/* Init badge */}
+                <input type="number" value={c.init}
+                  onChange={e => update(c.id, 'init', Number(e.target.value))}
+                  className="w-12 text-center text-sm font-bold rounded px-1 py-0.5 focus:outline-none"
+                  style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--accent)', border: '1px solid var(--bg-border)' }} />
+
+                {/* PC badge */}
+                {c.isPC && <span className="text-xs px-1 rounded flex-shrink-0"
+                  style={{ backgroundColor: 'rgba(201,168,76,0.15)', color: 'var(--accent)', border: '1px solid rgba(201,168,76,0.3)' }}>PC</span>}
+
+                {/* Name */}
+                <input type="text" value={c.name} onChange={e => update(c.id, 'name', e.target.value)}
+                  className="flex-1 bg-transparent text-sm font-semibold focus:outline-none min-w-0"
+                  style={{ color: isCurrent ? 'var(--accent)' : 'var(--text)' }} />
+
+                {/* HP */}
+                <input type="text" value={c.hp} onChange={e => update(c.id, 'hp', e.target.value)}
+                  placeholder="HP" className="w-14 text-center text-xs rounded px-1 py-0.5 focus:outline-none"
+                  style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }} />
+
+                <button onClick={() => onCurrentChange(c.id)} title="Set as current turn"
+                  className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+                  style={{ color: isCurrent ? 'var(--accent)' : 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>
+                  {isCurrent ? '★' : '☆'}
+                </button>
+                <button onClick={() => remove(c.id)} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+                  style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-6 mb-3" style={{ color: 'var(--text-faint)' }}>
+          <p className="text-sm">No combatants yet. Add enemies or roll for the party.</p>
+        </div>
+      )}
+
+      {/* Add combatant */}
+      <div className="flex gap-2 flex-wrap">
+        <input value={initInput} onChange={e => setInitInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && addCombatant()}
+          placeholder="Init" type="number"
+          className="w-16 input-field text-sm text-center" />
+        <input value={nameInput} onChange={e => setNameInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && addCombatant()}
+          placeholder="Name (enemy/NPC)..."
+          className="flex-1 input-field text-sm" />
+        <button onClick={addCombatant} className="text-xs px-3 py-1.5 rounded font-bold"
+          style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)', border: '1px solid var(--bg-border)' }}>+ Add</button>
+        <button onClick={addSelf} className="text-xs px-3 py-1.5 rounded font-bold"
+          style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}
+          title="Roll initiative for your character and add">🎲 Roll Self</button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Bardic Performance ───────────────────────────────────────────────────────
-function BardicPerformance({ character, onChange, pinned, onTogglePin }) {
+const SKALD_SONGS = [
+  'Raging Song','Inspired Rage','Song of Marching','Song of Strength',
+  'Song of the Dead','Dirge of Doom','Inspire Greatness','Inspire Heroics','Other',
+]
+
+function BardicPerformance({ character, onChange, pinned, onTogglePin, isSkald = false }) {
+  const perfList = isSkald ? SKALD_SONGS : BARD_PERFORMANCES
+  const title    = isSkald ? '🪗 Raging Song' : '🎶 Bardic Performance'
   const level  = character.level ?? 1
   const chaMod = Math.floor(((character.abilities?.cha ?? 10) - 10) / 2)
   const roundsPerDay = 4 + chaMod + (level - 1) * 2
@@ -120,7 +467,7 @@ function BardicPerformance({ character, onChange, pinned, onTogglePin }) {
     <div className="card">
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <h2 className="section-title mb-0">🎶 Bardic Performance</h2>
+          <h2 className="section-title mb-0">{title}</h2>
           {onTogglePin && <PinButton pinned={pinned} onToggle={onTogglePin} />}
         </div>
         <div className="flex items-center gap-3 flex-wrap">
@@ -141,9 +488,7 @@ function BardicPerformance({ character, onChange, pinned, onTogglePin }) {
           <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-border)' }}>
             <div className="h-full rounded-full transition-all duration-300" style={{ width: `${Math.max(0, pct)}%`, backgroundColor: barColor }} />
           </div>
-          <div className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
-            Lvl {level} + CHA {chaMod >= 0 ? `+${chaMod}` : chaMod} = {roundsPerDay} rounds/day
-          </div>
+          <div className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>Lvl {level} + CHA {chaMod >= 0 ? `+${chaMod}` : chaMod} = {roundsPerDay} rounds/day</div>
         </div>
         <div className="flex flex-col items-center justify-center gap-2">
           {isActive ? (
@@ -186,7 +531,7 @@ function BardicPerformance({ character, onChange, pinned, onTogglePin }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
         <div>
           <label className="text-xs" style={{ color: 'var(--text-dim)' }}>Performance Type</label>
-          <PerformancePicker value={currentPerf} onChange={v => updateBP({ currentPerf: v })} />
+          <PerformancePicker value={currentPerf} onChange={v => updateBP({ currentPerf: v })} options={perfList} />
         </div>
         <div>
           <label className="text-xs" style={{ color: 'var(--text-dim)' }}>Used Rounds</label>
@@ -202,61 +547,42 @@ function BardicPerformance({ character, onChange, pinned, onTogglePin }) {
 // ─── Stat Buff Card ───────────────────────────────────────────────────────────
 function StatBuffCard({ buff, onUpdate, onRemove }) {
   const [expanded, setExpanded] = useState(false)
-  const isDebuff   = buff.type === 'debuff'
+  const isDebuff  = buff.type === 'debuff'
   const activeColor = isDebuff ? '#ef4444' : 'var(--positive)'
   const nonZero = STAT_MOD_FIELDS.filter(f => (buff.mods?.[f.key] ?? 0) !== 0)
 
   return (
     <div className="rounded-lg overflow-hidden" style={{
       border: `1px solid ${buff.active ? (isDebuff ? '#7f1d1d' : 'var(--accent-dim)') : 'var(--bg-border)'}`,
-      backgroundColor: 'var(--bg-darker)',
-      opacity: buff.active ? 1 : 0.5,
+      backgroundColor: 'var(--bg-darker)', opacity: buff.active ? 1 : 0.5,
     }}>
-      {/* header row */}
       <div className="flex items-center gap-2 px-3 py-2">
-
-        {/* toggle */}
-        <button onClick={() => onUpdate('active', !buff.active)}
-          title={buff.active ? 'Deactivate' : 'Activate'}
+        <button onClick={() => onUpdate('active', !buff.active)} title={buff.active ? 'Deactivate' : 'Activate'}
           className="flex-shrink-0 w-8 h-5 rounded-full relative transition-colors"
           style={{ backgroundColor: buff.active ? activeColor : 'var(--bg-border)' }}>
           <span className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all"
             style={{ left: buff.active ? '14px' : '2px' }} />
         </button>
-
-        {/* type badge */}
         <span className="text-xs font-bold px-1.5 py-0.5 rounded flex-shrink-0"
           style={{ backgroundColor: isDebuff ? '#450a0a' : 'var(--accent-dim)', color: isDebuff ? '#f87171' : 'var(--accent)' }}>
           {isDebuff ? 'DEBUFF' : 'BUFF'}
         </span>
-
-        {/* name */}
         <input type="text" value={buff.name} onChange={e => onUpdate('name', e.target.value)}
           placeholder={isDebuff ? 'Debuff name...' : 'Buff name...'}
           className="flex-1 bg-transparent text-sm font-semibold focus:outline-none min-w-0"
           style={{ color: 'var(--text)', borderBottom: '1px solid transparent' }}
           onFocus={e => e.target.style.borderBottomColor = 'var(--accent)'}
           onBlur={e => e.target.style.borderBottomColor = 'transparent'} />
-
-        {/* source */}
         <select value={buff.source} onChange={e => onUpdate('source', e.target.value)}
           className="text-xs px-1 py-0.5 rounded focus:outline-none flex-shrink-0"
           style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--accent)', border: '1px solid var(--bg-border)' }}>
           {BUFF_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-
-        {/* expand */}
-        <button onClick={() => setExpanded(x => !x)}
-          className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+        <button onClick={() => setExpanded(x => !x)} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
           style={{ color: 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>{expanded ? '▲' : '▼'}</button>
-
-        {/* remove */}
-        <button onClick={onRemove}
-          className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+        <button onClick={onRemove} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
           style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
       </div>
-
-      {/* active modifier summary */}
       {!expanded && nonZero.length > 0 && (
         <div className="px-3 pb-2 flex flex-wrap gap-2">
           {nonZero.map(f => {
@@ -271,8 +597,6 @@ function StatBuffCard({ buff, onUpdate, onRemove }) {
           })}
         </div>
       )}
-
-      {/* expanded edit panel */}
       {expanded && (
         <div className="border-t px-3 py-3" style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-surface)' }}>
           <div className="grid grid-cols-3 md:grid-cols-5 gap-2 mb-3">
@@ -284,8 +608,7 @@ function StatBuffCard({ buff, onUpdate, onRemove }) {
                   className="w-full text-center text-xs rounded px-1 py-0.5 focus:outline-none"
                   style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text)', border: '1px solid var(--bg-border)' }}
                   onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-                  onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
-                />
+                  onBlur={e => e.target.style.borderColor = 'var(--bg-border)'} />
               </div>
             ))}
           </div>
@@ -362,24 +685,33 @@ function DurationBuffRow({ buff, onUpdate, onRemove }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function BuffTracker({ character, onChange, pins = {}, onTogglePin }) {
-  const buffs     = character.buffs ?? []
-  const statBuffs = character.statBuffs ?? []
-  const isBard    = (character.class ?? '').toLowerCase() === 'bard'
-  const [round, setRound] = useState(character.combatRound ?? 1)
+  const buffs      = character.buffs ?? []
+  const statBuffs  = character.statBuffs ?? []
+  const conditions = character.conditions ?? []
+  const combatants = character.initiativeCombatants ?? []
+  const performanceClasses = ['bard', 'skald']
+  const mainClass  = (character.class ?? '').toLowerCase()
+  const classNames = (character.classes ?? []).map(c => c.className?.toLowerCase())
+  const isBard     = performanceClasses.includes(mainClass) || classNames.some(c => performanceClasses.includes(c))
+  const isSkald    = mainClass === 'skald' || classNames.includes('skald')
+  const round      = character.combatRound ?? 1
 
-  const addStatBuff   = (type) => onChange('statBuffs', [...statBuffs, emptyStatBuff(type)])
-  const updateStatBuff = (i, key, val) => onChange('statBuffs', statBuffs.map((b, idx) => idx === i ? { ...b, [key]: val } : b))
+  const addStatBuff    = (type) => onChange('statBuffs', [...statBuffs, emptyStatBuff(type)])
+  const updateStatBuff = (i, k, v) => onChange('statBuffs', statBuffs.map((b, idx) => idx === i ? { ...b, [k]: v } : b))
   const removeStatBuff = (i) => onChange('statBuffs', statBuffs.filter((_, idx) => idx !== i))
-
-  const addDurBuff    = () => onChange('buffs', [...buffs, emptyDurationBuff()])
-  const updateDurBuff = (i, key, val) => onChange('buffs', buffs.map((b, idx) => idx === i ? { ...b, [key]: val } : b))
-  const removeDurBuff = (i) => onChange('buffs', buffs.filter((_, idx) => idx !== i))
+  const addDurBuff     = () => onChange('buffs', [...buffs, emptyDurationBuff()])
+  const updateDurBuff  = (i, k, v) => onChange('buffs', buffs.map((b, idx) => idx === i ? { ...b, [k]: v } : b))
+  const removeDurBuff  = (i) => onChange('buffs', buffs.filter((_, idx) => idx !== i))
 
   const nextRound = () => {
     const nr = round + 1
-    setRound(nr)
     onChange('combatRound', nr)
     onChange('buffs', buffs.map(b => b.unit !== 'rounds' || b.remaining <= 0 ? b : { ...b, remaining: b.remaining - 1 }))
+  }
+
+  const updateCombatants = (next, currentId) => {
+    onChange('initiativeCombatants', next)
+    if (currentId !== undefined) onChange('initiativeCurrent', currentId)
   }
 
   const summary = activeSummary(statBuffs)
@@ -389,58 +721,60 @@ export default function BuffTracker({ character, onChange, pins = {}, onTogglePi
   return (
     <div className="space-y-4">
 
+      <XPTracker character={character} onChange={onChange}
+        pinned={pins.xp} onTogglePin={onTogglePin ? () => onTogglePin('xp') : undefined} />
+
+      <ConditionTracker conditions={conditions}
+        onChange={next => onChange('conditions', next)}
+        pinned={pins.conditions} onTogglePin={onTogglePin ? () => onTogglePin('conditions') : undefined} />
+
+      <InitiativeTracker character={character} combatants={combatants}
+        onChange={updateCombatants}
+        round={round}
+        onRoundChange={r => onChange('combatRound', r)}
+        pinned={pins.initiative} onTogglePin={onTogglePin ? () => onTogglePin('initiative') : undefined} />
+
       {isBard && (
-        <BardicPerformance character={character} onChange={onChange}
+        <BardicPerformance character={character} onChange={onChange} isSkald={isSkald}
           pinned={pins.bardic} onTogglePin={onTogglePin ? () => onTogglePin('bardic') : undefined} />
       )}
 
-      {/* ── STAT BUFF / DEBUFF TRACKER ── */}
+      {/* ── STAT BUFF / DEBUFF ── */}
       <div className="card">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <h2 className="section-title mb-0">⚔️ Buff & Debuff Tracker</h2>
+            <h2 className="section-title mb-0">⚡ Stat Buffs & Debuffs</h2>
             {onTogglePin && <PinButton pinned={pins.statBuffs} onToggle={() => onTogglePin('statBuffs')} />}
           </div>
           <div className="flex gap-2">
-            <button onClick={() => addStatBuff('buff')} className="text-xs px-3 py-1 rounded font-bold transition-colors"
-              style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>
-              + Add Buff
-            </button>
-            <button onClick={() => addStatBuff('debuff')} className="text-xs px-3 py-1 rounded font-bold transition-colors"
-              style={{ backgroundColor: '#450a0a', color: '#f87171', border: '1px solid #7f1d1d' }}>
-              + Add Debuff
-            </button>
+            <button onClick={() => addStatBuff('buff')} className="text-xs px-3 py-1 rounded font-bold"
+              style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>+ Buff</button>
+            <button onClick={() => addStatBuff('debuff')} className="text-xs px-3 py-1 rounded font-bold"
+              style={{ backgroundColor: '#450a0a', color: '#f87171', border: '1px solid #7f1d1d' }}>+ Debuff</button>
           </div>
         </div>
-
-        {/* active summary bar */}
         {activeSummaryFields.length > 0 && (
           <div className="mb-3 p-2 rounded flex flex-wrap gap-2"
             style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
             <span className="text-xs font-bold" style={{ color: 'var(--text-dim)' }}>Net Active:</span>
             {activeSummaryFields.map(f => (
               <span key={f.key} className="text-xs px-1.5 py-0.5 rounded"
-                style={{
-                  backgroundColor: 'var(--bg-surface)',
-                  color: summary[f.key] > 0 ? 'var(--positive)' : '#ef4444',
-                  border: '1px solid var(--bg-border)',
-                }}>
+                style={{ backgroundColor: 'var(--bg-surface)', color: summary[f.key] > 0 ? 'var(--positive)' : '#ef4444', border: '1px solid var(--bg-border)' }}>
                 {f.label} {fmtMod(summary[f.key])}
               </span>
             ))}
           </div>
         )}
-
         {statBuffs.length === 0 ? (
           <div className="text-center py-8" style={{ color: 'var(--text-faint)' }}>
-            <div className="text-4xl mb-2">⚔️</div>
-            <p className="text-sm">No buffs or debuffs. Add one to track stat changes.</p>
+            <div className="text-4xl mb-2">⚡</div>
+            <p className="text-sm">No buffs or debuffs yet.</p>
           </div>
         ) : (
           <div className="space-y-2">
             {statBuffs.map((b, i) => (
               <StatBuffCard key={b.id} buff={b}
-                onUpdate={(key, val) => updateStatBuff(i, key, val)}
+                onUpdate={(k, v) => updateStatBuff(i, k, v)}
                 onRemove={() => removeStatBuff(i)} />
             ))}
           </div>
@@ -457,7 +791,7 @@ export default function BuffTracker({ character, onChange, pins = {}, onTogglePi
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-2 px-3 py-1 rounded"
               style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
-              <button onClick={() => setRound(r => Math.max(1, r - 1))}
+              <button onClick={() => onChange('combatRound', Math.max(1, round - 1))}
                 className="text-sm w-6 h-6 rounded flex items-center justify-center"
                 style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}>−</button>
               <div className="text-center">
@@ -473,7 +807,7 @@ export default function BuffTracker({ character, onChange, pins = {}, onTogglePi
                 Clear Expired ({expiredCount})
               </button>
             )}
-            <button onClick={() => { setRound(1); onChange('combatRound', 1) }}
+            <button onClick={() => onChange('combatRound', 1)}
               className="text-xs px-2 py-1 rounded border" style={{ color: 'var(--text-dim)', borderColor: 'var(--bg-border)' }}>↺ Reset</button>
             <button onClick={addDurBuff} className="btn-primary text-xs py-1 px-3">+ Add</button>
           </div>
@@ -486,7 +820,7 @@ export default function BuffTracker({ character, onChange, pins = {}, onTogglePi
           <div className="space-y-1.5">
             {buffs.map((b, i) => (
               <DurationBuffRow key={b.id} buff={b}
-                onUpdate={(key, val) => updateDurBuff(i, key, val)}
+                onUpdate={(k, v) => updateDurBuff(i, k, v)}
                 onRemove={() => removeDurBuff(i)} />
             ))}
           </div>

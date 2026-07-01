@@ -713,8 +713,9 @@ function SpellRow({ spell, dmgInfo, kind, dc, isOpen, spellAtk, casterLevel, onR
   )
 }
 
-export default function Attacks({ character, onChange, pinned, onTogglePin, buffTotals = {} }) {
-  const { weapons = [], bab, abilities } = character
+export default function Attacks({ character, onChange, pinned, onTogglePin, buffTotals = {}, computedBAB = null }) {
+  const { weapons = [], bab: manualBAB, abilities } = character
+  const bab = computedBAB ?? manualBAB
 
   const addWeapon = () => onChange('weapons', [...weapons, emptyWeapon()])
 

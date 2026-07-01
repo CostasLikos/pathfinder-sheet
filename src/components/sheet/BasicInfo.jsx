@@ -217,9 +217,26 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           {field('Height', 'height')}
           {field('Weight', 'weight')}
           {field('Background', 'background')}
+          {field('Drawbacks', 'drawbacks')}
           <div className="col-span-2 md:col-span-3 flex flex-col gap-1">
             <label className="text-gray-400 text-xs uppercase tracking-wide">Languages</label>
             <input type="text" value={character.languages||''} onChange={e => onChange('languages', e.target.value)} placeholder="e.g. Common, Elvish, Draconic..." className="input-field text-sm" />
+          </div>
+          <div className="col-span-2 md:col-span-3 flex flex-col gap-1">
+            <label className="text-gray-400 text-xs uppercase tracking-wide">Description</label>
+            <textarea
+              value={character.description || ''}
+              onChange={e => {
+                onChange('description', e.target.value)
+                e.target.style.height = 'auto'
+                e.target.style.height = e.target.scrollHeight + 'px'
+              }}
+              onFocus={e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
+              placeholder="Appearance, personality, mannerisms..."
+              rows={2}
+              className="input-field text-sm resize-none overflow-hidden"
+              style={{ minHeight: '2.5rem', transition: 'height 0.1s ease' }}
+            />
           </div>
         </div>
       </div>

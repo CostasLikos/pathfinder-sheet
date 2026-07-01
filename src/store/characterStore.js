@@ -63,6 +63,11 @@ const defaultCharacter = () => ({
   // Notes
   notes: '',
   experience: 0,
+  // Trackers
+  xpTrack: 'medium',
+  conditions: [],
+  initiativeCombatants: [],
+  initiativeCurrent: null,
   // Dashboard pins
   pins: { sections: [], skills: [] },
   // Session spell list (spell names saved for quick access)
