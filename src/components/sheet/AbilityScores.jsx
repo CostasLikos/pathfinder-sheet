@@ -43,7 +43,7 @@ function AbilityCard({ ab, base, buff, onChange }) {
           fontFamily: 'Georgia, serif',
           fontWeight: 'bold',
           color: hasBuff ? buffColor : 'var(--text)',
-          opacity: 0.08,
+          opacity: 0.82,
           lineHeight: 1,
           letterSpacing: '-0.05em',
         }}
@@ -57,13 +57,8 @@ function AbilityCard({ ab, base, buff, onChange }) {
         {ab}
       </span>
 
-      {/* Total score — big */}
-      <div className="relative text-3xl font-bold leading-none" style={{ color: hasBuff ? buffColor : 'var(--text)', fontFamily: 'Georgia, serif' }}>
-        {score}
-      </div>
-
       {/* Modifier */}
-      <div className="relative text-base font-bold leading-none" style={{ color: modColor }}>
+      <div className="relative text-3xl font-bold leading-none" style={{ color: modColor, fontFamily: 'Georgia, serif' }}>
         {formatMod(mod)}
       </div>
 
