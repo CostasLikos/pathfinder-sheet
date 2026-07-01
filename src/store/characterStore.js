@@ -10,6 +10,7 @@ const defaultCharacter = () => ({
   race: '',
   class: '',
   level: 1,
+  classes: [],   // [{ id, className, level, isFavored, favoredHP, favoredSkill }]
   alignment: '',
   deity: '',
   homeland: '',

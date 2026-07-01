@@ -2,9 +2,14 @@ import { abilityMod, formatMod } from '../../data/pf1eData'
 import PinButton from '../PinButton'
 import SpinnerInput from '../SpinnerInput'
 
-export default function CombatStats({ character, onChange, pins = {}, onTogglePin, buffTotals = {}, armorProps = {} }) {
+export default function CombatStats({ character, onChange, pins = {}, onTogglePin, buffTotals = {}, armorProps = {}, computedBAB = null, computedSaveBases = null, favoredHP = 0 }) {
   const { abilities, hp, ac, saves, bab, initiative, speed } = character
   const bt = buffTotals
+  // Use computed class-derived values when available, fall back to manual
+  const effectiveBAB       = computedBAB ?? (bab ?? 0)
+  const effectiveFortBase  = computedSaveBases?.fort ?? (saves.fort?.base ?? 0)
+  const effectiveRefBase   = computedSaveBases?.ref  ?? (saves.ref?.base  ?? 0)
+  const effectiveWillBase  = computedSaveBases?.will ?? (saves.will?.base ?? 0)
 
   // effective ability scores (base + buff)
   const effStr = (abilities.str ?? 10) + (bt.str ?? 0)
@@ -23,17 +28,17 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
   const totalAC     = 10 + (ac.armor ?? 0) + (ac.shield ?? 0) + dexMod + (ac.natural ?? 0) + (ac.deflect ?? 0) + (ac.misc ?? 0) + (bt.ac ?? 0)
   const touchAC     = 10 + dexMod + (ac.deflect ?? 0) + (ac.misc ?? 0) + (bt.ac ?? 0)
   const flatFooted  = 10 + (ac.armor ?? 0) + (ac.shield ?? 0) + (ac.natural ?? 0) + (ac.deflect ?? 0) + (ac.misc ?? 0) + (bt.ac ?? 0)
-  const totalFort   = (saves.fort?.base ?? 0) + conMod + (saves.fort?.enhance ?? 0) + (saves.fort?.misc ?? 0) + (bt.fort ?? 0)
-  const totalRef    = (saves.ref?.base  ?? 0) + rawDexMod + (saves.ref?.enhance  ?? 0) + (saves.ref?.misc  ?? 0) + (bt.ref  ?? 0)
-  const totalWill   = (saves.will?.base ?? 0) + wisMod + (saves.will?.enhance ?? 0) + (saves.will?.misc ?? 0) + (bt.will ?? 0)
+  const totalFort   = effectiveFortBase + conMod + (saves.fort?.enhance ?? 0) + (saves.fort?.misc ?? 0) + (bt.fort ?? 0)
+  const totalRef    = effectiveRefBase  + rawDexMod + (saves.ref?.enhance  ?? 0) + (saves.ref?.misc  ?? 0) + (bt.ref  ?? 0)
+  const totalWill   = effectiveWillBase + wisMod + (saves.will?.enhance ?? 0) + (saves.will?.misc ?? 0) + (bt.will ?? 0)
   const totalInit   = rawDexMod + (initiative?.misc ?? 0) + (bt.initiative ?? 0)
-  const cmb         = (bab ?? 0) + strMod + (bt.cmb ?? 0)
-  const cmd         = 10 + (bab ?? 0) + strMod + rawDexMod + (bt.cmb ?? 0)
+  const cmb         = effectiveBAB + strMod + (bt.cmb ?? 0)
+  const cmd         = 10 + effectiveBAB + strMod + rawDexMod + (bt.cmb ?? 0)
 
   // buff indicator helper
   const buffed = (key) => (bt[key] ?? 0) !== 0
 
-  const effectiveMaxHP = (hp.max ?? 0) + (bt.hp ?? 0)
+  const effectiveMaxHP = (hp.max ?? 0) + (bt.hp ?? 0) + favoredHP
   const hpPct   = effectiveMaxHP > 0 ? Math.max(0, Math.min(100, (hp.current / effectiveMaxHP) * 100)) : 0
   const hpColor = hpPct > 50 ? '#22c55e' : hpPct > 25 ? '#f59e0b' : '#ef4444'
 
@@ -135,7 +140,11 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           <div className="stat-box flex flex-col items-center justify-center gap-1">
             <div className="text-xs" style={{ color: 'var(--text-dim)' }}>BAB</div>
-            <SpinnerInput value={bab ?? 0} onChange={v => onChange('bab', v)} width="w-12" />
+            {computedBAB !== null
+              ? <div className="text-xl font-bold" style={{ color: 'var(--accent)' }}>+{computedBAB}</div>
+              : <SpinnerInput value={bab ?? 0} onChange={v => onChange('bab', v)} width="w-12" />
+            }
+            {computedBAB !== null && <div className="text-xs" style={{ color: 'var(--text-faint)' }}>auto</div>}
           </div>
           <div className="stat-box flex flex-col items-center justify-center gap-1">
             <div className="text-xs" style={{ color: 'var(--text-dim)' }}>Initiative</div>
@@ -172,7 +181,10 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
               <div className="text-xs space-y-1" style={{ color: 'var(--text-faint)' }}>
                 {[
                   { label: 'Ability', el: <span style={{ color: 'var(--text-dim)' }}>{formatMod(mod)}</span> },
-                  { label: 'Base',    el: <SpinnerInput value={saves[key]?.base    ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], base:    v } })} width="w-10" /> },
+                  { label: 'Base',    el: computedSaveBases
+                      ? <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>+{computedSaveBases[key]} <span style={{ color: 'var(--text-faint)', fontWeight: 'normal' }}>(auto)</span></span>
+                      : <SpinnerInput value={saves[key]?.base ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], base: v } })} width="w-10" />
+                  },
                   { label: 'Enhance', el: <SpinnerInput value={saves[key]?.enhance ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], enhance: v } })} width="w-10" /> },
                   { label: 'Misc',    el: <SpinnerInput value={saves[key]?.misc    ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], misc:    v } })} width="w-10" /> },
                 ].map(({ label: lbl, el }) => (

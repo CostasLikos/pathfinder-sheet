@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useCharacterStore } from '../store/characterStore'
+import { computeClassTotals } from '../data/pf1eData'
 import SigilBackground from '../components/SigilBackground'
 import BasicInfo from '../components/sheet/BasicInfo'
 import AbilityScores from '../components/sheet/AbilityScores'
@@ -47,6 +48,14 @@ export default function CharacterPage() {
     return t
   })()
 
+  // ── Multiclass computed totals ─────────────────────────────────────────────
+  const classTotals = computeClassTotals(character.classes ?? [])
+  const hasClasses  = (character.classes ?? []).length > 0
+  // If classes are set, use computed BAB and base saves; otherwise fall back to manual
+  const computedBAB       = hasClasses ? classTotals.totalBAB : null
+  const computedSaveBases = hasClasses ? { fort: classTotals.totalFort, ref: classTotals.totalRef, will: classTotals.totalWill } : null
+  const favoredHP         = classTotals.totalFavoredHP
+
   // ── Pin helpers ────────────────────────────────────────────────────────────
   const pins = character.pins ?? { sections: [], skills: [] }
 
@@ -90,7 +99,12 @@ export default function CharacterPage() {
                 {character.name || 'Unnamed Hero'}
               </span>
               <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
-                {character.class || '—'} {character.level ? `• Lvl ${character.level}` : ''} {character.race ? `• ${character.race}` : ''}
+                {hasClasses
+                  ? (character.classes ?? []).map(c => `${c.className} ${c.level}`).join(' / ')
+                  : (character.class || '—')
+                }
+                {' '}• Lvl {hasClasses ? classTotals.totalLevel : (character.level || '?')}
+                {character.race ? ` • ${character.race}` : ''}
               </span>
             </div>
           </div>
@@ -141,6 +155,9 @@ export default function CharacterPage() {
               onTogglePin={toggleSectionPin}
               buffTotals={buffTotals}
               armorProps={character.armorProps ?? {}}
+              computedBAB={computedBAB}
+              computedSaveBases={computedSaveBases}
+              favoredHP={favoredHP}
             />
           </>
         )}

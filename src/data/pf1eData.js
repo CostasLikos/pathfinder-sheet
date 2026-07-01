@@ -24,6 +24,58 @@ export const CLASSES = [
   'Swashbuckler', 'Warpriest', 'Witch', 'Wizard', 'Other',
 ]
 
+// bab: 'full'=1/lvl, 'mid'=3/4, 'half'=1/2
+// fort/ref/will: 'good'=floor(lvl/2)+2, 'poor'=floor(lvl/3)
+export const CLASS_DATA = {
+  Barbarian:   { bab:'full', fort:'good', ref:'poor', will:'poor', hd:12, skillsPerLevel:4 },
+  Bard:        { bab:'mid',  fort:'poor', ref:'good', will:'good', hd:8,  skillsPerLevel:6 },
+  Cleric:      { bab:'mid',  fort:'good', ref:'poor', will:'good', hd:8,  skillsPerLevel:2 },
+  Druid:       { bab:'mid',  fort:'good', ref:'poor', will:'good', hd:8,  skillsPerLevel:4 },
+  Fighter:     { bab:'full', fort:'good', ref:'poor', will:'poor', hd:10, skillsPerLevel:2 },
+  Gunslinger:  { bab:'full', fort:'good', ref:'good', will:'poor', hd:10, skillsPerLevel:4 },
+  Inquisitor:  { bab:'mid',  fort:'good', ref:'poor', will:'good', hd:8,  skillsPerLevel:6 },
+  Magus:       { bab:'mid',  fort:'good', ref:'poor', will:'good', hd:8,  skillsPerLevel:2 },
+  Monk:        { bab:'mid',  fort:'good', ref:'good', will:'good', hd:8,  skillsPerLevel:4 },
+  Oracle:      { bab:'mid',  fort:'poor', ref:'poor', will:'good', hd:8,  skillsPerLevel:4 },
+  Paladin:     { bab:'full', fort:'good', ref:'poor', will:'good', hd:10, skillsPerLevel:2 },
+  Ranger:      { bab:'full', fort:'good', ref:'good', will:'poor', hd:10, skillsPerLevel:6 },
+  Rogue:       { bab:'mid',  fort:'poor', ref:'good', will:'poor', hd:8,  skillsPerLevel:8 },
+  Shaman:      { bab:'mid',  fort:'poor', ref:'poor', will:'good', hd:8,  skillsPerLevel:4 },
+  Skald:       { bab:'mid',  fort:'good', ref:'poor', will:'good', hd:8,  skillsPerLevel:4 },
+  Slayer:      { bab:'mid',  fort:'good', ref:'good', will:'poor', hd:10, skillsPerLevel:6 },
+  Sorcerer:    { bab:'half', fort:'poor', ref:'poor', will:'good', hd:6,  skillsPerLevel:2 },
+  Summoner:    { bab:'mid',  fort:'poor', ref:'poor', will:'good', hd:8,  skillsPerLevel:2 },
+  Swashbuckler:{ bab:'full', fort:'good', ref:'good', will:'poor', hd:10, skillsPerLevel:4 },
+  Warpriest:   { bab:'mid',  fort:'good', ref:'poor', will:'good', hd:8,  skillsPerLevel:2 },
+  Witch:       { bab:'half', fort:'poor', ref:'poor', will:'good', hd:6,  skillsPerLevel:2 },
+  Wizard:      { bab:'half', fort:'poor', ref:'poor', will:'good', hd:6,  skillsPerLevel:2 },
+  Other:       { bab:'full', fort:'good', ref:'good', will:'good', hd:8,  skillsPerLevel:4 },
+}
+
+const babValue = (prog, lvl) => prog === 'full' ? lvl : prog === 'mid' ? Math.floor(lvl*3/4) : Math.floor(lvl/2)
+const saveGood = (lvl) => Math.floor(lvl/2) + 2
+const savePoor = (lvl) => Math.floor(lvl/3)
+const saveVal  = (type, lvl) => type === 'good' ? saveGood(lvl) : savePoor(lvl)
+
+export function computeClassTotals(classes = []) {
+  let totalLevel = 0, totalBAB = 0, totalFort = 0, totalRef = 0, totalWill = 0
+  let totalFavoredHP = 0, totalFavoredSkill = 0, totalHD = 0, totalSkillsPerLevel = 0
+  for (const c of classes) {
+    const lvl  = c.level ?? 0
+    const data = CLASS_DATA[c.className] ?? CLASS_DATA.Other
+    totalLevel       += lvl
+    totalBAB         += babValue(data.bab, lvl)
+    totalFort        += saveVal(data.fort, lvl)
+    totalRef         += saveVal(data.ref,  lvl)
+    totalWill        += saveVal(data.will, lvl)
+    totalFavoredHP   += c.favoredHP   ?? 0
+    totalFavoredSkill+= c.favoredSkill ?? 0
+    totalHD          += data.hd * lvl
+    totalSkillsPerLevel += data.skillsPerLevel * lvl
+  }
+  return { totalLevel, totalBAB, totalFort, totalRef, totalWill, totalFavoredHP, totalFavoredSkill, totalHD, totalSkillsPerLevel }
+}
+
 export const SPELL_SCHOOLS = [
   'Abjuration','Conjuration','Divination','Enchantment',
   'Evocation','Illusion','Necromancy','Transmutation','Universal',
