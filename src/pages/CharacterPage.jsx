@@ -21,8 +21,8 @@ const TABS = ['Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equi
 export default function CharacterPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { getCharacter, updateCharacter, exportCharacter, touchCharacter } = useCharacterStore()
-  const character = getCharacter(id)
+  const { characters, updateCharacter, exportCharacter, touchCharacter } = useCharacterStore()
+  const character = characters.find(c => c.id === id)
   const [activeTab, setActiveTab] = useState('Overview')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [sigilSpinning, setSigilSpinning] = useState(false)
