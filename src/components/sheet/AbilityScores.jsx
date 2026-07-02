@@ -24,7 +24,7 @@ function AbilityCard({ ab, base, buff, onChange }) {
 
   return (
     <div
-      className="stat-box flex flex-col items-center gap-1 relative overflow-hidden"
+      className="stat-box flex flex-col items-center gap-1 relative"
       style={{
         cursor: 'default',
         transition: 'border-color 0.15s, box-shadow 0.15s',
@@ -34,36 +34,35 @@ function AbilityCard({ ab, base, buff, onChange }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Ghost total score — large background watermark */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 flex items-center justify-center select-none pointer-events-none"
-        style={{
-          fontSize: '5rem',
-          fontFamily: 'Georgia, serif',
-          fontWeight: 'bold',
-          color: hasBuff ? buffColor : 'var(--text)',
-          opacity: 0.82,
-          lineHeight: 1,
-          letterSpacing: '-0.05em',
-        }}
-      >
-        {score}
-      </div>
-
-      {/* Foreground content */}
       {/* Ability name */}
-      <span className="relative text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+      <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
         {ab}
       </span>
 
-      {/* Modifier */}
-      <div className="relative text-3xl font-bold leading-none" style={{ color: modColor, fontFamily: 'Georgia, serif' }}>
-        {formatMod(mod)}
+      {/* Total score + modifier badge */}
+      <div className="relative flex items-center justify-center">
+        {/* Score — main number */}
+        <div className="text-4xl font-bold leading-none" style={{ color: hasBuff ? buffColor : 'var(--text)', fontFamily: 'Georgia, serif' }}>
+          {score}
+        </div>
+        {/* Modifier badge — pinned top-right of the score */}
+        <div
+          className="absolute font-bold text-xs px-1.5 py-0.5 rounded-full leading-none"
+          style={{
+            top: '-6px', right: '-22px',
+            backgroundColor: mod >= 0 ? 'rgba(34,197,94,0.18)' : 'rgba(239,68,68,0.18)',
+            color: modColor,
+            border: `1px solid ${modColor}`,
+            minWidth: '1.5rem',
+            textAlign: 'center',
+          }}
+        >
+          {formatMod(mod)}
+        </div>
       </div>
 
       {/* Base spinner + buff badge */}
-      <div className="relative flex items-center gap-1">
+      <div className="flex items-center gap-1 mt-1">
         <SpinnerInput value={base} onChange={v => onChange(ab, Math.max(1, Math.min(30, v)))} min={1} max={30} width="w-10" />
         {hasBuff && (
           <span className="text-xs px-1 rounded font-bold" style={{ color: buffColor, backgroundColor: buff > 0 ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)', border: `1px solid ${buffColor}` }}>
