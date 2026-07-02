@@ -53,7 +53,7 @@ export default function CharacterPage() {
 
   // Compute net buff/debuff totals from all active stat buffs + active conditions
   const buffTotals = (() => {
-    const t = { attackRoll:0, damage:0, ac:0, initiative:0, fort:0, ref:0, will:0, hp:0, cmb:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 }
+    const t = { attackRoll:0, damage:0, ac:0, initiative:0, fort:0, ref:0, will:0, hp:0, cmb:0, str:0, dex:0, con:0, int:0, wis:0, cha:0, stealth:0 }
     ;(character.statBuffs ?? []).filter(b => b.active).forEach(b => {
       Object.keys(t).forEach(k => { t[k] += (b.mods?.[k] ?? 0) * (b.type === 'debuff' ? -1 : 1) })
     })
@@ -211,6 +211,7 @@ export default function CharacterPage() {
             pinnedSkills={pins.skills ?? []}
             onToggleSkillPin={toggleSkillPin}
             armorCheckPenalty={character.armorProps?.checkPenalty ?? 0}
+            buffTotals={buffTotals}
           />
         )}
 

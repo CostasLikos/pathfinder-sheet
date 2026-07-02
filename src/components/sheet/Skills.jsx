@@ -12,8 +12,12 @@ const ACP_SKILLS = new Set(['acrobatics','climb','escapeArtist','fly','ride','sl
 // Swim gets double ACP
 const ACP_DOUBLE = new Set(['swim'])
 
-export default function Skills({ character, onChange, pinnedSkills = [], onToggleSkillPin, armorCheckPenalty = 0 }) {
+export default function Skills({ character, onChange, pinnedSkills = [], onToggleSkillPin, armorCheckPenalty = 0, buffTotals = {} }) {
   const { abilities, skills = {} } = character
+  // effective ability scores after buffs/debuffs
+  const effAbilities = Object.fromEntries(
+    Object.keys(abilities).map(k => [k, (abilities[k] ?? 10) + (buffTotals[k] ?? 0)])
+  )
 
   // Skill order stored in character, falls back to default
   const skillOrder = character.skillOrder ?? DEFAULT_SKILL_ORDER
@@ -36,12 +40,13 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
     const s     = getSkillData(skill.key)
     const ab    = s.ability ?? skill.ability
     const ranks = s.ranks ?? 0
-    const mod   = abilityMod(abilities[ab] ?? 10)
+    const mod   = abilityMod(effAbilities[ab] ?? 10)
     const isCS  = s.classSkill ?? false
     const misc  = s.misc ?? 0
     const csBonus = isCS && ranks > 0 ? 3 : 0
     const acp   = ACP_SKILLS.has(skill.key) ? (ACP_DOUBLE.has(skill.key) ? armorCheckPenalty * 2 : armorCheckPenalty) : 0
-    return ranks + mod + csBonus + misc - acp
+    const skillBuff = skill.key === 'stealth' ? (buffTotals.stealth ?? 0) : 0
+    return ranks + mod + csBonus + misc - acp + skillBuff
   }
 
   const getACP = (skill) => ACP_SKILLS.has(skill.key) ? (ACP_DOUBLE.has(skill.key) ? armorCheckPenalty * 2 : armorCheckPenalty) : 0
@@ -120,7 +125,7 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
               const s      = getSkillData(skill.key)
               const isCS   = s.classSkill ?? false
               const ab     = s.ability ?? skill.ability
-              const mod    = abilityMod(abilities[ab] ?? 10)
+              const mod    = abilityMod(effAbilities[ab] ?? 10)
               const total  = getTotal(skill)
               const acp    = getACP(skill)
               const isDrag = dragging === skill.key

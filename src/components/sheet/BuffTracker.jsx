@@ -19,7 +19,7 @@ const STAT_MOD_FIELDS = [
   { key: 'cmb',       label: 'CMB' },          { key: 'str',       label: 'STR' },
   { key: 'dex',       label: 'DEX' },          { key: 'con',       label: 'CON' },
   { key: 'int',       label: 'INT' },          { key: 'wis',       label: 'WIS' },
-  { key: 'cha',       label: 'CHA' },
+  { key: 'cha',       label: 'CHA' },          { key: 'stealth',   label: 'Stealth' },
 ]
 
 const emptyMods = () => Object.fromEntries(STAT_MOD_FIELDS.map(f => [f.key, 0]))
@@ -748,6 +748,7 @@ function SizeChanger({ character, onChange, pinned, onTogglePin }) {
         cmb:         sData.cmb,
         str:         sd.str,
         dex:         sd.dex,
+        stealth:     sData.stealth,
       },
     }
     onChange('statBuffs', [...without, sizeBuff])
