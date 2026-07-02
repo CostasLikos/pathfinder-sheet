@@ -140,11 +140,121 @@ const emptyItem = () => ({
   notes: '',
 })
 
+// ── Item Detail Panel (shared by browser + popup) ─────────────────────────────
+function ItemDetail({ item }) {
+  if (!item) return (
+    <div className="flex flex-col items-center justify-center h-full py-16" style={{ color: 'var(--text-faint)' }}>
+      <div className="text-5xl mb-3">🎒</div>
+      <p className="text-sm">Select an item to see details</p>
+    </div>
+  )
+  const hasBuff  = !!extractBuffMods(item.name)
+  const isWeapon = invCategoryFor(item) === 'Weapon'
+  const isArmor  = invCategoryFor(item) === 'Armor'
+  const mods     = extractBuffMods(item.name)
+  const statLabels = { str:'STR', dex:'DEX', con:'CON', int:'INT', wis:'WIS', cha:'CHA', ac:'AC', fort:'Fort', ref:'Ref', will:'Will', attackRoll:'Attack', damage:'Damage' }
+
+  return (
+    <div className="space-y-4">
+      {/* Name + badges */}
+      <div>
+        <h3 className="font-bold text-xl leading-tight" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>{item.name}</h3>
+        <div className="flex flex-wrap gap-1.5 mt-1.5">
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text-dim)' }}>{item._cat}</span>
+          {hasBuff  && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: 'rgba(34,197,94,0.15)', color: 'var(--positive)', border: '1px solid var(--positive)' }}>✨ +stat</span>}
+          {isWeapon && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>⚔️ weapon</span>}
+          {isArmor  && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: 'rgba(100,116,139,0.2)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>🛡️ armor</span>}
+        </div>
+      </div>
+
+      {/* Stat grid */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
+        {item.cost    && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Cost: </span><span style={{ color: '#f59e0b' }}>{item.cost}</span></div>}
+        {item.weight  && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Weight: </span><span style={{ color: 'var(--text-dim)' }}>{item.weight}</span></div>}
+        {item.dmg     && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Damage: </span><span style={{ color: 'var(--text)' }}>{item.dmg}</span></div>}
+        {item.crit    && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Crit: </span><span style={{ color: 'var(--text-dim)' }}>{item.crit}</span></div>}
+        {item.type    && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Type: </span><span style={{ color: 'var(--text-dim)' }}>{item.type}</span></div>}
+        {item.range   && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Range: </span><span style={{ color: 'var(--text-dim)' }}>{item.range}</span></div>}
+        {item.acBonus !== undefined && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>AC Bonus: </span><span style={{ color: 'var(--positive)' }}>+{item.acBonus}</span></div>}
+        {item.acp     !== undefined && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>ACP: </span><span style={{ color: item.acp < 0 ? '#ef4444' : 'var(--text-dim)' }}>{item.acp}</span></div>}
+        {item.maxDex  !== undefined && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Max Dex: </span><span style={{ color: 'var(--text-dim)' }}>{item.maxDex ?? '∞'}</span></div>}
+        {item.spellFailure            && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Spell Fail: </span><span style={{ color: '#f97316' }}>{item.spellFailure}</span></div>}
+        {item.speed   && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Speed: </span><span style={{ color: 'var(--text-dim)' }}>{item.speed}</span></div>}
+        {item.cl      && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Caster Level: </span><span style={{ color: 'var(--text-dim)' }}>{item.cl}</span></div>}
+        {item.slot    && <div><span className="font-bold" style={{ color: 'var(--accent)' }}>Slot: </span><span style={{ color: 'var(--text-dim)' }}>{item.slot}</span></div>}
+        {item.aura    && <div className="col-span-2"><span className="font-bold" style={{ color: 'var(--accent)' }}>Aura: </span><span style={{ color: 'var(--text-dim)' }}>{item.aura}</span></div>}
+      </div>
+
+      {/* Stat bonuses */}
+      {mods && (
+        <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)' }}>
+          <div className="text-xs font-bold mb-2" style={{ color: 'var(--positive)' }}>✨ Stat Bonuses (auto-applied)</div>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(mods).filter(([,v]) => v).map(([k, v]) => (
+              <span key={k} className="text-xs px-2 py-0.5 rounded font-bold" style={{ backgroundColor: 'rgba(34,197,94,0.15)', color: 'var(--positive)', border: '1px solid rgba(34,197,94,0.4)' }}>
+                {statLabels[k] ?? k} +{v}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Properties */}
+      {item.properties && (
+        <div>
+          <div className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--text-faint)' }}>Properties</div>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--text-dim)' }}>{item.properties}</p>
+        </div>
+      )}
+
+      {/* Description */}
+      {item.description && (
+        <div>
+          <div className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--text-faint)' }}>Description</div>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--text)' }}>{item.description}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Item Card Popup (for equipped items) ──────────────────────────────────────
+function ItemCardPopup({ itemName, onClose }) {
+  const data = useMemo(() => BROWSE_ITEMS.find(i => i.name.toLowerCase() === itemName.toLowerCase()), [itemName])
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75" onClick={onClose}>
+      <div
+        className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-xl shadow-2xl overflow-hidden"
+        style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="px-5 py-3 flex items-center justify-between flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
+          <span className="font-bold text-sm" style={{ color: 'var(--accent)' }}>📖 Item Details</span>
+          <button onClick={onClose} style={{ color: 'var(--text-dim)' }}>✕</button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-5">
+          {data
+            ? <ItemDetail item={data} />
+            : (
+              <div className="text-center py-10">
+                <div className="text-4xl mb-3">📦</div>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{itemName}</p>
+                <p className="text-xs mt-2" style={{ color: 'var(--text-faint)' }}>No database entry found for this item.</p>
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Item Browser ──────────────────────────────────────────────────────────────
 function ItemBrowser({ character, onChange, onClose }) {
   const [query, setQuery]         = useState('')
   const [browseFilter, setBrowse] = useState('All')
-  const [added, setAdded]         = useState({})   // id → true
+  const [selected, setSelected]   = useState(null)
+  const [added, setAdded]         = useState({})
 
   const results = useMemo(() => {
     const q    = query.toLowerCase().trim()
@@ -152,155 +262,132 @@ function ItemBrowser({ character, onChange, onClose }) {
     return BROWSE_ITEMS
       .filter(fObj.test)
       .filter(i => !q || i.name.toLowerCase().includes(q) || (i._cat ?? '').toLowerCase().includes(q) || (i.description ?? '').toLowerCase().includes(q))
-      .slice(0, 80)
+      .slice(0, 100)
   }, [query, browseFilter])
 
-  const addItem = (item) => {
+  const doAddItem = (item) => {
     const gear = character.gear ?? []
     const invCat = invCategoryFor(item)
     const weight  = parseWeight(item.weight)
-
-    const newGear = {
-      id: crypto.randomUUID(),
-      name: item.name,
-      category: invCat,
-      qty: 1,
-      weight,
-      notes: item.description ?? item.properties ?? '',
-      cost: item.cost ?? '',
-    }
-    onChange('gear', [...gear, newGear])
-
-    // ── Auto-add weapon to Attacks tab ──────────────────────────────────────
+    onChange('gear', [...gear, {
+      id: crypto.randomUUID(), name: item.name, category: invCat,
+      qty: 1, weight, notes: item.description ?? item.properties ?? '', cost: item.cost ?? '',
+    }])
     if (invCat === 'Weapon') {
-      const weapons = character.weapons ?? []
-      onChange('weapons', [...weapons, weaponFromData(item)])
+      onChange('weapons', [...(character.weapons ?? []), weaponFromData(item)])
     }
-
-    // ── Auto-apply armor props ───────────────────────────────────────────────
     if (invCat === 'Armor') {
       const ap = armorPropsFrom(item)
       if (ap) onChange('armorProps', { ...(character.armorProps ?? {}), ...ap })
     }
-
-    // ── Auto-add buff for magic items ────────────────────────────────────────
     const mods = extractBuffMods(item.name)
     if (mods && Object.keys(mods).length > 0) {
       const allMods = { attackRoll:0, damage:0, ac:0, initiative:0, fort:0, ref:0, will:0, hp:0, cmb:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 }
       Object.assign(allMods, mods)
-      const buff = {
-        id: crypto.randomUUID(),
-        name: item.name,
-        type: 'buff',
-        active: true,
-        mods: allMods,
-      }
-      onChange('statBuffs', [...(character.statBuffs ?? []), buff])
+      onChange('statBuffs', [...(character.statBuffs ?? []), { id: crypto.randomUUID(), name: item.name, type: 'buff', active: true, mods: allMods }])
     }
-
     setAdded(prev => ({ ...prev, [item.name]: true }))
     setTimeout(() => setAdded(prev => { const n = {...prev}; delete n[item.name]; return n }), 2000)
   }
 
   return (
-    <div className="card" style={{ border: '1px solid var(--accent)', backgroundColor: 'var(--bg-darker)' }}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-sm" style={{ color: 'var(--accent)' }}>📖 Browse Items</h3>
-        <button onClick={onClose} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>✕ Close</button>
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+      <div
+        className="w-full max-w-5xl max-h-[90vh] flex flex-col rounded-xl shadow-2xl overflow-hidden"
+        style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)' }}>
+          <div>
+            <h2 className="font-bold text-lg" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>🎒 Item Browser</h2>
+            <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{BROWSE_ITEMS.length} items · showing {results.length}</p>
+          </div>
+          <button onClick={onClose} className="text-xl" style={{ color: 'var(--text-dim)' }}>✕</button>
+        </div>
 
-      {/* Search */}
-      <div className="relative mb-3">
-        <input
-          type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="Search weapons, armor, rings, potions..."
-          autoFocus
-          className="w-full text-sm px-3 py-2 rounded focus:outline-none"
-          style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text)', border: '1px solid var(--accent)', paddingLeft: '2rem' }}
-        />
-        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-faint)' }}>🔍</span>
-        {query && (
-          <button onClick={() => setQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-faint)' }}>✕</button>
-        )}
-      </div>
+        {/* Filters */}
+        <div className="px-5 py-3 flex flex-wrap gap-2 flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
+          <div className="relative flex-1 min-w-48">
+            <input
+              type="text" value={query} onChange={e => setQuery(e.target.value)} autoFocus
+              placeholder="Search weapons, armor, rings, potions..."
+              className="input-field text-sm w-full"
+              style={{ paddingLeft: '2rem' }}
+            />
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-faint)' }}>🔍</span>
+            {query && <button onClick={() => setQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-faint)' }}>✕</button>}
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {BROWSE_FILTERS.map(f => (
+              <button key={f.label} onClick={() => setBrowse(f.label)} className="text-xs px-2 py-1 rounded transition-colors"
+                style={{ backgroundColor: browseFilter === f.label ? 'var(--accent-dim)' : 'var(--bg-surface)', color: browseFilter === f.label ? 'var(--accent)' : 'var(--text-dim)', border: `1px solid ${browseFilter === f.label ? 'var(--accent)' : 'var(--bg-border)'}` }}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      {/* Category filter chips */}
-      <div className="flex flex-wrap gap-1 mb-3">
-        {BROWSE_FILTERS.map(f => (
-          <button
-            key={f.label}
-            onClick={() => setBrowse(f.label)}
-            className="text-xs px-2 py-0.5 rounded transition-colors"
-            style={{
-              backgroundColor: browseFilter === f.label ? 'var(--accent-dim)' : 'var(--bg-surface)',
-              color:           browseFilter === f.label ? 'var(--accent)'     : 'var(--text-dim)',
-              border: `1px solid ${browseFilter === f.label ? 'var(--accent)' : 'var(--bg-border)'}`,
-            }}
-          >{f.label}</button>
-        ))}
-      </div>
-
-      <div className="text-xs mb-2" style={{ color: 'var(--text-faint)' }}>
-        {results.length} result{results.length !== 1 ? 's' : ''}{results.length === 80 ? ' (showing first 80)' : ''}
-      </div>
-
-      {/* Results */}
-      <div className="space-y-1 max-h-80 overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin' }}>
-        {results.length === 0 && (
-          <div className="text-center py-6 text-sm" style={{ color: 'var(--text-faint)' }}>No items found</div>
-        )}
-        {results.map((item, i) => {
-          const isAdded = added[item.name]
-          const hasBuff = !!extractBuffMods(item.name)
-          const isWeapon = invCategoryFor(item) === 'Weapon'
-          const isArmor  = invCategoryFor(item) === 'Armor'
-          return (
-            <div
-              key={`${item._cat}-${item.name}-${i}`}
-              className="flex items-start gap-2 p-2 rounded"
-              style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1 flex-wrap">
-                  <span className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{item.name}</span>
-                  {hasBuff  && <span className="text-xs px-1 rounded" style={{ backgroundColor: 'rgba(var(--positive-rgb,34,197,94),0.15)', color: 'var(--positive)', border: '1px solid var(--positive)' }}>+stat</span>}
-                  {isWeapon && <span className="text-xs px-1 rounded" style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)' }}>→attacks</span>}
-                  {isArmor  && <span className="text-xs px-1 rounded" style={{ backgroundColor: 'rgba(100,116,139,0.2)', color: 'var(--text-dim)' }}>→armor</span>}
+        {/* Two-panel body */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left: list */}
+          <div className="w-1/2 overflow-y-auto" style={{ borderRight: '1px solid var(--bg-border)' }}>
+            {results.length === 0 && <div className="text-center py-10 text-sm" style={{ color: 'var(--text-faint)' }}>No items found.</div>}
+            {results.map((item, i) => {
+              const isAdded  = added[item.name]
+              const hasBuff  = !!extractBuffMods(item.name)
+              const isWeapon = invCategoryFor(item) === 'Weapon'
+              const isArmor  = invCategoryFor(item) === 'Armor'
+              const isSel    = selected?.name === item.name
+              return (
+                <div key={`${item._cat}-${item.name}-${i}`}
+                  onClick={() => setSelected(item)}
+                  className="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors"
+                  style={{ backgroundColor: isSel ? 'var(--accent-dim)' : i % 2 === 0 ? 'var(--bg-darker)' : 'var(--bg-surface)', borderBottom: '1px solid var(--bg-border)' }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <span className="text-sm font-semibold truncate" style={{ color: isSel ? 'var(--accent)' : 'var(--text)' }}>{item.name}</span>
+                      {hasBuff  && <span className="text-xs px-1 rounded" style={{ color: 'var(--positive)', border: '1px solid var(--positive)' }}>+stat</span>}
+                      {isWeapon && <span className="text-xs px-1 rounded" style={{ color: 'var(--accent)', border: '1px solid var(--accent)' }}>⚔️</span>}
+                      {isArmor  && <span className="text-xs px-1 rounded" style={{ color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>🛡️</span>}
+                    </div>
+                    <div className="text-xs truncate" style={{ color: 'var(--text-dim)' }}>
+                      {item._cat}{item.cost ? ` · ${item.cost}` : ''}{item.dmg ? ` · ${item.dmg}` : ''}{item.acBonus !== undefined ? ` · AC+${item.acBonus}` : ''}
+                    </div>
+                  </div>
+                  <button
+                    onClick={e => { e.stopPropagation(); doAddItem(item) }}
+                    className="text-xs px-2 py-1 rounded flex-shrink-0 font-bold"
+                    style={{ backgroundColor: isAdded ? 'var(--positive)' : 'var(--accent)', color: 'var(--bg-darker)', minWidth: 48 }}
+                  >{isAdded ? '✓' : '+ Add'}</button>
                 </div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--text-dim)' }}>
-                  {item._cat}
-                  {item.cost && <> · <span style={{ color: 'var(--accent)' }}>{item.cost}</span></>}
-                  {item.dmg  && <> · {item.dmg}{item.crit ? ` crit ${item.crit}` : ''}</>}
-                  {item.acBonus !== undefined && <> · AC +{item.acBonus} ACP {item.acp}</>}
-                </div>
-                {item.description && (
-                  <div className="text-xs mt-0.5 line-clamp-2" style={{ color: 'var(--text-faint)' }}>{item.description}</div>
-                )}
-                {item.properties && (
-                  <div className="text-xs mt-0.5 line-clamp-1" style={{ color: 'var(--text-faint)' }}>{item.properties}</div>
-                )}
-              </div>
+              )
+            })}
+            {results.length === 100 && <div className="text-center py-3 text-xs" style={{ color: 'var(--text-faint)' }}>Showing first 100 — refine your search</div>}
+          </div>
+
+          {/* Right: detail */}
+          <div className="w-1/2 overflow-y-auto p-5">
+            <ItemDetail item={selected} />
+            {selected && (
               <button
-                onClick={() => addItem(item)}
-                className="text-xs px-2 py-1 rounded flex-shrink-0 font-bold transition-colors"
-                style={{
-                  backgroundColor: isAdded ? 'var(--positive)' : 'var(--accent)',
-                  color: 'var(--bg-darker)',
-                  minWidth: '48px',
-                }}
-              >{isAdded ? '✓' : '+ Add'}</button>
-            </div>
-          )
-        })}
+                onClick={() => { doAddItem(selected); onClose() }}
+                className="w-full py-2 rounded font-bold text-sm mt-4 transition-colors"
+                style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--accent)'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--accent-dim)'}
+              >+ Add to Inventory</button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
 // ── Inventory row ─────────────────────────────────────────────────────────────
-function ItemRow({ item, onUpdate, onRemove }) {
+function ItemRow({ item, onUpdate, onRemove, onShowCard }) {
   const [showNotes, setShowNotes] = useState(false)
   const totalWeight = (item.qty ?? 1) * (item.weight ?? 0)
   return (
@@ -347,6 +434,13 @@ function ItemRow({ item, onUpdate, onRemove }) {
         <div className="w-16 text-right text-sm font-bold flex-shrink-0" style={{ color: totalWeight > 0 ? 'var(--text)' : 'var(--text-faint)' }}>
           {totalWeight > 0 ? `${totalWeight} lb` : '—'}
         </div>
+        {item.name && (
+          <button onClick={() => onShowCard(item.name)} title="View item details" className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+            style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)', opacity: 0.7 }}
+            onMouseEnter={e => e.currentTarget.style.opacity = 1}
+            onMouseLeave={e => e.currentTarget.style.opacity = 0.7}
+          >📖</button>
+        )}
         <button
           onClick={() => setShowNotes(x => !x)}
           className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
@@ -447,6 +541,7 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
   const [sortBy, setSortBy]         = useState('none')
   const [invSearch, setInvSearch]   = useState('')
   const [showBrowser, setShowBrowser] = useState(false)
+  const [itemCard, setItemCard]     = useState(null)
 
   const totalWeight = gear.reduce((sum, g) => sum + (g.qty??1)*(g.weight??0), 0)
   const enc    = getEncumbrance(str, totalWeight)
@@ -517,14 +612,11 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
         </div>
       </div>
 
-      {/* Item Browser */}
-      {showBrowser && (
-        <ItemBrowser
-          character={character}
-          onChange={onChange}
-          onClose={() => setShowBrowser(false)}
-        />
-      )}
+      {/* Item Browser modal */}
+      {showBrowser && <ItemBrowser character={character} onChange={onChange} onClose={() => setShowBrowser(false)} />}
+
+      {/* Item card popup */}
+      {itemCard && <ItemCardPopup itemName={itemCard} onClose={() => setItemCard(null)} />}
 
       {/* Inventory */}
       <div className="card">
@@ -535,9 +627,9 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => setShowBrowser(x => !x)}
+              onClick={() => setShowBrowser(true)}
               className="text-xs py-1 px-3 rounded font-bold"
-              style={{ backgroundColor: showBrowser ? 'var(--accent-dim)' : 'var(--bg-border)', color: showBrowser ? 'var(--accent)' : 'var(--text-dim)', border:`1px solid ${showBrowser ? 'var(--accent)' : 'var(--bg-border)'}` }}
+              style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}
             >📖 Browse Items</button>
             <button onClick={addItem} className="btn-primary text-xs py-1 px-3">+ Custom Item</button>
           </div>
@@ -612,6 +704,7 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
               item={item}
               onUpdate={(key, value) => updateItem(getRealIndex(item), key, value)}
               onRemove={() => removeItem(getRealIndex(item))}
+              onShowCard={setItemCard}
             />
           ))}
         </div>
