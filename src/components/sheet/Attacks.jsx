@@ -214,18 +214,18 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
         </div>
       </div>
 
-      {/* ── Roll Bar ── */}
-      <div className="flex items-stretch gap-0 px-4 py-3">
+      {/* ── Roll Section ── */}
+      <div className="px-4 pt-3 pb-2 space-y-3">
 
-        {/* Attack buttons */}
-        <div className="flex-1 min-w-0 flex flex-col">
-          <div className="text-xs font-bold uppercase tracking-widest mb-1.5 text-center" style={{ color: accentColor }}>⚔ Attack Roll</div>
-          <div className="flex gap-1.5 flex-wrap flex-1 items-center">
+        {/* Attack Row — full width, buttons centered */}
+        <div>
+          <div className="text-xs font-bold uppercase tracking-widest mb-2 text-center" style={{ color: accentColor }}>⚔ Attack Roll</div>
+          <div className="flex gap-2 flex-wrap justify-center">
             {attackBonuses.map((bonus, i) => {
               const isHasteAttack = hasteActive && i === attackBonuses.length - 1
               return (
                 <button key={i} onClick={() => rollAttack(bonus)}
-                  className="font-bold rounded-lg px-3 py-2 text-sm transition-all hover:scale-105 active:scale-95"
+                  className="font-bold rounded-lg px-4 py-2 text-sm transition-all hover:scale-105 active:scale-95"
                   style={isHasteAttack
                     ? { backgroundColor: '#78350f', border: '2px solid #C9A84C', color: '#C9A84C', boxShadow: '0 0 8px #C9A84C44' }
                     : { backgroundColor: 'var(--danger)', border: `2px solid ${accentColor}66`, color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.4)' }}
@@ -239,40 +239,44 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
         </div>
 
         {/* Divider */}
-        <div className="w-px mx-3 self-stretch" style={{ backgroundColor: 'var(--bg-border)' }} />
+        <div className="h-px" style={{ backgroundColor: 'var(--bg-border)' }} />
 
-        {/* Damage button */}
-        <div className="flex-shrink-0 flex flex-col items-center">
-          <div className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#fbbf24' }}>🎲 Damage</div>
-          <button onClick={rollDamage}
-            className="font-bold rounded-lg px-4 py-2 text-sm transition-all hover:scale-105 active:scale-95 flex-1 flex items-center"
-            style={{ backgroundColor: '#78350f', border: '2px solid #f59e0b66', color: '#fbbf24', boxShadow: '0 2px 6px rgba(0,0,0,0.4)' }}
-            title="Click to roll damage"
-          >
-            {weapon.dmgDice}{totalDmgBonus !== 0 ? formatMod(totalDmgBonus) : ''}
-          </button>
-        </div>
+        {/* Damage + Temp row — centered as a pair */}
+        <div className="flex items-start justify-center gap-6">
 
-        {/* Divider */}
-        <div className="w-px mx-3 self-stretch" style={{ backgroundColor: 'var(--bg-border)' }} />
+          {/* Damage */}
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#fbbf24' }}>🎲 Damage</div>
+            <button onClick={rollDamage}
+              className="font-bold rounded-lg px-5 py-2 text-sm transition-all hover:scale-105 active:scale-95"
+              style={{ backgroundColor: '#78350f', border: '2px solid #f59e0b66', color: '#fbbf24', boxShadow: '0 2px 6px rgba(0,0,0,0.4)', minWidth: '80px', textAlign: 'center' }}
+              title="Click to roll damage"
+            >
+              {weapon.dmgDice}{totalDmgBonus !== 0 ? formatMod(totalDmgBonus) : ''}
+            </button>
+          </div>
 
-        {/* Temp buffs */}
-        <div className="flex-shrink-0 flex flex-col items-center">
-          <div className="text-xs font-bold uppercase tracking-widest mb-1.5 text-center" style={{ color: '#f59e0b' }}>✨ Temp</div>
-          <div className="flex gap-1.5 flex-1 items-center">
-            <div className="flex flex-col items-center gap-0.5">
-              <input type="number" value={weapon.tempAttack ?? 0} onChange={e => onUpdate('tempAttack', Number(e.target.value))}
-                className="w-12 h-9 text-center rounded-lg font-bold text-sm focus:outline-none"
-                style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid #f59e0b66', color: '#fbbf24' }}
-                title="Temporary attack bonus" />
-              <span className="text-xs" style={{ color: '#f59e0b88' }}>atk</span>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <input type="number" value={weapon.tempDamage ?? 0} onChange={e => onUpdate('tempDamage', Number(e.target.value))}
-                className="w-12 h-9 text-center rounded-lg font-bold text-sm focus:outline-none"
-                style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid #f59e0b66', color: '#fbbf24' }}
-                title="Temporary damage bonus" />
-              <span className="text-xs" style={{ color: '#f59e0b88' }}>dmg</span>
+          {/* Vertical divider */}
+          <div className="self-stretch w-px" style={{ backgroundColor: 'var(--bg-border)' }} />
+
+          {/* Temp buffs */}
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#f59e0b' }}>✨ Temp Bonus</div>
+            <div className="flex gap-3 items-center">
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-xs mb-0.5" style={{ color: '#f59e0b88' }}>Atk</span>
+                <input type="number" value={weapon.tempAttack ?? 0} onChange={e => onUpdate('tempAttack', Number(e.target.value))}
+                  className="w-12 h-9 text-center rounded-lg font-bold text-sm focus:outline-none"
+                  style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid #f59e0b66', color: '#fbbf24' }}
+                  title="Temporary attack bonus" />
+              </div>
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-xs mb-0.5" style={{ color: '#f59e0b88' }}>Dmg</span>
+                <input type="number" value={weapon.tempDamage ?? 0} onChange={e => onUpdate('tempDamage', Number(e.target.value))}
+                  className="w-12 h-9 text-center rounded-lg font-bold text-sm focus:outline-none"
+                  style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid #f59e0b66', color: '#fbbf24' }}
+                  title="Temporary damage bonus" />
+              </div>
             </div>
           </div>
         </div>
