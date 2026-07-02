@@ -683,6 +683,134 @@ function DurationBuffRow({ buff, onUpdate, onRemove }) {
   )
 }
 
+// ─── Size Changer ─────────────────────────────────────────────────────────────
+const SIZE_CATEGORIES = [
+  { id: 'fine',        label: 'Fine',        icon: '🔬', space: '½ ft',  reach: '0',    acAtk: +8,  cmb: -8, stealth: +16, fly: +8  },
+  { id: 'diminutive',  label: 'Diminutive',  icon: '🐜', space: '1 ft',  reach: '0',    acAtk: +4,  cmb: -4, stealth: +12, fly: +6  },
+  { id: 'tiny',        label: 'Tiny',        icon: '🐭', space: '2½ ft', reach: '0',    acAtk: +2,  cmb: -2, stealth: +8,  fly: +4  },
+  { id: 'small',       label: 'Small',       icon: '🧒', space: '5 ft',  reach: '5 ft', acAtk: +1,  cmb: -1, stealth: +4,  fly: +2  },
+  { id: 'medium',      label: 'Medium',      icon: '🧍', space: '5 ft',  reach: '5 ft', acAtk:  0,  cmb:  0, stealth: 0,   fly: 0   },
+  { id: 'large',       label: 'Large',       icon: '🧌', space: '10 ft', reach: '10ft', acAtk: -1,  cmb: +1, stealth: -4,  fly: -2  },
+  { id: 'huge',        label: 'Huge',        icon: '🦖', space: '15 ft', reach: '15ft', acAtk: -2,  cmb: +2, stealth: -8,  fly: -4  },
+  { id: 'gargantuan',  label: 'Gargantuan',  icon: '🐉', space: '20 ft', reach: '20ft', acAtk: -4,  cmb: +4, stealth: -12, fly: -6  },
+  { id: 'colossal',    label: 'Colossal',    icon: '🌋', space: '30 ft', reach: '30ft', acAtk: -8,  cmb: +8, stealth: -16, fly: -8  },
+]
+
+const SIZE_STR_DEX = {
+  fine:       { str: -8, dex: +8 },
+  diminutive: { str: -4, dex: +4 },
+  tiny:       { str: -2, dex: +2 },
+  small:      { str: -2, dex: +2 },
+  medium:     { str: 0,  dex: 0  },
+  large:      { str: +8, dex: -2 },
+  huge:       { str: +16, dex: -4 },
+  gargantuan: { str: +24, dex: -4 },
+  colossal:   { str: +32, dex: -4 },
+}
+
+function SizeChanger({ character, onChange, pinned, onTogglePin }) {
+  const current = character.sizeCategory ?? 'medium'
+  const size = SIZE_CATEGORIES.find(s => s.id === current) ?? SIZE_CATEGORIES[4]
+  const isMedium = current === 'medium'
+  const strDex = SIZE_STR_DEX[current] ?? { str: 0, dex: 0 }
+
+  const medIdx  = SIZE_CATEGORIES.findIndex(s => s.id === 'medium')
+  const curIdx  = SIZE_CATEGORIES.findIndex(s => s.id === current)
+
+  const acColor     = size.acAtk > 0 ? 'var(--positive)' : size.acAtk < 0 ? '#ef4444' : 'var(--text-dim)'
+  const cmbColor    = size.cmb   > 0 ? 'var(--positive)' : size.cmb   < 0 ? '#ef4444' : 'var(--text-dim)'
+  const steColor    = size.stealth > 0 ? 'var(--positive)' : size.stealth < 0 ? '#ef4444' : 'var(--text-dim)'
+
+  return (
+    <div className="card">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <h2 className="section-title mb-0">📏 Size Category</h2>
+          {onTogglePin && <PinButton pinned={pinned} onToggle={onTogglePin} />}
+        </div>
+        {!isMedium && (
+          <button onClick={() => onChange('sizeCategory', 'medium')}
+            className="text-xs px-3 py-1 rounded font-bold"
+            style={{ color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
+            ↺ Reset to Medium
+          </button>
+        )}
+      </div>
+
+      {/* Size selector track */}
+      <div className="flex gap-1 mb-4 overflow-x-auto pb-1">
+        {SIZE_CATEGORIES.map((s, i) => {
+          const isActive = s.id === current
+          const isMed    = s.id === 'medium'
+          const smaller  = i < medIdx
+          const bigger   = i > medIdx
+          return (
+            <button key={s.id} onClick={() => onChange('sizeCategory', s.id)}
+              className="flex flex-col items-center gap-0.5 flex-shrink-0 px-2 py-2 rounded-lg transition-all"
+              style={{
+                minWidth: '62px',
+                backgroundColor: isActive ? (isMed ? 'var(--bg-border)' : 'var(--accent-dim)') : 'var(--bg-darker)',
+                border: `2px solid ${isActive ? 'var(--accent)' : 'var(--bg-border)'}`,
+                transform: isActive ? 'scale(1.05)' : 'scale(1)',
+              }}>
+              <span style={{ fontSize: '1.25rem' }}>{s.icon}</span>
+              <span className="text-xs font-bold leading-tight text-center"
+                style={{ color: isActive ? 'var(--accent)' : isMed ? 'var(--text-dim)' : smaller ? '#60a5fa' : '#f97316', fontSize: '0.6rem' }}>
+                {s.label}
+              </span>
+              {s.acAtk !== 0 && (
+                <span className="text-xs font-bold"
+                  style={{ color: s.acAtk > 0 ? 'var(--positive)' : '#ef4444', fontSize: '0.6rem' }}>
+                  {s.acAtk > 0 ? `+${s.acAtk}` : s.acAtk} AC
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Stats panel */}
+      {!isMedium ? (
+        <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)' }}>
+          <div className="flex items-center gap-3 mb-3">
+            <span style={{ fontSize: '2rem' }}>{size.icon}</span>
+            <div>
+              <div className="font-bold text-lg" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>{size.label}</div>
+              <div className="text-xs" style={{ color: 'var(--text-faint)' }}>Space: {size.space} · Reach: {size.reach}</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+            <StatBadge label="AC / Attack" value={size.acAtk} color={acColor} />
+            <StatBadge label="CMB / CMD"   value={size.cmb}   color={cmbColor} />
+            <StatBadge label="Stealth"     value={size.stealth} color={steColor} />
+            {strDex.str !== 0 && <StatBadge label="STR (poly)"  value={strDex.str} color={strDex.str > 0 ? 'var(--positive)' : '#ef4444'} />}
+            {strDex.dex !== 0 && <StatBadge label="DEX (poly)"  value={strDex.dex} color={strDex.dex > 0 ? 'var(--positive)' : '#ef4444'} />}
+            <StatBadge label="Fly"         value={size.fly}   color={size.fly > 0 ? 'var(--positive)' : '#ef4444'} />
+          </div>
+          <div className="mt-3 text-xs px-1" style={{ color: 'var(--text-faint)' }}>
+            STR/DEX shown are typical polymorph adjustments. Permanent size changes use different rules.
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-4" style={{ color: 'var(--text-faint)' }}>
+          <p className="text-sm">Medium — no size modifiers. Select another size to see mechanical changes.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function StatBadge({ label, value, color }) {
+  const display = value > 0 ? `+${value}` : `${value}`
+  return (
+    <div className="flex items-center justify-between px-2 py-1.5 rounded"
+      style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}>
+      <span className="text-xs" style={{ color: 'var(--text-dim)' }}>{label}</span>
+      <span className="font-bold text-sm" style={{ color }}>{display}</span>
+    </div>
+  )
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function BuffTracker({ character, onChange, pins = {}, onTogglePin }) {
   const buffs      = character.buffs ?? []
@@ -720,6 +848,9 @@ export default function BuffTracker({ character, onChange, pins = {}, onTogglePi
 
   return (
     <div className="space-y-4">
+
+      <SizeChanger character={character} onChange={onChange}
+        pinned={pins.size} onTogglePin={onTogglePin ? () => onTogglePin('size') : undefined} />
 
       <XPTracker character={character} onChange={onChange}
         pinned={pins.xp} onTogglePin={onTogglePin ? () => onTogglePin('xp') : undefined} />

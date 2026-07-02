@@ -16,7 +16,7 @@ import Equipment from '../components/sheet/Equipment'
 import Dashboard from '../components/sheet/Dashboard'
 import SettingsPanel from '../components/SettingsPanel'
 
-const TABS = ['Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Tracker', 'Notes', '📌 Dashboard']
+const TABS = ['Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Helper', 'Notes', '📌 Dashboard']
 
 export default function CharacterPage() {
   const { id } = useParams()
@@ -232,7 +232,7 @@ export default function CharacterPage() {
           />
         )}
 
-        {activeTab === 'Tracker' && (
+        {activeTab === 'Helper' && (
           <BuffTracker
             character={character}
             onChange={update}
