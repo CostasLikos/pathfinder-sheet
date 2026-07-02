@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware'
 export const THEMES = {
   darkGold: {
     id: 'darkGold',
-    name: 'Dark Gold',
+    name: 'The Gilded Tome',
     preview: ['#12121e', '#C9A84C'],
     vars: {
       '--bg-darker':  '#12121e',
@@ -25,7 +25,7 @@ export const THEMES = {
   },
   darkRed: {
     id: 'darkRed',
-    name: 'Blood Red',
+    name: 'Crimson Pact',
     preview: ['#1a0a0a', '#dc2626'],
     vars: {
       '--bg-darker':  '#0f0808',
@@ -46,7 +46,7 @@ export const THEMES = {
   },
   arcane: {
     id: 'arcane',
-    name: 'Arcane Purple',
+    name: 'Weave of Shadows',
     preview: ['#0d0a1a', '#a855f7'],
     vars: {
       '--bg-darker':  '#0d0a1a',
@@ -67,7 +67,7 @@ export const THEMES = {
   },
   forest: {
     id: 'forest',
-    name: 'Forest Green',
+    name: 'The Wild Hunt',
     preview: ['#0a120a', '#22c55e'],
     vars: {
       '--bg-darker':  '#060e06',
@@ -88,7 +88,7 @@ export const THEMES = {
   },
   ocean: {
     id: 'ocean',
-    name: 'Ocean Blue',
+    name: 'Depths of Azlant',
     preview: ['#050f1a', '#0ea5e9'],
     vars: {
       '--bg-darker':  '#050f1a',
@@ -109,7 +109,7 @@ export const THEMES = {
   },
   parchment: {
     id: 'parchment',
-    name: 'Parchment (Light)',
+    name: 'Ancient Scroll',
     preview: ['#f5f0e8', '#7c3d12'],
     vars: {
       '--bg-darker':  '#e8dfc8',
@@ -133,7 +133,7 @@ export const THEMES = {
 
   cyberpunk: {
     id: 'cyberpunk',
-    name: 'Cyberpunk',
+    name: 'Technic League',
     preview: ['#0a0014', '#ff2d78'],
     vars: {
       '--bg-darker':  '#030008',
@@ -155,7 +155,7 @@ export const THEMES = {
 
   neon: {
     id: 'neon',
-    name: 'Neon City',
+    name: 'Numerian Circuits',
     preview: ['#000d1a', '#00f5ff'],
     vars: {
       '--bg-darker':  '#000508',
@@ -177,7 +177,7 @@ export const THEMES = {
 
   synthwave: {
     id: 'synthwave',
-    name: 'Synthwave',
+    name: 'Dream Realm',
     preview: ['#0e0020', '#f72585'],
     vars: {
       '--bg-darker':  '#070010',
@@ -199,7 +199,7 @@ export const THEMES = {
 
   midnight: {
     id: 'midnight',
-    name: 'Midnight Steel',
+    name: 'Iron Citadel',
     preview: ['#080c10', '#64748b'],
     vars: {
       '--bg-darker':  '#030507',
@@ -221,7 +221,7 @@ export const THEMES = {
 
   ember: {
     id: 'ember',
-    name: 'Ember',
+    name: "Dragon's Breath",
     preview: ['#0f0800', '#ff6b00'],
     vars: {
       '--bg-darker':  '#080400',
@@ -243,7 +243,7 @@ export const THEMES = {
 
   ice: {
     id: 'ice',
-    name: 'Ice Crystal',
+    name: 'Irrisen Winter',
     preview: ['#f0f8ff', '#0369a1'],
     vars: {
       '--bg-darker':  '#dbeafe',
@@ -265,7 +265,7 @@ export const THEMES = {
 
   void: {
     id: 'void',
-    name: 'Void Black',
+    name: 'The Void Between',
     preview: ['#000000', '#6366f1'],
     vars: {
       '--bg-darker':  '#000000',
@@ -287,7 +287,7 @@ export const THEMES = {
 
   nature: {
     id: 'nature',
-    name: 'Nature & Earth',
+    name: "Druid's Grove",
     preview: ['#f5f0e8', '#065f46'],
     vars: {
       '--bg-darker':  '#d4e6d4',
