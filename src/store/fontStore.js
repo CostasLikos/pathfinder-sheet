@@ -44,6 +44,43 @@ export const FONTS = {
     family: 'system-ui, -apple-system, sans-serif',
     preview: 'The dragon stirs in its lair...',
   },
+
+  // ── Dark / Eerie ──────────────────────────────────────────────────────────
+  darkGrimoire: {
+    id: 'darkGrimoire',
+    name: 'The Dark Grimoire',
+    desc: 'Grenze Gotisch — blackletter gothic, ominous and foreboding',
+    family: '"Grenze Gotisch", Georgia, serif',
+    preview: 'The dragon stirs in its lair...',
+  },
+  forbiddenCodex: {
+    id: 'forbiddenCodex',
+    name: 'The Forbidden Codex',
+    desc: 'UnifrakturMaguntia — old German gothic, the most forbidden tome',
+    family: '"UnifrakturMaguntia", Georgia, serif',
+    preview: 'The dragon stirs in its lair...',
+  },
+  piratesCharter: {
+    id: 'piratesCharter',
+    name: "Pirate's Charter",
+    desc: 'Pirata One — sharp and dangerous, treasure maps and dark deals',
+    family: '"Pirata One", Georgia, serif',
+    preview: 'The dragon stirs in its lair...',
+  },
+  lostEmpire: {
+    id: 'lostEmpire',
+    name: 'Lost Empire',
+    desc: 'Metamorphous — Roman/Greek carved in crumbling ruins',
+    family: '"Metamorphous", Georgia, serif',
+    preview: 'The dragon stirs in its lair...',
+  },
+  bloodInscription: {
+    id: 'bloodInscription',
+    name: 'Blood Inscription',
+    desc: 'Nosifer — dripping and visceral, for the truly unhinged',
+    family: '"Nosifer", Georgia, serif',
+    preview: 'The dragon stirs...',
+  },
 }
 
 export const useFontStore = create(
