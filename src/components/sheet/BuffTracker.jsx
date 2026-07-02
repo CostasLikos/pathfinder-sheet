@@ -737,31 +737,49 @@ function SizeChanger({ character, onChange, pinned, onTogglePin }) {
         )}
       </div>
 
-      {/* Size selector track */}
-      <div className="flex gap-1 mb-4 overflow-x-auto pb-1">
-        {SIZE_CATEGORIES.map((s, i) => {
+      {/* Size selector grid — 5 top row, 4 bottom row */}
+      <div className="grid grid-cols-5 gap-1.5 mb-2">
+        {SIZE_CATEGORIES.slice(0, 5).map((s, i) => {
           const isActive = s.id === current
           const isMed    = s.id === 'medium'
           const smaller  = i < medIdx
-          const bigger   = i > medIdx
           return (
             <button key={s.id} onClick={() => onChange('sizeCategory', s.id)}
-              className="flex flex-col items-center gap-0.5 flex-shrink-0 px-2 py-2 rounded-lg transition-all"
+              className="flex flex-col items-center gap-0.5 py-2 rounded-lg transition-all"
               style={{
-                minWidth: '62px',
-                backgroundColor: isActive ? (isMed ? 'var(--bg-border)' : 'var(--accent-dim)') : 'var(--bg-darker)',
+                backgroundColor: isActive ? 'var(--accent-dim)' : 'var(--bg-darker)',
                 border: `2px solid ${isActive ? 'var(--accent)' : 'var(--bg-border)'}`,
-                transform: isActive ? 'scale(1.05)' : 'scale(1)',
               }}>
-              <span style={{ fontSize: '1.25rem' }}>{s.icon}</span>
-              <span className="text-xs font-bold leading-tight text-center"
-                style={{ color: isActive ? 'var(--accent)' : isMed ? 'var(--text-dim)' : smaller ? '#60a5fa' : '#f97316', fontSize: '0.6rem' }}>
+              <span style={{ fontSize: '1.1rem' }}>{s.icon}</span>
+              <span style={{ fontSize: '0.58rem', fontWeight: isActive ? 700 : 400, color: isActive ? 'var(--accent)' : isMed ? 'var(--text-dim)' : smaller ? '#60a5fa' : 'var(--text-faint)', lineHeight: 1.2, textAlign: 'center', padding: '0 2px' }}>
                 {s.label}
               </span>
               {s.acAtk !== 0 && (
-                <span className="text-xs font-bold"
-                  style={{ color: s.acAtk > 0 ? 'var(--positive)' : '#ef4444', fontSize: '0.6rem' }}>
-                  {s.acAtk > 0 ? `+${s.acAtk}` : s.acAtk} AC
+                <span style={{ fontSize: '0.58rem', fontWeight: 700, color: s.acAtk > 0 ? 'var(--positive)' : '#ef4444' }}>
+                  {s.acAtk > 0 ? `+${s.acAtk}` : s.acAtk}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+      <div className="grid grid-cols-4 gap-1.5 mb-4">
+        {SIZE_CATEGORIES.slice(5).map((s) => {
+          const isActive = s.id === current
+          return (
+            <button key={s.id} onClick={() => onChange('sizeCategory', s.id)}
+              className="flex flex-col items-center gap-0.5 py-2 rounded-lg transition-all"
+              style={{
+                backgroundColor: isActive ? 'var(--accent-dim)' : 'var(--bg-darker)',
+                border: `2px solid ${isActive ? 'var(--accent)' : 'var(--bg-border)'}`,
+              }}>
+              <span style={{ fontSize: '1.1rem' }}>{s.icon}</span>
+              <span style={{ fontSize: '0.58rem', fontWeight: isActive ? 700 : 400, color: isActive ? 'var(--accent)' : '#f97316', lineHeight: 1.2, textAlign: 'center', padding: '0 2px' }}>
+                {s.label}
+              </span>
+              {s.acAtk !== 0 && (
+                <span style={{ fontSize: '0.58rem', fontWeight: 700, color: '#ef4444' }}>
+                  {s.acAtk > 0 ? `+${s.acAtk}` : s.acAtk}
                 </span>
               )}
             </button>
@@ -779,7 +797,7 @@ function SizeChanger({ character, onChange, pinned, onTogglePin }) {
               <div className="text-xs" style={{ color: 'var(--text-faint)' }}>Space: {size.space} · Reach: {size.reach}</div>
             </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+          <div className="flex flex-wrap gap-2">
             <StatBadge label="AC / Attack" value={size.acAtk} color={acColor} />
             <StatBadge label="CMB / CMD"   value={size.cmb}   color={cmbColor} />
             <StatBadge label="Stealth"     value={size.stealth} color={steColor} />
@@ -792,8 +810,8 @@ function SizeChanger({ character, onChange, pinned, onTogglePin }) {
           </div>
         </div>
       ) : (
-        <div className="text-center py-4" style={{ color: 'var(--text-faint)' }}>
-          <p className="text-sm">Medium — no size modifiers. Select another size to see mechanical changes.</p>
+        <div className="text-center py-4 rounded-lg" style={{ color: 'var(--text-faint)', backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
+          <p className="text-sm">Medium — no modifiers active.</p>
         </div>
       )}
     </div>
@@ -803,7 +821,7 @@ function SizeChanger({ character, onChange, pinned, onTogglePin }) {
 function StatBadge({ label, value, color }) {
   const display = value > 0 ? `+${value}` : `${value}`
   return (
-    <div className="flex items-center justify-between px-2 py-1.5 rounded"
+    <div className="flex items-center gap-2 px-2 py-1.5 rounded flex-shrink-0"
       style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}>
       <span className="text-xs" style={{ color: 'var(--text-dim)' }}>{label}</span>
       <span className="font-bold text-sm" style={{ color }}>{display}</span>

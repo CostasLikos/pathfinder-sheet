@@ -20,6 +20,7 @@ const SECTION_LABELS = {
   statBuffs:    { icon: '⚡',  label: 'Stat Buffs' },
   buffs:        { icon: '⏱️',  label: 'Buffs & Tracking' },
   bardic:       { icon: '🎶',  label: 'Bardic Performance' },
+  size:         { icon: '📏',  label: 'Size Category' },
   feats:        { icon: '🏅',  label: 'Feats' },
   traits:       { icon: '🌟',  label: 'Traits' },
   equipment:    { icon: '🎒',  label: 'Equipment' },
@@ -482,6 +483,52 @@ function PinnedSkillsWidget({ character, onUnpin }) {
   )
 }
 
+// ─── Size Widget ──────────────────────────────────────────────────────────────
+
+const DASH_SIZES = [
+  { id:'fine',       label:'Fine',       icon:'🔬', acAtk:+8,  cmb:-8  },
+  { id:'diminutive', label:'Diminutive', icon:'🐜', acAtk:+4,  cmb:-4  },
+  { id:'tiny',       label:'Tiny',       icon:'🐭', acAtk:+2,  cmb:-2  },
+  { id:'small',      label:'Small',      icon:'🧒', acAtk:+1,  cmb:-1  },
+  { id:'medium',     label:'Medium',     icon:'🧍', acAtk: 0,  cmb: 0  },
+  { id:'large',      label:'Large',      icon:'🧌', acAtk:-1,  cmb:+1  },
+  { id:'huge',       label:'Huge',       icon:'🦖', acAtk:-2,  cmb:+2  },
+  { id:'gargantuan', label:'Gargantuan', icon:'🐉', acAtk:-4,  cmb:+4  },
+  { id:'colossal',   label:'Colossal',   icon:'🌋', acAtk:-8,  cmb:+8  },
+]
+
+function SizeWidget({ character, onChange }) {
+  const current = character.sizeCategory ?? 'medium'
+  const size = DASH_SIZES.find(s => s.id === current) ?? DASH_SIZES[4]
+  const isMedium = current === 'medium'
+  return (
+    <div className="space-y-2">
+      <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        {DASH_SIZES.map(s => {
+          const isActive = s.id === current
+          return (
+            <button key={s.id} onClick={() => onChange('sizeCategory', s.id)}
+              className="flex flex-col items-center gap-0.5 py-1.5 px-1 rounded text-center transition-all"
+              style={{ backgroundColor: isActive ? 'var(--accent-dim)' : 'var(--bg-darker)', border: `1px solid ${isActive ? 'var(--accent)' : 'var(--bg-border)'}` }}>
+              <span style={{ fontSize: '1rem' }}>{s.icon}</span>
+              <span style={{ fontSize: '0.55rem', color: isActive ? 'var(--accent)' : 'var(--text-faint)', fontWeight: isActive ? 700 : 400 }}>{s.label}</span>
+            </button>
+          )
+        })}
+      </div>
+      {!isMedium && (
+        <div className="flex gap-2 text-xs px-1">
+          <span style={{ color: 'var(--text-faint)' }}>AC/Atk</span>
+          <span className="font-bold" style={{ color: size.acAtk > 0 ? 'var(--positive)' : '#ef4444' }}>{size.acAtk > 0 ? `+${size.acAtk}` : size.acAtk}</span>
+          <span style={{ color: 'var(--text-faint)' }}>CMB</span>
+          <span className="font-bold" style={{ color: size.cmb > 0 ? 'var(--positive)' : '#ef4444' }}>{size.cmb > 0 ? `+${size.cmb}` : size.cmb}</span>
+          <button onClick={() => onChange('sizeCategory','medium')} className="ml-auto text-xs" style={{ color: 'var(--text-faint)' }}>↺ Medium</button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Widget Renderer ──────────────────────────────────────────────────────────
 
 function renderWidget(id, character, onChange) {
@@ -498,6 +545,7 @@ function renderWidget(id, character, onChange) {
     case 'statBuffs':    return <StatBuffsWidget character={character} onChange={onChange} />
     case 'buffs':        return <BuffsWidget character={character} onChange={onChange} />
     case 'bardic':       return <BardicWidget character={character} onChange={onChange} />
+    case 'size':         return <SizeWidget character={character} onChange={onChange} />
     case 'feats':        return <FeatsWidget character={character} />
     case 'traits':       return <TraitsWidget character={character} />
     case 'equipment':    return <EquipmentWidget character={character} />
