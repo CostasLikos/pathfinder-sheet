@@ -46,6 +46,7 @@ const PRESETS = {
   twfOffhand:  () => ({ atkBonus: -2, dmgBonus: 0, label: 'TWF Off-hand', desc: '−2 atk (TWF feat + light off-hand)' }),
   flanking:    () => ({ atkBonus: +2, dmgBonus: 0, label: 'Flanking', desc: '+2 atk (flanking)' }),
   charge:      () => ({ atkBonus: +2, dmgBonus: 0, label: 'Charge', desc: '+2 atk / −2 AC (charge)' }),
+  haste:       () => ({ atkBonus: +1, dmgBonus: 0, label: '⚡ Haste', desc: '+1 atk + extra attack at highest BAB', extraAttack: true }),
 }
 
 const EXTRA_DIE_TYPES = ['d3','d4','d6','d8','d10','d12']
@@ -113,10 +114,13 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
 
   // Generate iterative attacks from BAB
   const babVal = bab ?? 0
+  const hasteActive = activePresets.includes('haste')
   const attackBonuses = [baseAttackBonus]
   if (babVal >= 6)  attackBonuses.push(baseAttackBonus - 5)
   if (babVal >= 11) attackBonuses.push(baseAttackBonus - 10)
   if (babVal >= 16) attackBonuses.push(baseAttackBonus - 15)
+  // Haste: extra attack at highest BAB, appended last
+  if (hasteActive) attackBonuses.push(baseAttackBonus)
 
   const rollAttack = (bonus) => {
     const d20 = Math.floor(Math.random() * 20) + 1
@@ -193,16 +197,22 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
           <div className="flex flex-col items-center gap-1">
             <span className="text-xs text-gray-400">Attack</span>
             <div className="flex gap-1">
-              {attackBonuses.map((bonus, i) => (
-                <button
-                  key={i}
-                  onClick={() => rollAttack(bonus)}
-                  className="bg-pf-red hover:bg-red-700 text-white text-xs font-bold rounded border border-red-800 transition-colors min-w-[40px] h-7"
-                  title={`Click to roll attack ${i + 1}`}
-                >
-                  {formatMod(bonus)}
-                </button>
-              ))}
+              {attackBonuses.map((bonus, i) => {
+                const isHasteAttack = hasteActive && i === attackBonuses.length - 1
+                return (
+                  <button
+                    key={i}
+                    onClick={() => rollAttack(bonus)}
+                    className="text-xs font-bold rounded border transition-colors min-w-[40px] h-7"
+                    style={isHasteAttack
+                      ? { backgroundColor: '#78350f', borderColor: '#C9A84C', color: '#C9A84C' }
+                      : { backgroundColor: 'var(--danger)', borderColor: '#7f1d1d', color: '#fff' }}
+                    title={isHasteAttack ? '⚡ Haste extra attack' : `Click to roll attack ${i + 1}`}
+                  >
+                    {isHasteAttack ? <span>⚡{formatMod(bonus)}</span> : formatMod(bonus)}
+                  </button>
+                )
+              })}
             </div>
             <div className="h-4" />
           </div>
