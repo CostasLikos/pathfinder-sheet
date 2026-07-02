@@ -266,10 +266,39 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
       </div>
 
       {/* ── Speed ── */}
-      <div className="card flex items-center gap-3">
-        <span className="text-sm" style={{ color: 'var(--text-dim)' }}>Speed</span>
-        <SpinnerInput value={speed ?? 30} onChange={v => onChange('speed', Math.max(0, v))} min={0} step={5} width="w-14" />
-        <span className="text-sm" style={{ color: 'var(--text-dim)' }}>ft.</span>
+      <div className="card">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>⚡ Movement Speed</span>
+          <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{Math.round((speed ?? 30) / 5)} squares</span>
+        </div>
+        <div className="flex items-center gap-4">
+          {/* Big speed value */}
+          <div className="text-center">
+            <div className="text-4xl font-bold leading-none" style={{ color: 'var(--accent)', fontFamily: 'Georgia, serif' }}>
+              {speed ?? 30}
+            </div>
+            <div className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>ft. / round</div>
+          </div>
+
+          {/* Pip track — each pip = 5 ft, up to 12 pips (60 ft) */}
+          <div className="flex-1">
+            <div className="flex gap-1 flex-wrap">
+              {Array.from({ length: 12 }).map((_, i) => {
+                const filled = (speed ?? 30) / 5 > i
+                return (
+                  <div key={i} className="h-2 rounded-sm flex-1 min-w-[10px] transition-colors"
+                    style={{ backgroundColor: filled ? 'var(--accent)' : 'var(--bg-border)', opacity: filled ? (i < 6 ? 1 : 0.65) : 0.4 }} />
+                )
+              })}
+            </div>
+            <div className="flex justify-between mt-1 text-xs" style={{ color: 'var(--text-faint)' }}>
+              <span>0</span><span>30 ft</span><span>60 ft</span>
+            </div>
+          </div>
+
+          {/* Spinner */}
+          <SpinnerInput value={speed ?? 30} onChange={v => onChange('speed', Math.max(0, v))} min={0} step={5} width="w-14" />
+        </div>
       </div>
 
     </div>
