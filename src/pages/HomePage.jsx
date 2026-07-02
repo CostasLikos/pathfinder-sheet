@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from 'react'
 import SettingsPanel from '../components/SettingsPanel'
 import { THEMES, useThemeStore } from '../store/themeStore'
 import SigilBackground from '../components/SigilBackground'
+import { computeClassTotals } from '../data/pf1eData'
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -405,7 +406,15 @@ export default function HomePage() {
                       {char.name || 'Unnamed Hero'}
                     </h3>
                     <p className={`text-sm font-semibold ${getClassColor(char.class)}`}>
-                      {char.class || 'No Class'} {char.level > 0 ? `• Level ${char.level}` : ''}
+                      {(() => {
+                        const hasClasses = (char.classes ?? []).length > 0
+                        if (hasClasses) {
+                          const totals = computeClassTotals(char.classes)
+                          const classStr = char.classes.map(c => `${c.className} ${c.level}`).join(' / ')
+                          return `${classStr} • Level ${totals.totalLevel}`
+                        }
+                        return `${char.class || 'No Class'}${char.level > 0 ? ` • Level ${char.level}` : ''}`
+                      })()}
                     </p>
                     <p className="text-xs mt-1" style={{ color: 'var(--text-dim)' }}>
                       {char.race || 'Unknown Race'} {char.alignment ? `• ${char.alignment}` : ''}
