@@ -297,7 +297,7 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                           skillBuff !== 0 && { label: 'Size (Stealth)', value: skillBuff, always: false },
                         ].filter(Boolean).filter(l => l.always || l.value !== 0)
                         return (
-                          <div className="absolute z-50 right-0 bottom-full mb-2 w-44 rounded-lg p-2 shadow-2xl pointer-events-none"
+                          <div className={`absolute z-50 right-0 w-44 rounded-lg p-2 shadow-2xl pointer-events-none ${rowIndex < 3 ? 'top-full mt-2' : 'bottom-full mb-2'}`}
                             style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)', color: 'var(--text-dim)', fontSize: '0.72rem', minWidth: '160px' }}>
                             <div className="font-bold mb-1.5 text-xs uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
                               {getDisplayName(skill)} Breakdown
