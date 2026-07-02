@@ -170,132 +170,136 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
     </div>
   )
 
+  const typeIcon = weapon.attackType === 'Ranged' ? '🏹' : weapon.attackType === 'Natural' ? '🐾' : '⚔️'
+  const accentColor = weapon.attackType === 'Ranged' ? '#0ea5e9' : weapon.attackType === 'Natural' ? '#22c55e' : 'var(--accent)'
+
   return (
-    <div className="bg-pf-darker border border-pf-border rounded-lg overflow-hidden">
+    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${accentColor}44`, backgroundColor: 'var(--bg-darker)', boxShadow: `0 2px 12px ${accentColor}18` }}>
       {rollResult && <DiceRoller result={rollResult} onClose={() => setRollResult(null)} />}
 
-      {/* Main Row */}
-      <div className="flex items-center gap-3 p-3">
-        {/* Weapon Name */}
+      {/* ── Card Header ── */}
+      <div className="flex items-center gap-3 px-4 py-3 relative overflow-hidden" style={{ background: `linear-gradient(135deg, var(--bg-surface) 0%, ${accentColor}22 100%)`, borderBottom: `1px solid ${accentColor}33` }}>
+        {/* Type icon */}
+        <div className="text-2xl flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg" style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}44` }}>
+          {typeIcon}
+        </div>
+
+        {/* Name + subtitle */}
         <div className="flex-1 min-w-0">
           <input
             type="text"
             value={weapon.name}
             onChange={e => onUpdate('name', e.target.value)}
             placeholder="Weapon name..."
-            className="bg-transparent text-white font-semibold text-sm focus:outline-none w-full border-b border-transparent focus:border-pf-gold"
+            className="bg-transparent font-bold text-base focus:outline-none w-full"
+            style={{ color: 'var(--text)', fontFamily: 'Georgia, serif', borderBottom: '1px solid transparent' }}
+            onFocus={e => e.target.style.borderBottomColor = accentColor}
+            onBlur={e => e.target.style.borderBottomColor = 'transparent'}
           />
-          <div className="text-gray-500 text-xs mt-0.5">
-            {weapon.attackType} • {weapon.dmgDice} • {weapon.damageType} • Crit {weapon.critRange}/{weapon.critMult}
+          <div className="flex items-center gap-2 flex-wrap mt-0.5">
+            <span className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: `${accentColor}20`, color: accentColor, border: `1px solid ${accentColor}44` }}>{weapon.attackType}</span>
+            <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{weapon.dmgDice} {weapon.damageType}</span>
+            <span className="text-xs" style={{ color: 'var(--text-faint)' }}>Crit {weapon.critRange}/{weapon.critMult}</span>
           </div>
         </div>
 
-        {/* Attack / Damage / Buff — each column owns its label + box */}
-        <div className="flex gap-1 items-end">
-
-          {/* Attack column */}
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-400">Attack</span>
-            <div className="flex gap-1">
-              {attackBonuses.map((bonus, i) => {
-                const isHasteAttack = hasteActive && i === attackBonuses.length - 1
-                return (
-                  <button
-                    key={i}
-                    onClick={() => rollAttack(bonus)}
-                    className="text-xs font-bold rounded border transition-colors min-w-[40px] h-7"
-                    style={isHasteAttack
-                      ? { backgroundColor: '#78350f', borderColor: '#C9A84C', color: '#C9A84C' }
-                      : { backgroundColor: 'var(--danger)', borderColor: '#7f1d1d', color: '#fff' }}
-                    title={isHasteAttack ? '⚡ Haste extra attack' : `Click to roll attack ${i + 1}`}
-                  >
-                    {isHasteAttack ? <span>⚡{formatMod(bonus)}</span> : formatMod(bonus)}
-                  </button>
-                )
-              })}
-            </div>
-            <div className="h-4" />
-          </div>
-
-          {/* Damage column */}
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-400">Damage</span>
-            <button
-              onClick={rollDamage}
-              className="bg-amber-800 hover:bg-amber-700 text-white text-xs font-bold rounded px-2 border border-amber-700 transition-colors w-16 h-7"
-              title="Click to roll damage"
-            >
-              {weapon.dmgDice}{totalDmgBonus !== 0 ? formatMod(totalDmgBonus) : ''}
-            </button>
-            <div className="h-4" />
-          </div>
-
-          {/* Buff column */}
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-yellow-500">Buff</span>
-            <div className="flex gap-1">
-              <input
-                type="number"
-                value={weapon.tempAttack ?? 0}
-                onChange={e => onUpdate('tempAttack', Number(e.target.value))}
-                className="w-10 h-7 text-center bg-pf-surface border border-yellow-700 rounded text-yellow-400 text-xs focus:outline-none"
-                title="Temporary attack bonus"
-              />
-              <input
-                type="number"
-                value={weapon.tempDamage ?? 0}
-                onChange={e => onUpdate('tempDamage', Number(e.target.value))}
-                className="w-10 h-7 text-center bg-pf-surface border border-yellow-700 rounded text-yellow-400 text-xs focus:outline-none"
-                title="Temporary damage bonus"
-              />
-            </div>
-            <div className="flex gap-1 w-full">
-              <span className="w-10 text-center text-xs text-gray-600">atk</span>
-              <span className="w-10 text-center text-xs text-gray-600">dmg</span>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Expand / Delete */}
-        <div className="flex flex-col gap-1">
-          <button onClick={() => setExpanded(x => !x)} className="text-gray-400 hover:text-white text-xs px-2 py-1 border border-pf-border rounded transition-colors">
+        {/* Controls */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <button onClick={() => setExpanded(x => !x)} className="w-7 h-7 flex items-center justify-center rounded text-xs transition-colors"
+            style={{ color: 'var(--text-dim)', border: '1px solid var(--bg-border)', backgroundColor: expanded ? 'var(--bg-border)' : 'transparent' }}>
             {expanded ? '▲' : '▼'}
           </button>
-          <button onClick={onRemove} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 border border-pf-border rounded transition-colors">✕</button>
+          <button onClick={onRemove} className="w-7 h-7 flex items-center justify-center rounded text-xs transition-colors"
+            style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
         </div>
       </div>
 
-      {/* Breakdown Bar */}
-      <div className="px-3 pb-2 flex flex-wrap gap-3 text-xs text-gray-500 border-t border-pf-border/30 pt-2 items-center">
-        <span>BAB {formatMod(bab ?? 0)}</span>
-        <span>+ {weapon.ability.toUpperCase()} {formatMod(abilityModForAttack)}</span>
-        <span className="flex items-center gap-1">
+      {/* ── Roll Bar ── */}
+      <div className="flex items-stretch gap-0 px-4 py-3">
+
+        {/* Attack buttons */}
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-faint)' }}>Attack Roll</div>
+          <div className="flex gap-1.5 flex-wrap">
+            {attackBonuses.map((bonus, i) => {
+              const isHasteAttack = hasteActive && i === attackBonuses.length - 1
+              return (
+                <button key={i} onClick={() => rollAttack(bonus)}
+                  className="font-bold rounded-lg px-3 py-2 text-sm transition-all hover:scale-105 active:scale-95"
+                  style={isHasteAttack
+                    ? { backgroundColor: '#78350f', border: '2px solid #C9A84C', color: '#C9A84C', boxShadow: '0 0 8px #C9A84C44' }
+                    : { backgroundColor: 'var(--danger)', border: `2px solid ${accentColor}66`, color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.4)' }}
+                  title={isHasteAttack ? '⚡ Haste extra attack' : `Attack ${i + 1} — click to roll`}
+                >
+                  {isHasteAttack ? <>⚡ {formatMod(bonus)}</> : formatMod(bonus)}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="w-px mx-3 self-stretch" style={{ backgroundColor: 'var(--bg-border)' }} />
+
+        {/* Damage button */}
+        <div className="flex-shrink-0">
+          <div className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-faint)' }}>Damage</div>
+          <button onClick={rollDamage}
+            className="font-bold rounded-lg px-4 py-2 text-sm transition-all hover:scale-105 active:scale-95"
+            style={{ backgroundColor: '#78350f', border: '2px solid #f59e0b66', color: '#fbbf24', boxShadow: '0 2px 6px rgba(0,0,0,0.4)' }}
+            title="Click to roll damage"
+          >
+            🎲 {weapon.dmgDice}{totalDmgBonus !== 0 ? formatMod(totalDmgBonus) : ''}
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div className="w-px mx-3 self-stretch" style={{ backgroundColor: 'var(--bg-border)' }} />
+
+        {/* Temp buffs */}
+        <div className="flex-shrink-0">
+          <div className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#f59e0b' }}>Temp Buff</div>
+          <div className="flex gap-1.5">
+            <div className="flex flex-col items-center gap-0.5">
+              <input type="number" value={weapon.tempAttack ?? 0} onChange={e => onUpdate('tempAttack', Number(e.target.value))}
+                className="w-12 h-9 text-center rounded-lg font-bold text-sm focus:outline-none"
+                style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid #f59e0b66', color: '#fbbf24' }}
+                title="Temporary attack bonus" />
+              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>atk</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <input type="number" value={weapon.tempDamage ?? 0} onChange={e => onUpdate('tempDamage', Number(e.target.value))}
+                className="w-12 h-9 text-center rounded-lg font-bold text-sm focus:outline-none"
+                style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid #f59e0b66', color: '#fbbf24' }}
+                title="Temporary damage bonus" />
+              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>dmg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Breakdown bar ── */}
+      <div className="px-4 pb-2 flex flex-wrap gap-2 text-xs items-center" style={{ borderTop: '1px solid var(--bg-border)' }}>
+        <span className="pt-2" style={{ color: 'var(--text-faint)' }}>BAB {formatMod(bab ?? 0)}</span>
+        <span className="pt-2" style={{ color: 'var(--text-faint)' }}>+ {weapon.ability.toUpperCase()} {formatMod(abilityModForAttack)}</span>
+        <span className="pt-2 flex items-center gap-1" style={{ color: 'var(--text-faint)' }}>
           + Misc
-          <input
-            type="number"
-            value={weapon.attackMisc ?? 0}
-            onChange={e => onUpdate('attackMisc', Number(e.target.value))}
+          <input type="number" value={weapon.attackMisc ?? 0} onChange={e => onUpdate('attackMisc', Number(e.target.value))}
             className="w-12 text-center rounded focus:outline-none text-xs"
-            style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${(weapon.attackMisc ?? 0) < 0 ? '#ef4444' : (weapon.attackMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--bg-border)'}`, color: (weapon.attackMisc ?? 0) < 0 ? '#ef4444' : (weapon.attackMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--text-faint)' }}
-            title="Misc attack modifier — use negative for penalties (Power Attack, TWF, etc.)"
-          />
+            style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${(weapon.attackMisc ?? 0) !== 0 ? accentColor : 'var(--bg-border)'}`, color: (weapon.attackMisc ?? 0) < 0 ? '#ef4444' : (weapon.attackMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--text-faint)' }}
+            title="Misc attack modifier" />
         </span>
-        {weapon.tempAttack !== 0 && <span className="text-yellow-500">+ Buff {formatMod(weapon.tempAttack)}</span>}
-        <span className="text-pf-border">|</span>
-        <span>Dmg {weapon.dmgAbility.toUpperCase()} {formatMod(abilityModForDmg)}</span>
-        <span className="flex items-center gap-1">
+        {weapon.tempAttack !== 0 && <span className="pt-2" style={{ color: '#f59e0b' }}>+ Buff {formatMod(weapon.tempAttack)}</span>}
+        <span className="pt-2" style={{ color: 'var(--bg-border)' }}>│</span>
+        <span className="pt-2" style={{ color: 'var(--text-faint)' }}>Dmg {weapon.dmgAbility.toUpperCase()} {formatMod(abilityModForDmg)}</span>
+        <span className="pt-2 flex items-center gap-1" style={{ color: 'var(--text-faint)' }}>
           + Misc
-          <input
-            type="number"
-            value={weapon.dmgMisc ?? 0}
-            onChange={e => onUpdate('dmgMisc', Number(e.target.value))}
+          <input type="number" value={weapon.dmgMisc ?? 0} onChange={e => onUpdate('dmgMisc', Number(e.target.value))}
             className="w-12 text-center rounded focus:outline-none text-xs"
-            style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${(weapon.dmgMisc ?? 0) < 0 ? '#ef4444' : (weapon.dmgMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--bg-border)'}`, color: (weapon.dmgMisc ?? 0) < 0 ? '#ef4444' : (weapon.dmgMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--text-faint)' }}
-            title="Misc damage modifier — use negative for penalties"
-          />
+            style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${(weapon.dmgMisc ?? 0) !== 0 ? '#f59e0b' : 'var(--bg-border)'}`, color: (weapon.dmgMisc ?? 0) < 0 ? '#ef4444' : (weapon.dmgMisc ?? 0) > 0 ? '#fbbf24' : 'var(--text-faint)' }}
+            title="Misc damage modifier" />
         </span>
-        {weapon.tempDamage !== 0 && <span className="text-yellow-500">+ Buff {formatMod(weapon.tempDamage)}</span>}
+        {weapon.tempDamage !== 0 && <span className="pt-2" style={{ color: '#f59e0b' }}>+ Buff {formatMod(weapon.tempDamage)}</span>}
       </div>
 
       {/* ── Presets ── */}
