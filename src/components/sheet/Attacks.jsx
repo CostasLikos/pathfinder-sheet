@@ -218,9 +218,9 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
       <div className="flex items-stretch gap-0 px-4 py-3">
 
         {/* Attack buttons */}
-        <div className="flex-1 min-w-0">
-          <div className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-faint)' }}>Attack Roll</div>
-          <div className="flex gap-1.5 flex-wrap">
+        <div className="flex-1 min-w-0 flex flex-col">
+          <div className="text-xs font-bold uppercase tracking-widest mb-1.5 text-center" style={{ color: accentColor }}>⚔ Attack Roll</div>
+          <div className="flex gap-1.5 flex-wrap flex-1 items-center">
             {attackBonuses.map((bonus, i) => {
               const isHasteAttack = hasteActive && i === attackBonuses.length - 1
               return (
@@ -242,14 +242,14 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
         <div className="w-px mx-3 self-stretch" style={{ backgroundColor: 'var(--bg-border)' }} />
 
         {/* Damage button */}
-        <div className="flex-shrink-0">
-          <div className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-faint)' }}>Damage</div>
+        <div className="flex-shrink-0 flex flex-col items-center">
+          <div className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#fbbf24' }}>🎲 Damage</div>
           <button onClick={rollDamage}
-            className="font-bold rounded-lg px-4 py-2 text-sm transition-all hover:scale-105 active:scale-95"
+            className="font-bold rounded-lg px-4 py-2 text-sm transition-all hover:scale-105 active:scale-95 flex-1 flex items-center"
             style={{ backgroundColor: '#78350f', border: '2px solid #f59e0b66', color: '#fbbf24', boxShadow: '0 2px 6px rgba(0,0,0,0.4)' }}
             title="Click to roll damage"
           >
-            🎲 {weapon.dmgDice}{totalDmgBonus !== 0 ? formatMod(totalDmgBonus) : ''}
+            {weapon.dmgDice}{totalDmgBonus !== 0 ? formatMod(totalDmgBonus) : ''}
           </button>
         </div>
 
@@ -257,49 +257,55 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
         <div className="w-px mx-3 self-stretch" style={{ backgroundColor: 'var(--bg-border)' }} />
 
         {/* Temp buffs */}
-        <div className="flex-shrink-0">
-          <div className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#f59e0b' }}>Temp Buff</div>
-          <div className="flex gap-1.5">
+        <div className="flex-shrink-0 flex flex-col items-center">
+          <div className="text-xs font-bold uppercase tracking-widest mb-1.5 text-center" style={{ color: '#f59e0b' }}>✨ Temp</div>
+          <div className="flex gap-1.5 flex-1 items-center">
             <div className="flex flex-col items-center gap-0.5">
               <input type="number" value={weapon.tempAttack ?? 0} onChange={e => onUpdate('tempAttack', Number(e.target.value))}
                 className="w-12 h-9 text-center rounded-lg font-bold text-sm focus:outline-none"
                 style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid #f59e0b66', color: '#fbbf24' }}
                 title="Temporary attack bonus" />
-              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>atk</span>
+              <span className="text-xs" style={{ color: '#f59e0b88' }}>atk</span>
             </div>
             <div className="flex flex-col items-center gap-0.5">
               <input type="number" value={weapon.tempDamage ?? 0} onChange={e => onUpdate('tempDamage', Number(e.target.value))}
                 className="w-12 h-9 text-center rounded-lg font-bold text-sm focus:outline-none"
                 style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid #f59e0b66', color: '#fbbf24' }}
                 title="Temporary damage bonus" />
-              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>dmg</span>
+              <span className="text-xs" style={{ color: '#f59e0b88' }}>dmg</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* ── Breakdown bar ── */}
-      <div className="px-4 pb-2 flex flex-wrap gap-2 text-xs items-center" style={{ borderTop: '1px solid var(--bg-border)' }}>
-        <span className="pt-2" style={{ color: 'var(--text-faint)' }}>BAB {formatMod(bab ?? 0)}</span>
-        <span className="pt-2" style={{ color: 'var(--text-faint)' }}>+ {weapon.ability.toUpperCase()} {formatMod(abilityModForAttack)}</span>
-        <span className="pt-2 flex items-center gap-1" style={{ color: 'var(--text-faint)' }}>
+      <div className="px-4 py-2 flex flex-wrap gap-x-3 gap-y-1 text-xs items-center" style={{ borderTop: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-surface)' }}>
+        {/* Attack side */}
+        <span style={{ color: accentColor, fontWeight: 'bold' }}>ATK</span>
+        <span style={{ color: 'var(--text-dim)' }}>BAB <span style={{ color: accentColor }}>{formatMod(bab ?? 0)}</span></span>
+        <span style={{ color: 'var(--text-dim)' }}>+ {weapon.ability.toUpperCase()} <span style={{ color: accentColor }}>{formatMod(abilityModForAttack)}</span></span>
+        <span className="flex items-center gap-1" style={{ color: 'var(--text-dim)' }}>
           + Misc
           <input type="number" value={weapon.attackMisc ?? 0} onChange={e => onUpdate('attackMisc', Number(e.target.value))}
             className="w-12 text-center rounded focus:outline-none text-xs"
-            style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${(weapon.attackMisc ?? 0) !== 0 ? accentColor : 'var(--bg-border)'}`, color: (weapon.attackMisc ?? 0) < 0 ? '#ef4444' : (weapon.attackMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--text-faint)' }}
+            style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid ${(weapon.attackMisc ?? 0) !== 0 ? accentColor : 'var(--bg-border)'}`, color: (weapon.attackMisc ?? 0) < 0 ? '#ef4444' : (weapon.attackMisc ?? 0) > 0 ? 'var(--positive)' : 'var(--text-faint)' }}
             title="Misc attack modifier" />
         </span>
-        {weapon.tempAttack !== 0 && <span className="pt-2" style={{ color: '#f59e0b' }}>+ Buff {formatMod(weapon.tempAttack)}</span>}
-        <span className="pt-2" style={{ color: 'var(--bg-border)' }}>│</span>
-        <span className="pt-2" style={{ color: 'var(--text-faint)' }}>Dmg {weapon.dmgAbility.toUpperCase()} {formatMod(abilityModForDmg)}</span>
-        <span className="pt-2 flex items-center gap-1" style={{ color: 'var(--text-faint)' }}>
+        {weapon.tempAttack !== 0 && <span style={{ color: '#fbbf24' }}>+ Buff <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>{formatMod(weapon.tempAttack)}</span></span>}
+
+        <span style={{ color: 'var(--bg-border)' }}>│</span>
+
+        {/* Damage side */}
+        <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>DMG</span>
+        <span style={{ color: 'var(--text-dim)' }}>{weapon.dmgAbility.toUpperCase()} <span style={{ color: '#fbbf24' }}>{formatMod(abilityModForDmg)}</span></span>
+        <span className="flex items-center gap-1" style={{ color: 'var(--text-dim)' }}>
           + Misc
           <input type="number" value={weapon.dmgMisc ?? 0} onChange={e => onUpdate('dmgMisc', Number(e.target.value))}
             className="w-12 text-center rounded focus:outline-none text-xs"
-            style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${(weapon.dmgMisc ?? 0) !== 0 ? '#f59e0b' : 'var(--bg-border)'}`, color: (weapon.dmgMisc ?? 0) < 0 ? '#ef4444' : (weapon.dmgMisc ?? 0) > 0 ? '#fbbf24' : 'var(--text-faint)' }}
+            style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid ${(weapon.dmgMisc ?? 0) !== 0 ? '#f59e0b' : 'var(--bg-border)'}`, color: (weapon.dmgMisc ?? 0) < 0 ? '#ef4444' : (weapon.dmgMisc ?? 0) > 0 ? '#fbbf24' : 'var(--text-faint)' }}
             title="Misc damage modifier" />
         </span>
-        {weapon.tempDamage !== 0 && <span className="pt-2" style={{ color: '#f59e0b' }}>+ Buff {formatMod(weapon.tempDamage)}</span>}
+        {weapon.tempDamage !== 0 && <span style={{ color: '#fbbf24' }}>+ Buff <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>{formatMod(weapon.tempDamage)}</span></span>}
       </div>
 
       {/* ── Presets ── */}
