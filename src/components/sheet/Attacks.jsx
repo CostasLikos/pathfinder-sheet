@@ -227,11 +227,11 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
                 <button key={i} onClick={() => rollAttack(bonus)}
                   className="font-bold rounded-lg px-4 py-2 text-sm transition-all hover:scale-105 active:scale-95"
                   style={isHasteAttack
-                    ? { backgroundColor: '#78350f', border: '2px solid #C9A84C', color: '#C9A84C', boxShadow: '0 0 8px #C9A84C44' }
+                    ? { backgroundColor: '#0c2a4a', border: '2px solid #38bdf8', color: '#38bdf8', boxShadow: '0 0 10px #38bdf844' }
                     : { backgroundColor: 'var(--danger)', border: `2px solid ${accentColor}66`, color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.4)' }}
                   title={isHasteAttack ? '⚡ Haste extra attack' : `Attack ${i + 1} — click to roll`}
                 >
-                  {isHasteAttack ? <>⚡ {formatMod(bonus)}</> : formatMod(bonus)}
+                  {isHasteAttack ? <>🔵⚡ {formatMod(bonus)}</> : formatMod(bonus)}
                 </button>
               )
             })}
