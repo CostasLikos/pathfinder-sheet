@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { SKILLS, DEFAULT_SKILL_ORDER, abilityMod, formatMod } from '../../data/pf1eData'
 import PinButton from '../PinButton'
 
@@ -25,6 +25,7 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
   const dragKey = useRef(null)
   const dragOverKey = useRef(null)
   const [dragging, setDragging] = useState(null)
+  const [tooltip, setTooltip] = useState(null)
 
   // ── helpers ──────────────────────────────────────────────────────────────
 
@@ -263,20 +264,62 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                     />
                   </td>
 
-                  {/* Total */}
+                  {/* Total + breakdown tooltip */}
                   <td className="py-1.5 text-center">
-                    <span
-                      className="font-bold text-sm px-2 py-0.5 rounded"
-                      style={{
-                        backgroundColor: 'var(--bg-darker)',
-                        color: total >= 10 ? 'var(--positive)' : total >= 5 ? 'var(--accent)' : 'var(--text)',
-                        border: `1px solid ${acp > 0 ? 'var(--warning)' : 'var(--bg-border)'}`,
-                      }}
-                      title={acp > 0 ? `Armor Check Penalty −${acp}${ACP_DOUBLE.has(skill.key) ? ' (×2 for Swim)' : ''} applied` : ''}
-                    >
-                      {formatMod(total)}
-                      {acp > 0 && <span className="ml-0.5 text-xs" style={{ color: 'var(--warning)' }}>⚔</span>}
-                    </span>
+                    <div className="relative inline-block"
+                      onMouseEnter={() => setTooltip(skill.key)}
+                      onMouseLeave={() => setTooltip(null)}>
+                      <span
+                        className="font-bold text-sm px-2 py-0.5 rounded cursor-help"
+                        style={{
+                          backgroundColor: 'var(--bg-darker)',
+                          color: total >= 10 ? 'var(--positive)' : total >= 5 ? 'var(--accent)' : 'var(--text)',
+                          border: `1px solid ${acp > 0 ? 'var(--warning)' : 'var(--bg-border)'}`,
+                        }}
+                      >
+                        {formatMod(total)}
+                        {acp > 0 && <span className="ml-0.5 text-xs" style={{ color: 'var(--warning)' }}>⚔</span>}
+                      </span>
+
+                      {tooltip === skill.key && (() => {
+                        const ranks    = s.ranks ?? 0
+                        const misc     = s.misc ?? 0
+                        const csBonus  = isCS && ranks > 0 ? 3 : 0
+                        const skillBuff = skill.key === 'stealth' ? (buffTotals.stealth ?? 0) : 0
+                        const buffStr  = buffTotals[ab] ?? 0
+                        const lines = [
+                          { label: `${ab.toUpperCase()} mod`, value: mod, always: true },
+                          { label: 'Ranks', value: ranks, always: true },
+                          { label: 'Class Skill', value: csBonus, always: false },
+                          { label: 'Misc', value: misc, always: false },
+                          acp !== 0 && { label: 'Armor Penalty', value: -acp, always: false },
+                          buffStr !== 0 && { label: `${ab.toUpperCase()} buff`, value: Math.floor(buffStr / 2), always: false },
+                          skillBuff !== 0 && { label: 'Size (Stealth)', value: skillBuff, always: false },
+                        ].filter(Boolean).filter(l => l.always || l.value !== 0)
+                        return (
+                          <div className="absolute z-50 right-0 bottom-full mb-2 w-44 rounded-lg p-2 shadow-2xl pointer-events-none"
+                            style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)', color: 'var(--text-dim)', fontSize: '0.72rem', minWidth: '160px' }}>
+                            <div className="font-bold mb-1.5 text-xs uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+                              {getDisplayName(skill)} Breakdown
+                            </div>
+                            {lines.map(({ label, value }) => (
+                              <div key={label} className="flex justify-between items-center py-0.5" style={{ borderBottom: '1px solid var(--bg-border)' }}>
+                                <span style={{ color: 'var(--text-faint)' }}>{label}</span>
+                                <span className="font-bold" style={{ color: value > 0 ? 'var(--positive)' : value < 0 ? '#ef4444' : 'var(--text-dim)' }}>
+                                  {value > 0 ? `+${value}` : value}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="flex justify-between items-center pt-1 mt-0.5 font-bold text-xs">
+                              <span style={{ color: 'var(--text-dim)' }}>Total</span>
+                              <span style={{ color: total >= 10 ? 'var(--positive)' : total >= 5 ? 'var(--accent)' : 'var(--text)' }}>
+                                {formatMod(total)}
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      })()}
+                    </div>
                   </td>
                 </tr>
               )
