@@ -46,7 +46,9 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
     const misc  = s.misc ?? 0
     const csBonus = isCS && ranks > 0 ? 3 : 0
     const acp   = ACP_SKILLS.has(skill.key) ? (ACP_DOUBLE.has(skill.key) ? armorCheckPenalty * 2 : armorCheckPenalty) : 0
-    const skillBuff = skill.key === 'stealth' ? (buffTotals.stealth ?? 0) : 0
+    const skillBuff = skill.key === 'stealth' ? (buffTotals.stealth ?? 0)
+                    : skill.key === 'fly'     ? (buffTotals.fly ?? 0)
+                    : 0
     return ranks + mod + csBonus + misc - acp + skillBuff
   }
 
@@ -285,7 +287,10 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                         const ranks    = s.ranks ?? 0
                         const misc     = s.misc ?? 0
                         const csBonus  = isCS && ranks > 0 ? 3 : 0
-                        const skillBuff = skill.key === 'stealth' ? (buffTotals.stealth ?? 0) : 0
+                        const skillBuff = skill.key === 'stealth' ? (buffTotals.stealth ?? 0)
+                                        : skill.key === 'fly'     ? (buffTotals.fly ?? 0)
+                                        : 0
+                        const skillBuffLabel = skill.key === 'fly' ? 'Size (Fly)' : 'Size (Stealth)'
                         const buffStr  = buffTotals[ab] ?? 0
                         const lines = [
                           { label: `${ab.toUpperCase()} mod`, value: mod, always: true },
@@ -294,7 +299,7 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                           { label: 'Misc', value: misc, always: false },
                           acp !== 0 && { label: 'Armor Penalty', value: -acp, always: false },
                           buffStr !== 0 && { label: `${ab.toUpperCase()} buff`, value: Math.floor(buffStr / 2), always: false },
-                          skillBuff !== 0 && { label: 'Size (Stealth)', value: skillBuff, always: false },
+                          skillBuff !== 0 && { label: skillBuffLabel, value: skillBuff, always: false },
                         ].filter(Boolean).filter(l => l.always || l.value !== 0)
                         return (
                           <div className={`absolute z-50 right-0 w-44 rounded-lg p-2 shadow-2xl pointer-events-none ${rowIndex < 3 ? 'top-full mt-2' : 'bottom-full mb-2'}`}

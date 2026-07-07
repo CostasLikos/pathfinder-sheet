@@ -336,12 +336,62 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary 
   )
 }
 
+// ─── Drawback Editor ──────────────────────────────────────────────────────────
+
+function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
+  const [adding, setAdding] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newDesc, setNewDesc] = useState('')
+
+  const handleAdd = () => {
+    if (!newName.trim()) return
+    onAdd({ name: newName.trim(), desc: newDesc.trim() })
+    setNewName(''); setNewDesc(''); setAdding(false)
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <h3 className="font-bold text-sm flex items-center gap-1.5" style={{ color: '#ef4444' }}>
+          ⚠ Drawbacks ({drawbacks.length})
+        </h3>
+        <button onClick={() => setAdding(true)} className="text-xs px-2 py-0.5 rounded"
+          style={{ color: '#ef4444', border: '1px solid #ef4444' }}>
+          + Add
+        </button>
+      </div>
+
+      {adding && (
+        <div className="rounded-lg p-3 mb-2 space-y-2" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid #ef4444' }}>
+          <input autoFocus type="text" placeholder="Drawback name (e.g. Dependent)" value={newName}
+            onChange={e => setNewName(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
+            className="input-field text-sm" />
+          <textarea placeholder="Description, penalty, effect... (optional)" value={newDesc}
+            onChange={e => setNewDesc(e.target.value)} rows={2} className="input-field text-sm resize-none" />
+          <div className="flex gap-2">
+            <button onClick={handleAdd} className="btn-primary text-xs py-1 px-3">Save</button>
+            <button onClick={() => setAdding(false)} className="btn-secondary text-xs py-1 px-3">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-1">
+        {drawbacks.map((item, i) => (
+          <ItemRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} isEven={i % 2 === 0} />
+        ))}
+        {drawbacks.length === 0 && <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>No drawbacks</div>}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export default function FeatsTraits({ character, onChange, pins = {}, onTogglePin }) {
   const [showLibrary, setShowLibrary] = useState(false)
   const [featSearch, setFeatSearch] = useState('')
-  const { feats = [], traits = [] } = character
+  const { feats = [], traits = [], drawbacks = [] } = character
 
   const addFeat    = (item) => onChange('feats', [...feats, item])
   const removeFeat = (i)    => onChange('feats', feats.filter((_, idx) => idx !== i))
@@ -350,6 +400,10 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
   const addTrait    = (item) => onChange('traits', [...traits, item])
   const removeTrait = (i)    => onChange('traits', traits.filter((_, idx) => idx !== i))
   const updateTrait = (i, f, v) => onChange('traits', traits.map((x, idx) => idx === i ? { ...x, [f]: v } : x))
+
+  const addDrawback    = (item) => onChange('drawbacks', [...drawbacks, item])
+  const removeDrawback = (i)    => onChange('drawbacks', drawbacks.filter((_, idx) => idx !== i))
+  const updateDrawback = (i, f, v) => onChange('drawbacks', drawbacks.map((x, idx) => idx === i ? { ...x, [f]: v } : x))
 
   return (
     <div className="space-y-4">
@@ -389,6 +443,14 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
               onUpdate={updateTrait}
               onRemove={removeTrait}
               placeholder="Trait name (e.g. Reactionary)"
+            />
+          </div>
+          <div style={{ borderTop: '1px solid #ef444433', paddingTop: '1.5rem' }}>
+            <DrawbackEditor
+              drawbacks={drawbacks}
+              onAdd={addDrawback}
+              onUpdate={updateDrawback}
+              onRemove={removeDrawback}
             />
           </div>
         </div>

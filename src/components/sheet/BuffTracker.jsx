@@ -749,6 +749,7 @@ function SizeChanger({ character, onChange, pinned, onTogglePin }) {
         str:         sd.str,
         dex:         sd.dex,
         stealth:     sData.stealth,
+        fly:         sData.fly,
       },
     }
     onChange('statBuffs', [...without, sizeBuff])
