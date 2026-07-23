@@ -58,10 +58,12 @@ export default function CharacterPage() {
         pendingRanks:      (existing.pendingRanks ?? 0) + newRanks,
         pendingFeat:       (existing.pendingFeat  ?? false) || hasFeat,
         pendingAbilityBump:(existing.pendingAbilityBump ?? false) || hasBump,
+        pendingHP:         true,
         forLevel:          curLevel,
         rankBaseline:      totalRanksSpent,
         featBaselineCount: (character.feats ?? []).length,
         abilityBaseline:   { ...character.abilities },
+        hpBaseline:        character.hp?.max ?? 0,
       }})
     }
     prevLevelRef.current = curLevel
@@ -98,6 +100,15 @@ export default function CharacterPage() {
       updateCharacter(id, { levelUpState: { ...state, pendingAbilityBump: false } })
     }
   }, [character?.abilities])
+
+  useEffect(() => {
+    if (!character) return
+    const state = character.levelUpState
+    if (!state?.pendingHP) return
+    if ((character.hp?.max ?? 0) > (state.hpBaseline ?? 0)) {
+      updateCharacter(id, { levelUpState: { ...state, pendingHP: false } })
+    }
+  }, [character?.hp?.max])
 
   const handleTabChange = (tab) => {
     setActiveTab(tab)
@@ -147,6 +158,7 @@ export default function CharacterPage() {
   const lusRanks  = (lus.pendingRanks ?? 0) > 0
   const lusFeat   = lus.pendingFeat   ?? false
   const lusBump   = lus.pendingAbilityBump ?? false
+  const lusHP     = lus.pendingHP ?? false
 
   // ── Pin helpers ────────────────────────────────────────────────────────────
   const pins = character.pins ?? { sections: [], skills: [] }
@@ -266,6 +278,7 @@ export default function CharacterPage() {
               computedBAB={computedBAB}
               computedSaveBases={computedSaveBases}
               favoredHP={favoredHP}
+              pendingHP={lusHP}
             />
           </>
         )}

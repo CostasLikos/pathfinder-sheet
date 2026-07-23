@@ -18,7 +18,7 @@ function useFlash(value) {
   return elRef
 }
 
-export default function CombatStats({ character, onChange, pins = {}, onTogglePin, buffTotals = {}, armorProps = {}, computedBAB = null, computedSaveBases = null, favoredHP = 0 }) {
+export default function CombatStats({ character, onChange, pins = {}, onTogglePin, buffTotals = {}, armorProps = {}, computedBAB = null, computedSaveBases = null, favoredHP = 0, pendingHP = false }) {
   const { abilities, hp, ac, saves, bab, initiative, speed } = character
   const bt = buffTotals
   // Use computed class-derived values when available, fall back to manual
@@ -99,9 +99,10 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
               <SpinnerInput value={hp.current ?? 0} onChange={v => onChange('hp', { ...hp, current: v })} width="w-14" />
             </div>
             <span className="text-xl mt-4" style={{ color: 'var(--text-faint)' }}>/</span>
-            <div className="text-center">
-              <div className="text-xs mb-1 flex items-center justify-center gap-1" style={{ color: 'var(--text-dim)' }}>
-                Max <BuffBadge val={bt.hp ?? 0} />
+            <div className={`text-center rounded-lg p-1 ${pendingHP ? 'level-up-pulse' : ''}`}
+              style={pendingHP ? { border: '2px solid #22c55e88' } : {}}>
+              <div className="text-xs mb-1 flex items-center justify-center gap-1" style={{ color: pendingHP ? '#22c55e' : 'var(--text-dim)' }}>
+                Max {pendingHP && <span className="font-bold">⬆ +HP?</span>} <BuffBadge val={bt.hp ?? 0} />
               </div>
               <SpinnerInput value={hp.max ?? 0} onChange={v => onChange('hp', { ...hp, max: Math.max(0, v) })} min={0} width="w-14" />
               {(bt.hp ?? 0) !== 0 && (

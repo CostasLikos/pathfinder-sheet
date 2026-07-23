@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from 'react'
-import { SKILLS, DEFAULT_SKILL_ORDER, abilityMod, formatMod } from '../../data/pf1eData'
+import { SKILLS, DEFAULT_SKILL_ORDER, abilityMod, formatMod, computeClassTotals } from '../../data/pf1eData'
 import PinButton from '../PinButton'
 
 const ABILITY_OPTIONS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -14,6 +14,11 @@ const ACP_DOUBLE = new Set(['swim'])
 
 export default function Skills({ character, onChange, pinnedSkills = [], onToggleSkillPin, armorCheckPenalty = 0, buffTotals = {}, pendingRanks = 0 }) {
   const { abilities, skills = {} } = character
+  const hasClasses = (character.classes ?? []).length > 0
+  const maxRanks = hasClasses
+    ? computeClassTotals(character.classes).totalLevel
+    : (character.level || 1)
+
   // effective ability scores after buffs/debuffs
   const effAbilities = Object.fromEntries(
     Object.keys(abilities).map(k => [k, (abilities[k] ?? 10) + (buffTotals[k] ?? 0)])
@@ -253,12 +258,12 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                         type="number"
                         value={s.ranks ?? 0}
                         min={0}
-                        onChange={e => updateSkill(skill.key, 'ranks', Math.max(0, Number(e.target.value)))}
+                        onChange={e => updateSkill(skill.key, 'ranks', Math.max(0, Math.min(maxRanks, Number(e.target.value))))}
                         className="w-10 text-center text-sm font-bold focus:outline-none rounded"
                         style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text)', border: '1px solid var(--bg-border)' }}
                       />
                       <button
-                        onClick={() => updateSkill(skill.key, 'ranks', (s.ranks ?? 0) + 1)}
+                        onClick={() => updateSkill(skill.key, 'ranks', Math.min(maxRanks, (s.ranks ?? 0) + 1))}
                         className="w-4 h-4 flex items-center justify-center rounded text-xs"
                         style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}
                       >+</button>
