@@ -92,22 +92,35 @@ function PerformancePicker({ value, onChange, options = BARD_PERFORMANCES }) {
 // ─── XP Tracker ──────────────────────────────────────────────────────────────
 function XPTracker({ character, onChange, pinned, onTogglePin }) {
   const xp    = character.experience ?? 0
-  const level = character.level ?? 1
   const track = character.xpTrack ?? 'medium'
+  const [adding, setAdding] = useState('')
+
+  // Compute level from XP — always reactive to current XP total
+  const thresholds = getThresholds(track)
+  const xpLevel = thresholds.reduce((lvl, threshold, i) => xp >= threshold ? i + 1 : lvl, 1)
+
+  // If character has explicit classes set, show their total instead; otherwise use xpLevel
+  const hasClasses = (character.classes ?? []).length > 0
+  const classLevel = hasClasses ? computeClassTotals(character.classes).totalLevel : null
+  const level = classLevel ?? xpLevel
+
+  // Sync xpLevel back to character.level when it changes (only when no classes)
+  useEffect(() => {
+    if (!hasClasses && xpLevel !== (character.level ?? 1)) {
+      onChange('level', xpLevel)
+    }
+  }, [xpLevel, hasClasses])
+
   const next  = xpToNext(level, track)
   const curr  = xpForLevel(level, track)
   const pct   = next ? Math.min(100, ((xp - curr) / (next - curr)) * 100) : 100
-  const levelUp = next !== null && xp >= next
-  const [adding, setAdding] = useState('')
+  const levelUp = !hasClasses && next !== null && xp >= next
 
   const applyXP = () => {
     const n = parseInt(adding)
     if (!isNaN(n)) onChange('experience', Math.max(0, xp + n))
     setAdding('')
   }
-
-  // Build the full level table for this track
-  const thresholds = getThresholds(track)
 
   return (
     <div className="card">
