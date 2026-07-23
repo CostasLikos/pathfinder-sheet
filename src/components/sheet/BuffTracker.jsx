@@ -114,7 +114,8 @@ function XPTracker({ character, onChange, pinned, onTogglePin }) {
   const next  = xpToNext(level, track)
   const curr  = xpForLevel(level, track)
   const pct   = next ? Math.min(100, ((xp - curr) / (next - curr)) * 100) : 100
-  const levelUp = !hasClasses && next !== null && xp >= next
+  // Level up when XP meets the threshold for the next level (works with or without classes)
+  const levelUp = next !== null && xp >= next
 
   const applyXP = () => {
     const n = parseInt(adding)
@@ -131,9 +132,9 @@ function XPTracker({ character, onChange, pinned, onTogglePin }) {
         </div>
         <div className="flex items-center gap-2">
           {levelUp && (
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full font-bold text-sm animate-pulse"
-              style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>
-              🎉 Level Up! → Level {level + 1}
+            <div className="level-up-pulse flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-sm"
+              style={{ backgroundColor: '#22c55e22', color: '#22c55e', border: '2px solid #22c55e88', letterSpacing: '0.05em' }}>
+              ⬆ LEVEL UP! → {level + 1}
             </div>
           )}
           {/* Track selector */}
