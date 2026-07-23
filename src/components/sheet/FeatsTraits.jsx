@@ -271,7 +271,7 @@ function ListEditor({ title, items, onAdd, onUpdate, onRemove, placeholder, show
 
 // ─── Feat List Editor (with search-aware index remapping) ─────────────────────
 
-function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary }) {
+function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary, pendingFeat = false }) {
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
@@ -293,12 +293,22 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary 
   return (
     <div>
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-        <h3 className="font-bold text-sm" style={{ color: 'var(--accent)' }}>{title}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-bold text-sm" style={{ color: 'var(--accent)' }}>{title}</h3>
+          {pendingFeat && (
+            <span className="level-up-pulse text-xs px-1.5 py-0.5 rounded-full"
+              style={{ backgroundColor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e66' }}>
+              feat!
+            </span>
+          )}
+        </div>
         <div className="flex gap-2">
           <button onClick={showLibrary} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--accent)', border: '1px solid var(--accent)', backgroundColor: 'var(--accent-dim)' }}>
             ⚔️ Library
           </button>
-          <button onClick={() => setAdding(true)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--accent)', border: '1px solid var(--accent)' }}>
+          <button onClick={() => setAdding(true)}
+            className={`text-xs px-2 py-0.5 rounded ${pendingFeat ? 'level-up-pulse' : ''}`}
+            style={{ color: pendingFeat ? '#22c55e' : 'var(--accent)', border: `1px solid ${pendingFeat ? '#22c55e' : 'var(--accent)'}` }}>
             + Add
           </button>
         </div>
@@ -388,7 +398,7 @@ function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
-export default function FeatsTraits({ character, onChange, pins = {}, onTogglePin }) {
+export default function FeatsTraits({ character, onChange, pins = {}, onTogglePin, pendingFeat = false }) {
   const [showLibrary, setShowLibrary] = useState(false)
   const [featSearch, setFeatSearch] = useState('')
   const { feats = [], traits = [], drawbacks = [] } = character
@@ -434,6 +444,7 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
             onUpdate={updateFeat}
             onRemove={removeFeat}
             showLibrary={() => setShowLibrary(true)}
+            pendingFeat={pendingFeat}
           />
           <div style={{ borderTop: '1px solid var(--bg-border)', paddingTop: '1.5rem' }}>
             <ListEditor

@@ -164,6 +164,15 @@ body {
   animation: condition-blink 2.4s ease-in-out infinite;
 }
 
+/* ── Level-up pulse ─────────────────────────────────────── */
+@keyframes level-up-pulse {
+  0%, 100% { box-shadow: 0 0 4px 1px #22c55e55; }
+  50%       { box-shadow: 0 0 14px 4px #22c55eaa; }
+}
+.level-up-pulse {
+  animation: level-up-pulse 1.6s ease-in-out infinite;
+}
+
 /* ── Stat flash ──────────────────────────────────────────── */
 @keyframes flash-positive {
   0%   { background-color: rgba(34,197,94,0.35); }

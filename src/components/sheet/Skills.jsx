@@ -12,7 +12,7 @@ const ACP_SKILLS = new Set(['acrobatics','climb','escapeArtist','fly','ride','sl
 // Swim gets double ACP
 const ACP_DOUBLE = new Set(['swim'])
 
-export default function Skills({ character, onChange, pinnedSkills = [], onToggleSkillPin, armorCheckPenalty = 0, buffTotals = {} }) {
+export default function Skills({ character, onChange, pinnedSkills = [], onToggleSkillPin, armorCheckPenalty = 0, buffTotals = {}, pendingRanks = 0 }) {
   const { abilities, skills = {} } = character
   // effective ability scores after buffs/debuffs
   const effAbilities = Object.fromEntries(
@@ -100,9 +100,17 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
     <div className="card">
       <div className="flex items-center justify-between mb-1">
         <h2 className="section-title mb-0">Skills</h2>
-        <span className="text-xs" style={{ color: 'var(--text-faint)' }}>
-          {totalRanks} ranks spent · drag ☰ to reorder
-        </span>
+        <div className="flex items-center gap-2">
+          {pendingRanks > 0 && (
+            <span className="level-up-pulse text-xs font-bold px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e66' }}>
+              +{pendingRanks} rank{pendingRanks > 1 ? 's' : ''} to spend
+            </span>
+          )}
+          <span className="text-xs" style={{ color: 'var(--text-faint)' }}>
+            {totalRanks} spent · drag ☰ to reorder
+          </span>
+        </div>
       </div>
       <div className="text-xs mb-3" style={{ color: 'var(--text-faint)' }}>
         SC = Class Skill (+3 when trained) · * = Trained Only
@@ -118,7 +126,9 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
               <th className="text-left pb-2">Skill</th>
               <th className="text-center pb-2 w-10">Ab</th>
               <th className="text-center pb-2 w-10">Mod</th>
-              <th className="text-center pb-2 w-16">Ranks</th>
+              <th className={`text-center pb-2 w-16 ${pendingRanks > 0 ? 'level-up-pulse' : ''}`}
+                style={pendingRanks > 0 ? { color: '#22c55e', borderRadius: '4px' } : {}}>
+                Ranks</th>
               <th className="text-center pb-2 w-12">Misc</th>
               <th className="text-center pb-2 w-14">Total</th>
             </tr>

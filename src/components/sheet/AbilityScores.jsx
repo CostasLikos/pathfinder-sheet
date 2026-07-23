@@ -129,11 +129,19 @@ function AbilityCard({ ab, base, buff, onChange }) {
   )
 }
 
-export default function AbilityScores({ abilities, onChange, pinned, onTogglePin, buffTotals = {} }) {
+export default function AbilityScores({ abilities, onChange, pinned, onTogglePin, buffTotals = {}, pendingBump = false }) {
   return (
     <div className="card">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="section-title mb-0">Ability Scores</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="section-title mb-0">Ability Scores</h2>
+          {pendingBump && (
+            <span className="level-up-pulse text-xs px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e66' }}>
+              +1 to spend!
+            </span>
+          )}
+        </div>
         {onTogglePin && <PinButton pinned={pinned} onToggle={onTogglePin} />}
       </div>
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3">

@@ -30,6 +30,75 @@ export default function CharacterPage() {
   useEffect(() => { touchCharacter(id) }, [id])
   const spinTimer = useRef(null)
 
+  // ── Level-up detection ─────────────────────────────────────────────────────
+  const prevLevelRef = useRef(null)
+  const prevSklRef   = useRef(null)
+
+  useEffect(() => {
+    if (!character) return
+    const hasC = (character.classes ?? []).length > 0
+    const ct   = computeClassTotals(character.classes ?? [])
+    const curLevel = hasC ? ct.totalLevel : (character.level || 1)
+    const curSkl   = hasC ? ct.totalSkillsPerLevel : null
+
+    if (prevLevelRef.current !== null && curLevel > prevLevelRef.current) {
+      const levelsGained = curLevel - prevLevelRef.current
+      const intMod = Math.max(0, Math.floor(((character.abilities?.int ?? 10) - 10) / 2))
+      let newRanks
+      if (hasC && prevSklRef.current !== null && curSkl !== null) {
+        newRanks = Math.max(levelsGained, (curSkl - prevSklRef.current) + intMod * levelsGained)
+      } else {
+        newRanks = Math.max(levelsGained, (2 + intMod) * levelsGained)
+      }
+      const hasFeat  = [1,3,5,7,9,11,13,15,17,19].some(l => l > prevLevelRef.current && l <= curLevel)
+      const hasBump  = [4,8,12,16,20].some(l => l > prevLevelRef.current && l <= curLevel)
+      const existing = character.levelUpState ?? {}
+      const totalRanksSpent = Object.values(character.skills ?? {}).reduce((s,v) => s+(v.ranks??0), 0)
+      updateCharacter(id, { levelUpState: {
+        pendingRanks:      (existing.pendingRanks ?? 0) + newRanks,
+        pendingFeat:       (existing.pendingFeat  ?? false) || hasFeat,
+        pendingAbilityBump:(existing.pendingAbilityBump ?? false) || hasBump,
+        forLevel:          curLevel,
+        rankBaseline:      totalRanksSpent,
+        featBaselineCount: (character.feats ?? []).length,
+        abilityBaseline:   { ...character.abilities },
+      }})
+    }
+    prevLevelRef.current = curLevel
+    prevSklRef.current   = curSkl
+  }, [character?.classes, character?.level])
+
+  // ── Auto-clear level-up pending items when user acts ──────────────────────
+  useEffect(() => {
+    if (!character) return
+    const state = character.levelUpState
+    if (!state || state.pendingRanks <= 0) return
+    const spent = Object.values(character.skills ?? {}).reduce((s,v) => s+(v.ranks??0), 0)
+    if (spent >= (state.rankBaseline ?? 0) + state.pendingRanks) {
+      updateCharacter(id, { levelUpState: { ...state, pendingRanks: 0 } })
+    }
+  }, [character?.skills])
+
+  useEffect(() => {
+    if (!character) return
+    const state = character.levelUpState
+    if (!state?.pendingFeat) return
+    if ((character.feats ?? []).length > (state.featBaselineCount ?? 0)) {
+      updateCharacter(id, { levelUpState: { ...state, pendingFeat: false } })
+    }
+  }, [character?.feats?.length])
+
+  useEffect(() => {
+    if (!character) return
+    const state = character.levelUpState
+    if (!state?.pendingAbilityBump || !state.abilityBaseline) return
+    const bumped = Object.keys(character.abilities ?? {}).some(k =>
+      (character.abilities[k] ?? 10) > (state.abilityBaseline[k] ?? 10))
+    if (bumped) {
+      updateCharacter(id, { levelUpState: { ...state, pendingAbilityBump: false } })
+    }
+  }, [character?.abilities])
+
   const handleTabChange = (tab) => {
     setActiveTab(tab)
     setSigilSpinning(true)
@@ -72,6 +141,12 @@ export default function CharacterPage() {
   const computedBAB       = hasClasses ? classTotals.totalBAB : null
   const computedSaveBases = hasClasses ? { fort: classTotals.totalFort, ref: classTotals.totalRef, will: classTotals.totalWill } : null
   const favoredHP         = classTotals.totalFavoredHP
+
+  // ── Level-up state shorthand ───────────────────────────────────────────────
+  const lus = character.levelUpState ?? {}
+  const lusRanks  = (lus.pendingRanks ?? 0) > 0
+  const lusFeat   = lus.pendingFeat   ?? false
+  const lusBump   = lus.pendingAbilityBump ?? false
 
   // ── Pin helpers ────────────────────────────────────────────────────────────
   const pins = character.pins ?? { sections: [], skills: [] }
@@ -137,19 +212,29 @@ export default function CharacterPage() {
         </div>
 
         <div className="tab-bar px-4 flex gap-0 overflow-x-auto">
-          {TABS.map(tab => (
-            <button key={tab} onClick={() => handleTabChange(tab)} className={`tab-btn ${activeTab === tab ? 'active' : ''}`}>
-              {tab}
-              {tab === 'Buff & Debuff' && character.class?.toLowerCase() === 'bard' && (
-                <span className="ml-1 text-xs px-1 rounded" style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)' }}>🎶</span>
-              )}
-              {tab === '📌 Dashboard' && (pins.sections?.length > 0 || pins.skills?.length > 0) && (
-                <span className="ml-1 text-xs px-1 rounded" style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)' }}>
-                  {(pins.sections?.length ?? 0) + (pins.skills?.length > 0 ? 1 : 0)}
-                </span>
-              )}
-            </button>
-          ))}
+          {TABS.map(tab => {
+            const tabPulse = (tab === 'Overview' && lusBump) ||
+                             (tab === 'Skills' && lusRanks) ||
+                             (tab === 'Feats & Traits' && lusFeat)
+            return (
+              <button key={tab} onClick={() => handleTabChange(tab)}
+                className={`tab-btn ${activeTab === tab ? 'active' : ''} ${tabPulse && activeTab !== tab ? 'level-up-pulse' : ''}`}
+                style={tabPulse && activeTab !== tab ? { '--blink-color': '#22c55e' } : {}}>
+                {tab}
+                {tab === 'Buff & Debuff' && character.class?.toLowerCase() === 'bard' && (
+                  <span className="ml-1 text-xs px-1 rounded" style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)' }}>🎶</span>
+                )}
+                {tab === '📌 Dashboard' && (pins.sections?.length > 0 || pins.skills?.length > 0) && (
+                  <span className="ml-1 text-xs px-1 rounded" style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)' }}>
+                    {(pins.sections?.length ?? 0) + (pins.skills?.length > 0 ? 1 : 0)}
+                  </span>
+                )}
+                {tabPulse && (
+                  <span className="ml-1 text-xs px-1 rounded-full" style={{ backgroundColor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e66' }}>!</span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -169,6 +254,7 @@ export default function CharacterPage() {
               pinned={pinnedMap.abilities}
               onTogglePin={() => toggleSectionPin('abilities')}
               buffTotals={buffTotals}
+              pendingBump={lusBump}
             />
             <CombatStats
               character={character}
@@ -212,6 +298,7 @@ export default function CharacterPage() {
             onToggleSkillPin={toggleSkillPin}
             armorCheckPenalty={character.armorProps?.checkPenalty ?? 0}
             buffTotals={buffTotals}
+            pendingRanks={lus.pendingRanks ?? 0}
           />
         )}
 
@@ -220,6 +307,7 @@ export default function CharacterPage() {
             character={character}
             onChange={update}
             pins={pinnedMap}
+            pendingFeat={lusFeat}
             onTogglePin={toggleSectionPin}
           />
         )}

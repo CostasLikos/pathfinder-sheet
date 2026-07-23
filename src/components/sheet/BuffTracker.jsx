@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import PinButton from '../PinButton'
-import { CONDITIONS } from '../../data/pf1eData'
+import { CONDITIONS, computeClassTotals, CLASS_DATA } from '../../data/pf1eData'
 
 const DURATION_UNITS = ['rounds', 'minutes', 'hours', 'permanent']
 const BUFF_SOURCES   = ['Spell', 'Feat', 'Item', 'Class Ability', 'Racial', 'Other']
@@ -683,6 +683,151 @@ function DurationBuffRow({ buff, onUpdate, onRemove }) {
   )
 }
 
+// ─── Level Up Helper ──────────────────────────────────────────────────────────
+
+const FEAT_LEVELS = new Set([1,3,5,7,9,11,13,15,17,19])
+const BUMP_LEVELS = new Set([4,8,12,16,20])
+
+function LevelUpHelper({ character, onChange }) {
+  const [open, setOpen] = useState(false)
+  const hasClasses = (character.classes ?? []).length > 0
+  const ct         = computeClassTotals(character.classes ?? [])
+  const totalLevel = hasClasses ? ct.totalLevel : (character.level || 1)
+  const lus        = character.levelUpState ?? {}
+  const hasPending = (lus.pendingRanks ?? 0) > 0 || lus.pendingFeat || lus.pendingAbilityBump
+
+  const nextFeat = [...FEAT_LEVELS].find(l => l > totalLevel)
+  const nextBump = [...BUMP_LEVELS].find(l => l > totalLevel)
+
+  const clearItem = (key, val = false) =>
+    onChange('levelUpState', { ...lus, [key]: val })
+
+  return (
+    <div className="card">
+      <button onClick={() => setOpen(x => !x)} className="w-full flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="font-bold" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>📈 Level Up Helper</span>
+          {hasPending && (
+            <span className="level-up-pulse text-xs px-1.5 py-0.5 rounded-full"
+              style={{ backgroundColor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e66' }}>
+              {[
+                (lus.pendingRanks ?? 0) > 0 && 'ranks',
+                lus.pendingFeat && 'feat',
+                lus.pendingAbilityBump && '+1 stat',
+              ].filter(Boolean).join(' · ')} pending
+            </span>
+          )}
+        </div>
+        <span style={{ color: 'var(--text-faint)' }}>{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div className="mt-4 space-y-4">
+          {/* Current level info */}
+          <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+            <span className="font-semibold" style={{ color: 'var(--text)' }}>Level {totalLevel}</span>
+            {hasClasses && (
+              <span className="ml-1">
+                — {character.classes.map(c => `${c.className} ${c.level}`).join(' / ')}
+              </span>
+            )}
+          </div>
+
+          {/* Pending tasks */}
+          {hasPending ? (
+            <div className="space-y-2">
+              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#22c55e' }}>
+                ✨ Pending at Level {lus.forLevel ?? totalLevel}
+              </div>
+
+              {(lus.pendingRanks ?? 0) > 0 && (
+                <div className="flex items-center justify-between p-2 rounded-lg"
+                  style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid #22c55e44' }}>
+                  <div>
+                    <div className="text-xs font-semibold" style={{ color: 'var(--text)' }}>
+                      📚 Skill Ranks — {lus.pendingRanks} remaining
+                    </div>
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
+                      Go to the Skills tab and add ranks
+                    </div>
+                  </div>
+                  <button onClick={() => clearItem('pendingRanks', 0)}
+                    className="text-xs px-2 py-1 rounded flex-shrink-0"
+                    style={{ color: 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>
+                    ✓ Done
+                  </button>
+                </div>
+              )}
+
+              {lus.pendingFeat && (
+                <div className="flex items-center justify-between p-2 rounded-lg"
+                  style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid #22c55e44' }}>
+                  <div>
+                    <div className="text-xs font-semibold" style={{ color: 'var(--text)' }}>
+                      ⚔️ New Feat available
+                    </div>
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
+                      Go to Feats & Traits tab and add it
+                    </div>
+                  </div>
+                  <button onClick={() => clearItem('pendingFeat')}
+                    className="text-xs px-2 py-1 rounded flex-shrink-0"
+                    style={{ color: 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>
+                    ✓ Done
+                  </button>
+                </div>
+              )}
+
+              {lus.pendingAbilityBump && (
+                <div className="flex items-center justify-between p-2 rounded-lg"
+                  style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid #22c55e44' }}>
+                  <div>
+                    <div className="text-xs font-semibold" style={{ color: 'var(--text)' }}>
+                      💪 Ability Score +1
+                    </div>
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
+                      Go to Overview and raise one ability score
+                    </div>
+                  </div>
+                  <button onClick={() => clearItem('pendingAbilityBump')}
+                    className="text-xs px-2 py-1 rounded flex-shrink-0"
+                    style={{ color: 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>
+                    ✓ Done
+                  </button>
+                </div>
+              )}
+
+              <button
+                onClick={() => onChange('levelUpState', { ...lus, pendingRanks: 0, pendingFeat: false, pendingAbilityBump: false })}
+                className="w-full text-xs py-1 rounded"
+                style={{ color: 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>
+                Dismiss all
+              </button>
+            </div>
+          ) : (
+            <div className="text-xs py-2" style={{ color: 'var(--text-faint)' }}>
+              Nothing pending — all caught up!
+            </div>
+          )}
+
+          {/* Coming up */}
+          {(nextFeat || nextBump) && (
+            <div style={{ borderTop: '1px solid var(--bg-border)', paddingTop: '0.75rem' }}>
+              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-dim)' }}>
+                Coming Up
+              </div>
+              <div className="space-y-1 text-xs" style={{ color: 'var(--text-faint)' }}>
+                {nextFeat && <div>⚔️ Next feat — Level {nextFeat}</div>}
+                {nextBump && <div>💪 Ability score bump — Level {nextBump}</div>}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Size Changer ─────────────────────────────────────────────────────────────
 const SIZE_CATEGORIES = [
   { id: 'fine',        label: 'Fine',        icon: '🔬', space: '½ ft',  reach: '0',    acAtk: +8,  cmb: -8, stealth: +16, fly: +8  },
@@ -878,6 +1023,8 @@ export default function BuffTracker({ character, onChange, pins = {}, onTogglePi
 
   return (
     <div className="space-y-4">
+
+      <LevelUpHelper character={character} onChange={onChange} />
 
       <SizeChanger character={character} onChange={onChange}
         pinned={pins.size} onTogglePin={onTogglePin ? () => onTogglePin('size') : undefined} />
