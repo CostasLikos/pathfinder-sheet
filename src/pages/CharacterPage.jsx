@@ -41,7 +41,10 @@ export default function CharacterPage() {
     const curLevel = hasC ? ct.totalLevel : (character.level || 1)
     const curSkl   = hasC ? ct.totalSkillsPerLevel : null
 
-    if (prevLevelRef.current !== null && curLevel > prevLevelRef.current) {
+    if (prevLevelRef.current !== null && curLevel < prevLevelRef.current) {
+      // Level decreased — wipe all pending level-up state
+      updateCharacter(id, { levelUpState: {} })
+    } else if (prevLevelRef.current !== null && curLevel > prevLevelRef.current) {
       const levelsGained = curLevel - prevLevelRef.current
       const intMod = Math.max(0, Math.floor(((character.abilities?.int ?? 10) - 10) / 2))
       let newRanks
