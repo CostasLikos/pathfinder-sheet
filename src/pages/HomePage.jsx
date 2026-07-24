@@ -419,6 +419,11 @@ export default function HomePage() {
                     <p className="text-xs mt-1" style={{ color: 'var(--text-dim)' }}>
                       {char.race || 'Unknown Race'} {char.alignment ? `• ${char.alignment}` : ''}
                     </p>
+                    {(char.campaign?.name || char.campaign?.customName) && (
+                      <p className="text-xs mt-1 truncate" style={{ color: 'var(--accent)', opacity: 0.75 }}>
+                        🗺 {char.campaign.name || char.campaign.customName}
+                      </p>
+                    )}
                   </div>
                 </div>
 
