@@ -88,61 +88,90 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
 
       {/* ── HP ── */}
       <div className="card">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="section-title mb-0">Hit Points</h2>
           {onTogglePin && <PinButton pinned={pins.hp} onToggle={() => onTogglePin('hp')} />}
         </div>
-        <div className="flex items-center gap-6 flex-wrap">
-          <div className="flex items-start gap-3">
-            <div className="text-center">
-              <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>Current</div>
-              <SpinnerInput value={hp.current ?? 0} onChange={v => onChange('hp', { ...hp, current: v })} width="w-14" />
-            </div>
-            <span className="text-xl mt-4" style={{ color: 'var(--text-faint)' }}>/</span>
-            <div className={`text-center rounded-lg p-1 ${pendingHP ? 'level-up-pulse' : ''}`}
-              style={pendingHP ? { border: '2px solid #22c55e88' } : {}}>
-              <div className="text-xs mb-1 flex items-center justify-center gap-1" style={{ color: pendingHP ? '#22c55e' : 'var(--text-dim)' }}>
-                Max {pendingHP && <span className="font-bold">⬆ +HP?</span>} <BuffBadge val={bt.hp ?? 0} />
+
+        <div className="flex flex-col gap-4">
+
+          {/* Top row: Current / Max / Nonlethal */}
+          <div className="flex items-end gap-4 flex-wrap">
+
+            {/* Current HP — hero number */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: hpColor }}>
+                ❤ Current
               </div>
-              <SpinnerInput value={hp.max ?? 0} onChange={v => onChange('hp', { ...hp, max: Math.max(0, v) })} min={0} width="w-14" />
+              <SpinnerInput value={hp.current ?? 0} onChange={v => onChange('hp', { ...hp, current: v })} width="w-16" />
+            </div>
+
+            <div className="text-2xl font-bold pb-1" style={{ color: 'var(--text-faint)' }}>/</div>
+
+            {/* Max HP */}
+            <div className={`flex flex-col items-center gap-1 rounded-lg px-2 py-1 ${pendingHP ? 'level-up-pulse' : ''}`}
+              style={pendingHP ? { border: '2px solid #22c55e88' } : {}}>
+              <div className="text-xs font-bold uppercase tracking-widest flex items-center gap-1"
+                style={{ color: pendingHP ? '#22c55e' : 'var(--text-dim)' }}>
+                Max
+                {pendingHP && <span style={{ color: '#22c55e' }}>⬆ +HP?</span>}
+                <BuffBadge val={bt.hp ?? 0} />
+              </div>
+              <SpinnerInput value={hp.max ?? 0} onChange={v => onChange('hp', { ...hp, max: Math.max(0, v) })} min={0} width="w-16" />
               {(bt.hp ?? 0) !== 0 && (
-                <div className="text-sm font-bold mt-1" style={{ color: 'var(--positive)' }}>{effectiveMaxHP}</div>
+                <div className="text-xs font-bold" style={{ color: 'var(--positive)' }}>={effectiveMaxHP}</div>
               )}
             </div>
-            <div className="text-center">
-              <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>Nonlethal</div>
-              <SpinnerInput value={hp.nonlethal ?? 0} onChange={v => onChange('hp', { ...hp, nonlethal: Math.max(0, v) })} min={0} width="w-14" />
+
+            {/* Divider */}
+            <div style={{ width: 1, height: 48, backgroundColor: 'var(--bg-border)', flexShrink: 0 }} />
+
+            {/* Nonlethal */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: (hp.nonlethal ?? 0) > 0 ? '#f59e0b' : 'var(--text-faint)' }}>
+                Nonlethal
+              </div>
+              <SpinnerInput value={hp.nonlethal ?? 0} onChange={v => onChange('hp', { ...hp, nonlethal: Math.max(0, v) })} min={0} width="w-16" />
+              {(hp.nonlethal ?? 0) > 0 && (
+                <div className="text-xs" style={{ color: '#f59e0b' }}>−{hp.nonlethal} effective</div>
+              )}
             </div>
           </div>
-          <div className="flex-1 min-w-32" ref={hpFlashRef} style={{ borderRadius: '4px' }}>
-            {effectiveMaxHP > 0 && (
-              <>
-                <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-border)' }}>
-                  <div
-                    className={`h-full rounded-full transition-all${hpDanger ? ' hp-bar-danger' : ''}`}
-                    style={{ width: `${Math.max(0, hpPct)}%`, backgroundColor: hpColor }}
-                  />
-                </div>
-                <div className="text-xs mt-1 text-center font-bold" style={{ color: hpColor }}>
-                  {hp.current}/{effectiveMaxHP} HP{hpDanger && !hpStatus ? ' ⚠' : ''}
-                </div>
-              </>
-            )}
-            {hpStatus && (
-              <div
-                className="mt-2 text-center font-bold tracking-widest"
-                style={{
-                  color: hpStatusColor,
-                  fontSize: hpStatus === 'DEAD' ? '1.4rem' : '1rem',
-                  textShadow: `0 0 12px ${hpStatusColor}`,
-                  animation: hpStatus === 'DEAD' ? 'hp-danger 1.4s ease-in-out infinite' : hpStatus === 'Unconscious' ? 'hp-danger 2.5s ease-in-out infinite' : 'none',
-                  letterSpacing: hpStatus === 'DEAD' ? '0.25em' : '0.1em',
-                }}
-              >
-                {hpStatus}
+
+          {/* Progress bar */}
+          {effectiveMaxHP > 0 && (
+            <div ref={hpFlashRef} style={{ borderRadius: 4 }}>
+              <div className="rounded-full overflow-hidden" style={{ height: '18px', backgroundColor: 'var(--bg-border)' }}>
+                <div
+                  className={`h-full rounded-full transition-all duration-500${hpDanger ? ' hp-bar-danger' : ''}`}
+                  style={{ width: `${Math.max(0, hpPct)}%`, backgroundColor: hpColor }}
+                />
               </div>
-            )}
-          </div>
+              <div className="flex justify-between text-xs mt-1 font-bold">
+                <span style={{ color: hpColor }}>
+                  {hp.current}/{effectiveMaxHP} HP{hpDanger && !hpStatus ? ' ⚠' : ''}
+                </span>
+                <span style={{ color: 'var(--text-faint)' }}>{Math.round(hpPct)}%</span>
+              </div>
+            </div>
+          )}
+
+          {/* Status banner */}
+          {hpStatus && (
+            <div className="text-center font-bold tracking-widest rounded-lg py-2"
+              style={{
+                color: hpStatusColor,
+                fontSize: hpStatus === 'DEAD' ? '1.4rem' : '1rem',
+                textShadow: `0 0 16px ${hpStatusColor}`,
+                backgroundColor: `${hpStatusColor}11`,
+                border: `1px solid ${hpStatusColor}44`,
+                animation: hpStatus === 'DEAD' ? 'hp-danger 1.4s ease-in-out infinite' : hpStatus === 'Unconscious' ? 'hp-danger 2.5s ease-in-out infinite' : 'none',
+                letterSpacing: hpStatus === 'DEAD' ? '0.25em' : '0.1em',
+              }}>
+              {hpStatus}
+            </div>
+          )}
+
         </div>
       </div>
 
