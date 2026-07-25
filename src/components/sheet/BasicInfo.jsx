@@ -238,8 +238,7 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           {field('Experience', 'experience', 'number')}
           {field('Age', 'age', 'number')}
           {field('Gender', 'gender')}
-          {field('Size', 'size', 'text', ['Fine','Diminutive','Tiny','Small','Medium','Large','Huge','Gargantuan','Colossal'])}
-          {field('Height', 'height')}
+{field('Height', 'height')}
           {field('Weight', 'weight')}
           {field('Background', 'background')}
           <div className="col-span-2 md:col-span-3 flex flex-col gap-1">

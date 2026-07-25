@@ -96,18 +96,18 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
         <div className="flex flex-col gap-4">
 
           {/* Current / Max row */}
-          <div className="flex items-center justify-center gap-4 flex-wrap">
+          <div className="flex items-center justify-center gap-3 flex-wrap">
 
             {/* Current HP */}
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-1.5">
               <div className="text-xs font-bold uppercase tracking-widest" style={{ color: hpColor }}>❤ Current</div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) - 1 })}
                   className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
-                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent' }}
-                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
-                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
+                  style={{ border: `1px solid ${hpColor}66`, color: hpColor, backgroundColor: 'transparent' }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = hpColor; e.currentTarget.style.color = 'var(--bg-darker)' }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = hpColor }}
                 >−</button>
                 <input
                   type="number"
@@ -115,29 +115,32 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
                   onChange={e => onChange('hp', { ...hp, current: Number(e.target.value) })}
                   className="text-center font-bold focus:outline-none rounded-lg"
                   style={{
-                    width: '80px', height: '60px', fontSize: '2.4rem',
+                    width: '76px', height: '60px', fontSize: '2.2rem',
                     fontFamily: 'Georgia, serif',
                     color: hpColor,
-                    backgroundColor: 'var(--bg-darker)',
-                    border: `2px solid ${hpColor}55`,
+                    backgroundColor: `${hpColor}12`,
+                    border: `2px solid ${hpColor}88`,
                   }}
                   onFocus={e => e.target.style.borderColor = hpColor}
-                  onBlur={e => e.target.style.borderColor = `${hpColor}55`}
+                  onBlur={e => e.target.style.borderColor = `${hpColor}88`}
                 />
                 <button
                   onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) + 1 })}
                   className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
-                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent' }}
-                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
-                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
+                  style={{ border: `1px solid ${hpColor}66`, color: hpColor, backgroundColor: 'transparent' }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = hpColor; e.currentTarget.style.color = 'var(--bg-darker)' }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = hpColor }}
                 >+</button>
               </div>
             </div>
 
-            <div className="text-4xl font-bold" style={{ color: 'var(--text-faint)', marginBottom: '4px' }}>/</div>
+            {/* Separator */}
+            <div className="flex flex-col items-center" style={{ paddingTop: '22px' }}>
+              <span className="text-3xl font-bold" style={{ color: 'var(--text-faint)', lineHeight: 1 }}>/</span>
+            </div>
 
             {/* Max HP */}
-            <div className={`flex flex-col items-center gap-2 rounded-xl px-3 py-2 ${pendingHP ? 'level-up-pulse' : ''}`}
+            <div className={`flex flex-col items-center gap-1.5 rounded-xl px-2 py-1 ${pendingHP ? 'level-up-pulse' : ''}`}
               style={pendingHP ? { border: '2px solid #22c55e88' } : {}}>
               <div className="text-xs font-bold uppercase tracking-widest flex items-center gap-1"
                 style={{ color: pendingHP ? '#22c55e' : 'var(--text-dim)' }}>
@@ -146,8 +149,8 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onChange('hp', { ...hp, max: Math.max(0, (hp.max ?? 0) - 1) })}
-                  className="w-7 h-7 rounded-full flex items-center justify-center font-bold transition-all"
-                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent', fontSize: '1rem' }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
+                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent' }}
                   onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
                 >−</button>
@@ -157,19 +160,19 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
                   onChange={e => onChange('hp', { ...hp, max: Math.max(0, Number(e.target.value)) })}
                   className="text-center font-bold focus:outline-none rounded-lg"
                   style={{
-                    width: '68px', height: '50px', fontSize: '1.9rem',
+                    width: '76px', height: '60px', fontSize: '2.2rem',
                     fontFamily: 'Georgia, serif',
                     color: 'var(--text)',
                     backgroundColor: 'var(--bg-darker)',
-                    border: '2px solid var(--bg-border)',
+                    border: '2px dashed var(--bg-border)',
                   }}
                   onFocus={e => e.target.style.borderColor = 'var(--accent)'}
                   onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
                 />
                 <button
                   onClick={() => onChange('hp', { ...hp, max: (hp.max ?? 0) + 1 })}
-                  className="w-7 h-7 rounded-full flex items-center justify-center font-bold transition-all"
-                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent', fontSize: '1rem' }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
+                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent' }}
                   onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
                 >+</button>
