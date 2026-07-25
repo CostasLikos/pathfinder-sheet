@@ -346,6 +346,80 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
   )
 }
 
+// ─── Drawback Row (with hover tooltip for description) ────────────────────────
+
+function DrawbackRow({ item, index, onUpdate, onRemove, isEven }) {
+  const [hovered, setHovered] = useState(false)
+  const [editing, setEditing] = useState(false)
+
+  return (
+    <div className="relative rounded-lg overflow-visible"
+      style={{ backgroundColor: isEven ? 'var(--bg-darker)' : 'var(--bg-surface)', border: '1px solid #ef444433' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setEditing(false) }}>
+
+      <div className="flex items-center gap-2 px-3 py-2">
+        <input
+          type="text"
+          value={item.name ?? ''}
+          onChange={e => onUpdate(index, 'name', e.target.value)}
+          placeholder="Drawback name..."
+          className="flex-1 bg-transparent font-semibold text-sm focus:outline-none min-w-0"
+          style={{ color: '#ef4444', borderBottom: '1px solid transparent' }}
+          onFocus={e => e.target.style.borderBottomColor = '#ef4444'}
+          onBlur={e => e.target.style.borderBottomColor = 'transparent'}
+        />
+        {item.desc && (
+          <span className="text-xs flex-shrink-0" style={{ color: '#ef444488' }} title="Has description">📝</span>
+        )}
+        <button onClick={() => setEditing(x => !x)}
+          className="text-xs px-2 py-0.5 rounded flex-shrink-0"
+          style={{ color: '#ef4444', border: '1px solid #ef444466' }}>
+          {editing ? '▲' : 'edit'}
+        </button>
+        <button onClick={() => onRemove(index)}
+          className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+          style={{ color: '#ef4444', border: '1px solid #ef444433' }}>✕</button>
+      </div>
+
+      {/* Hover tooltip showing description */}
+      {hovered && !editing && item.desc && (
+        <div className="absolute z-50 rounded-lg p-3 text-xs pointer-events-none"
+          style={{
+            top: 'calc(100% + 6px)', left: 0, minWidth: '220px', maxWidth: '320px',
+            backgroundColor: 'var(--bg-darker)',
+            border: '1px solid #ef444466',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+            color: 'var(--text-dim)',
+          }}>
+          <div style={{ position: 'absolute', top: '-6px', left: '16px', width: 0, height: 0,
+            borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
+            borderBottom: '6px solid #ef444466' }} />
+          <div className="font-bold mb-1" style={{ color: '#ef4444' }}>{item.name}</div>
+          <div className="whitespace-pre-line leading-relaxed">{item.desc}</div>
+        </div>
+      )}
+
+      {/* Inline edit for description */}
+      {editing && (
+        <div className="px-3 pb-3" style={{ borderTop: '1px solid #ef444433' }}>
+          <textarea
+            autoFocus
+            value={item.desc ?? ''}
+            onChange={e => onUpdate(index, 'desc', e.target.value)}
+            placeholder="Description, penalty, effect..."
+            rows={3}
+            className="w-full text-xs resize-none focus:outline-none mt-2 p-2 rounded"
+            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid #ef444433' }}
+            onFocus={e => e.target.style.borderColor = '#ef4444'}
+            onBlur={e => e.target.style.borderColor = '#ef444433'}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Drawback Editor ──────────────────────────────────────────────────────────
 
 function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
@@ -388,7 +462,7 @@ function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
 
       <div className="space-y-1">
         {drawbacks.map((item, i) => (
-          <ItemRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} isEven={i % 2 === 0} />
+          <DrawbackRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} isEven={i % 2 === 0} />
         ))}
         {drawbacks.length === 0 && <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>No drawbacks</div>}
       </div>

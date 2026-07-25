@@ -99,6 +99,24 @@ function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored 
               style={{ backgroundColor:'var(--bg-border)', color: favTotal < maxFav ? 'var(--text)' : 'var(--text-faint)' }}
             >+</button>
           </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs" style={{ color: 'var(--text-dim)' }}>Racial:</span>
+            <input
+              type="text"
+              value={entry.favoredRacial ?? ''}
+              onChange={e => set('favoredRacial', e.target.value)}
+              placeholder="e.g. +1 to Bardic Knowledge"
+              className="text-xs focus:outline-none rounded px-2 py-0.5"
+              style={{
+                backgroundColor: 'var(--bg-darker)',
+                color: 'var(--text)',
+                border: '1px solid var(--bg-border)',
+                minWidth: '160px',
+              }}
+              onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+              onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
+            />
+          </div>
           {remaining < 0 && (
             <span className="text-xs" style={{ color: '#ef4444' }}>Over budget by {Math.abs(remaining)}</span>
           )}
@@ -217,7 +235,6 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           {field('Height', 'height')}
           {field('Weight', 'weight')}
           {field('Background', 'background')}
-          {field('Drawbacks', 'drawbacks')}
           <div className="col-span-2 md:col-span-3 flex flex-col gap-1">
             <label className="text-gray-400 text-xs uppercase tracking-wide">Languages</label>
             <input type="text" value={character.languages||''} onChange={e => onChange('languages', e.target.value)} placeholder="e.g. Common, Elvish, Draconic..." className="input-field text-sm" />
