@@ -14,7 +14,7 @@ const emptyClassEntry = (isFavored = false) => ({
 function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored }) {
   const data  = CLASS_DATA[entry.className] ?? CLASS_DATA.Other
   const lvl   = entry.level ?? 1
-  const favTotal = (entry.favoredHP ?? 0) + (entry.favoredSkill ?? 0)
+  const favTotal = (entry.favoredHP ?? 0) + (entry.favoredSkill ?? 0) + (entry.favoredRacialCount ?? 0)
   const maxFav   = entry.isFavored ? lvl : 0
   const remaining = maxFav - favTotal
 
@@ -101,17 +101,24 @@ function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored 
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs" style={{ color: 'var(--text-dim)' }}>Racial:</span>
+            <button onClick={() => set('favoredRacialCount', Math.max(0, (entry.favoredRacialCount??0)-1))} className="w-5 h-5 flex items-center justify-center rounded text-xs" style={{ backgroundColor:'var(--bg-border)', color:'var(--text)' }}>−</button>
+            <span className="text-sm font-bold w-5 text-center" style={{ color: (entry.favoredRacialCount??0)>0 ? 'var(--positive)' : 'var(--text-faint)' }}>{entry.favoredRacialCount??0}</span>
+            <button
+              onClick={() => favTotal < maxFav && set('favoredRacialCount', (entry.favoredRacialCount??0)+1)}
+              className="w-5 h-5 flex items-center justify-center rounded text-xs"
+              style={{ backgroundColor:'var(--bg-border)', color: favTotal < maxFav ? 'var(--text)' : 'var(--text-faint)' }}
+            >+</button>
             <input
               type="text"
               value={entry.favoredRacial ?? ''}
               onChange={e => set('favoredRacial', e.target.value)}
-              placeholder="e.g. +1 to Bardic Knowledge"
+              placeholder="describe the racial bonus..."
               className="text-xs focus:outline-none rounded px-2 py-0.5"
               style={{
                 backgroundColor: 'var(--bg-darker)',
                 color: 'var(--text)',
                 border: '1px solid var(--bg-border)',
-                minWidth: '160px',
+                minWidth: '220px',
               }}
               onFocus={e => e.target.style.borderColor = 'var(--accent)'}
               onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
