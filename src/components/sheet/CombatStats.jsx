@@ -95,45 +95,87 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
 
         <div className="flex flex-col gap-4">
 
-          {/* Top row: Current / Max / Nonlethal */}
-          <div className="flex items-end gap-4 flex-wrap">
+          {/* Current / Max row */}
+          <div className="flex items-center justify-center gap-4 flex-wrap">
 
-            {/* Current HP — hero number */}
-            <div className="flex flex-col items-center gap-1">
-              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: hpColor }}>
-                ❤ Current
+            {/* Current HP */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: hpColor }}>❤ Current</div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) - 1 })}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
+                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent' }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
+                >−</button>
+                <input
+                  type="number"
+                  value={hp.current ?? 0}
+                  onChange={e => onChange('hp', { ...hp, current: Number(e.target.value) })}
+                  className="text-center font-bold focus:outline-none rounded-lg"
+                  style={{
+                    width: '80px', height: '60px', fontSize: '2.4rem',
+                    fontFamily: 'Georgia, serif',
+                    color: hpColor,
+                    backgroundColor: 'var(--bg-darker)',
+                    border: `2px solid ${hpColor}55`,
+                  }}
+                  onFocus={e => e.target.style.borderColor = hpColor}
+                  onBlur={e => e.target.style.borderColor = `${hpColor}55`}
+                />
+                <button
+                  onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) + 1 })}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
+                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent' }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
+                >+</button>
               </div>
-              <SpinnerInput value={hp.current ?? 0} onChange={v => onChange('hp', { ...hp, current: v })} width="w-16" />
             </div>
 
-            <div className="text-2xl font-bold pb-1" style={{ color: 'var(--text-faint)' }}>/</div>
+            <div className="text-4xl font-bold" style={{ color: 'var(--text-faint)', marginBottom: '4px' }}>/</div>
 
             {/* Max HP */}
-            <div className={`flex flex-col items-center gap-1 rounded-lg px-2 py-1 ${pendingHP ? 'level-up-pulse' : ''}`}
+            <div className={`flex flex-col items-center gap-2 rounded-xl px-3 py-2 ${pendingHP ? 'level-up-pulse' : ''}`}
               style={pendingHP ? { border: '2px solid #22c55e88' } : {}}>
               <div className="text-xs font-bold uppercase tracking-widest flex items-center gap-1"
                 style={{ color: pendingHP ? '#22c55e' : 'var(--text-dim)' }}>
-                Max
-                {pendingHP && <span style={{ color: '#22c55e' }}>⬆ +HP?</span>}
-                <BuffBadge val={bt.hp ?? 0} />
+                Max {pendingHP && <span>⬆ +HP?</span>} <BuffBadge val={bt.hp ?? 0} />
               </div>
-              <SpinnerInput value={hp.max ?? 0} onChange={v => onChange('hp', { ...hp, max: Math.max(0, v) })} min={0} width="w-16" />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onChange('hp', { ...hp, max: Math.max(0, (hp.max ?? 0) - 1) })}
+                  className="w-7 h-7 rounded-full flex items-center justify-center font-bold transition-all"
+                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent', fontSize: '1rem' }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
+                >−</button>
+                <input
+                  type="number"
+                  value={hp.max ?? 0}
+                  onChange={e => onChange('hp', { ...hp, max: Math.max(0, Number(e.target.value)) })}
+                  className="text-center font-bold focus:outline-none rounded-lg"
+                  style={{
+                    width: '68px', height: '50px', fontSize: '1.9rem',
+                    fontFamily: 'Georgia, serif',
+                    color: 'var(--text)',
+                    backgroundColor: 'var(--bg-darker)',
+                    border: '2px solid var(--bg-border)',
+                  }}
+                  onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+                  onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
+                />
+                <button
+                  onClick={() => onChange('hp', { ...hp, max: (hp.max ?? 0) + 1 })}
+                  className="w-7 h-7 rounded-full flex items-center justify-center font-bold transition-all"
+                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent', fontSize: '1rem' }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
+                >+</button>
+              </div>
               {(bt.hp ?? 0) !== 0 && (
-                <div className="text-xs font-bold" style={{ color: 'var(--positive)' }}>={effectiveMaxHP}</div>
-              )}
-            </div>
-
-            {/* Divider */}
-            <div style={{ width: 1, height: 48, backgroundColor: 'var(--bg-border)', flexShrink: 0 }} />
-
-            {/* Nonlethal */}
-            <div className="flex flex-col items-center gap-1">
-              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: (hp.nonlethal ?? 0) > 0 ? '#f59e0b' : 'var(--text-faint)' }}>
-                Nonlethal
-              </div>
-              <SpinnerInput value={hp.nonlethal ?? 0} onChange={v => onChange('hp', { ...hp, nonlethal: Math.max(0, v) })} min={0} width="w-16" />
-              {(hp.nonlethal ?? 0) > 0 && (
-                <div className="text-xs" style={{ color: '#f59e0b' }}>−{hp.nonlethal} effective</div>
+                <div className="text-xs font-bold" style={{ color: 'var(--positive)' }}>= {effectiveMaxHP} effective</div>
               )}
             </div>
           </div>
@@ -141,7 +183,7 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
           {/* Progress bar */}
           {effectiveMaxHP > 0 && (
             <div ref={hpFlashRef} style={{ borderRadius: 4 }}>
-              <div className="rounded-full overflow-hidden" style={{ height: '18px', backgroundColor: 'var(--bg-border)' }}>
+              <div className="rounded-full overflow-hidden" style={{ height: '16px', backgroundColor: 'var(--bg-border)' }}>
                 <div
                   className={`h-full rounded-full transition-all duration-500${hpDanger ? ' hp-bar-danger' : ''}`}
                   style={{ width: `${Math.max(0, hpPct)}%`, backgroundColor: hpColor }}
@@ -155,6 +197,18 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
               </div>
             </div>
           )}
+
+          {/* Nonlethal — secondary */}
+          <div className="flex items-center justify-center gap-3 pt-1" style={{ borderTop: '1px solid var(--bg-border)' }}>
+            <span className="text-xs uppercase tracking-widest font-bold"
+              style={{ color: (hp.nonlethal ?? 0) > 0 ? '#f59e0b' : 'var(--text-faint)' }}>
+              Nonlethal
+            </span>
+            <SpinnerInput value={hp.nonlethal ?? 0} onChange={v => onChange('hp', { ...hp, nonlethal: Math.max(0, v) })} min={0} width="w-14" />
+            {(hp.nonlethal ?? 0) > 0 && (
+              <span className="text-xs font-bold" style={{ color: '#f59e0b' }}>−{hp.nonlethal} effective</span>
+            )}
+          </div>
 
           {/* Status banner */}
           {hpStatus && (
