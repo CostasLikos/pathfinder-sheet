@@ -14,6 +14,7 @@ import Spells from '../components/sheet/Spells'
 import BuffTracker from '../components/sheet/BuffTracker'
 import Equipment from '../components/sheet/Equipment'
 import Dashboard from '../components/sheet/Dashboard'
+import Campaign from '../components/sheet/Campaign'
 import SettingsPanel from '../components/SettingsPanel'
 
 const TABS = ['Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Helper', 'Notes', '📌 Dashboard']
@@ -282,6 +283,10 @@ export default function CharacterPage() {
               computedSaveBases={computedSaveBases}
               favoredHP={favoredHP}
               pendingHP={lusHP}
+            />
+            <Campaign
+              campaign={character.campaign ?? {}}
+              onChange={v => update('campaign', v)}
             />
           </>
         )}

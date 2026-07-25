@@ -346,123 +346,51 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
   )
 }
 
-// ─── Campaign ─────────────────────────────────────────────────────────────────
+// ─── Drawback Editor ──────────────────────────────────────────────────────────
 
-const PF_CAMPAIGNS = {
-  'PF1e — Official Adventure Paths': [
-    'Rise of the Runelords', 'Curse of the Crimson Throne', 'Second Darkness',
-    'Legacy of Fire', 'Council of Thieves', 'Kingmaker', 'Serpent\'s Skull',
-    'Carrion Crown', 'Jade Regent', 'Skull & Shackles', 'Shattered Star',
-    'Reign of Winter', 'Wrath of the Righteous', 'Mummy\'s Mask', 'Iron Gods',
-    'Giantslayer', 'Hell\'s Rebels', 'Hell\'s Vengeance', 'Strange Aeons',
-    'Ironfang Invasion', 'Ruins of Azlant', 'War for the Crown',
-    'Return of the Runelords', 'Tyrant\'s Grasp',
-  ],
-  'PF2e — Official Adventure Paths': [
-    'Age of Ashes', 'Extinction Curse', 'Agents of Edgewatch',
-    'Abomination Vaults', 'Fists of the Ruby Phoenix', 'Strength of Thousands',
-    'Quest for the Frozen Flame', 'Outlaws of Alkenstar', 'Blood Lords',
-    'Gatewalkers', 'Kingmaker (PF2e)', 'Stolen Fate', 'Sky King\'s Tomb',
-    'Season of Ghosts', 'Seven Dooms for Sandpoint', 'Curtain Call', 'Spore War',
-  ],
-  'Standalone Modules': [
-    'We Be Goblins!', 'Emerald Spire Superdungeon', 'Thornkeep',
-    'Rappan Athuk', 'Slumbering Tsar',
-  ],
-  'Third-Party / Unofficial': [
-    'War of the Burning Sky', 'Zeitgeist', 'Razor Coast',
-    'Way of the Wicked', 'Sunken Empires', 'Legendary Planet',
-  ],
-}
+function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
+  const [adding, setAdding] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newDesc, setNewDesc] = useState('')
 
-function CampaignBox({ campaign = {}, onChange }) {
-  const [search, setSearch] = useState('')
-  const selected = campaign.name ?? ''
-  const notes    = campaign.notes ?? ''
-
-  const allCampaigns = Object.entries(PF_CAMPAIGNS).flatMap(([group, list]) =>
-    list.map(name => ({ group, name }))
-  )
-  const filtered = search.trim()
-    ? allCampaigns.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
-    : allCampaigns
-
-  const grouped = filtered.reduce((acc, c) => {
-    acc[c.group] = acc[c.group] ?? []
-    acc[c.group].push(c.name)
-    return acc
-  }, {})
-
-  const select = (name) => {
-    onChange({ ...campaign, name })
-    setSearch('')
+  const handleAdd = () => {
+    if (!newName.trim()) return
+    onAdd({ name: newName.trim(), desc: newDesc.trim() })
+    setNewName(''); setNewDesc(''); setAdding(false)
   }
 
   return (
     <div>
-      <h3 className="font-bold text-sm mb-3 flex items-center gap-1.5" style={{ color: 'var(--accent)' }}>
-        🗺 Campaign
-      </h3>
-      <div className="flex gap-3 flex-col md:flex-row">
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <h3 className="font-bold text-sm flex items-center gap-1.5" style={{ color: '#ef4444' }}>
+          ⚠ Drawbacks ({drawbacks.length})
+        </h3>
+        <button onClick={() => setAdding(true)} className="text-xs px-2 py-0.5 rounded"
+          style={{ color: '#ef4444', border: '1px solid #ef4444' }}>
+          + Add
+        </button>
+      </div>
 
-        {/* Left panel — picker */}
-        <div className="flex-1 rounded-lg p-3 space-y-2" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
-          <div className="text-xs font-bold mb-1" style={{ color: 'var(--text-dim)' }}>Select Campaign</div>
-          {selected && (
-            <div className="flex items-center justify-between px-2 py-1 rounded text-xs font-bold mb-2"
-              style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>
-              <span>{selected}</span>
-              <button onClick={() => onChange({ ...campaign, name: '' })} style={{ color: 'var(--text-faint)' }}>✕</button>
-            </div>
-          )}
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search campaigns..."
-            className="input-field text-xs"
-          />
-          <div className="overflow-y-auto space-y-2" style={{ maxHeight: '220px' }}>
-            {Object.entries(grouped).map(([group, names]) => (
-              <div key={group}>
-                <div className="text-xs font-bold px-1 py-0.5 mb-1" style={{ color: 'var(--text-faint)', borderBottom: '1px solid var(--bg-border)' }}>{group}</div>
-                {names.map(name => (
-                  <button key={name} onClick={() => select(name)}
-                    className="w-full text-left text-xs px-2 py-1 rounded"
-                    style={{
-                      backgroundColor: name === selected ? 'var(--accent-dim)' : 'transparent',
-                      color: name === selected ? 'var(--accent)' : 'var(--text-dim)',
-                    }}>
-                    {name}
-                  </button>
-                ))}
-              </div>
-            ))}
-            {filtered.length === 0 && (
-              <div className="text-xs italic px-1 py-2" style={{ color: 'var(--text-faint)' }}>No matches — write it in the notes</div>
-            )}
+      {adding && (
+        <div className="rounded-lg p-3 mb-2 space-y-2" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid #ef4444' }}>
+          <input autoFocus type="text" placeholder="Drawback name (e.g. Dependent)" value={newName}
+            onChange={e => setNewName(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
+            className="input-field text-sm" />
+          <textarea placeholder="Description, penalty, effect... (optional)" value={newDesc}
+            onChange={e => setNewDesc(e.target.value)} rows={2} className="input-field text-sm resize-none" />
+          <div className="flex gap-2">
+            <button onClick={handleAdd} className="btn-primary text-xs py-1 px-3">Save</button>
+            <button onClick={() => setAdding(false)} className="btn-secondary text-xs py-1 px-3">Cancel</button>
           </div>
         </div>
+      )}
 
-        {/* Right panel — notes */}
-        <div className="flex-1 rounded-lg p-3 flex flex-col gap-2" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
-          <div className="text-xs font-bold" style={{ color: 'var(--text-dim)' }}>Campaign Notes</div>
-          <input
-            type="text"
-            value={campaign.customName ?? ''}
-            onChange={e => onChange({ ...campaign, customName: e.target.value })}
-            placeholder="Custom campaign name (if not in list)..."
-            className="input-field text-xs"
-          />
-          <textarea
-            value={notes}
-            onChange={e => onChange({ ...campaign, notes: e.target.value })}
-            placeholder="Session notes, party goals, current location, DM name, house rules..."
-            rows={7}
-            className="input-field text-xs resize-none flex-1"
-          />
-        </div>
-
+      <div className="space-y-1">
+        {drawbacks.map((item, i) => (
+          <ItemRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} isEven={i % 2 === 0} />
+        ))}
+        {drawbacks.length === 0 && <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>No drawbacks</div>}
       </div>
     </div>
   )
@@ -473,7 +401,7 @@ function CampaignBox({ campaign = {}, onChange }) {
 export default function FeatsTraits({ character, onChange, pins = {}, onTogglePin, pendingFeat = false }) {
   const [showLibrary, setShowLibrary] = useState(false)
   const [featSearch, setFeatSearch] = useState('')
-  const { feats = [], traits = [] } = character
+  const { feats = [], traits = [], drawbacks = [] } = character
 
   const addFeat    = (item) => onChange('feats', [...feats, item])
   const removeFeat = (i)    => onChange('feats', feats.filter((_, idx) => idx !== i))
@@ -482,6 +410,10 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
   const addTrait    = (item) => onChange('traits', [...traits, item])
   const removeTrait = (i)    => onChange('traits', traits.filter((_, idx) => idx !== i))
   const updateTrait = (i, f, v) => onChange('traits', traits.map((x, idx) => idx === i ? { ...x, [f]: v } : x))
+
+  const addDrawback    = (item) => onChange('drawbacks', [...drawbacks, item])
+  const removeDrawback = (i)    => onChange('drawbacks', drawbacks.filter((_, idx) => idx !== i))
+  const updateDrawback = (i, f, v) => onChange('drawbacks', drawbacks.map((x, idx) => idx === i ? { ...x, [f]: v } : x))
 
   return (
     <div className="space-y-4">
@@ -524,10 +456,12 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
               placeholder="Trait name (e.g. Reactionary)"
             />
           </div>
-          <div style={{ borderTop: '1px solid var(--bg-border)', paddingTop: '1.5rem' }}>
-            <CampaignBox
-              campaign={character.campaign ?? {}}
-              onChange={v => onChange('campaign', v)}
+          <div style={{ borderTop: '1px solid #ef444433', paddingTop: '1.5rem' }}>
+            <DrawbackEditor
+              drawbacks={drawbacks}
+              onAdd={addDrawback}
+              onUpdate={updateDrawback}
+              onRemove={removeDrawback}
             />
           </div>
         </div>
