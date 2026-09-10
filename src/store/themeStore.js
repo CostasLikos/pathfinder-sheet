@@ -286,6 +286,28 @@ export const THEMES = {
     }
   },
 
+  ironBlood: {
+    id: 'ironBlood',
+    name: 'Iron & Blood',
+    preview: ['#2A2723', '#923534'],
+    vars: {
+      '--bg-darker':    '#171512',
+      '--bg-dark':      '#2A2723',
+      '--bg-surface':   '#3a3330',
+      '--bg-border':    '#4E4842',
+      '--accent':       '#923534',
+      '--accent-dim':   '#631111',
+      '--accent-hover': '#b54a49',
+      '--text':         '#e8ddd8',
+      '--text-dim':     '#4E4842',
+      '--text-faint':   '#3a3330',
+      '--danger':       '#631111',
+      '--danger-hover': '#923534',
+      '--positive':     '#5a8a60',
+      '--warning':      '#a07850',
+    }
+  },
+
   bloodMoon: {
     id: 'bloodMoon',
     name: 'Blood Moon',
