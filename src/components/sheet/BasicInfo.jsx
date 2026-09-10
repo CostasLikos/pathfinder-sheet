@@ -77,56 +77,46 @@ function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored 
 
       {/* Favored class bonus tracker */}
       {entry.isFavored && (
-        <div className="flex items-center gap-3 flex-wrap pt-1" style={{ borderTop: '1px solid var(--bg-border)' }}>
-          <span className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>★ Favored Bonus ({remaining >= 0 ? remaining : 0} unspent / {maxFav} levels)</span>
-          <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: 'var(--text-dim)' }}>+HP:</span>
-            <button onClick={() => set('favoredHP', Math.max(0, (entry.favoredHP??0)-1))} className="w-5 h-5 flex items-center justify-center rounded text-xs" style={{ backgroundColor:'var(--bg-border)', color:'var(--text)' }}>−</button>
-            <span className="text-sm font-bold w-5 text-center" style={{ color: (entry.favoredHP??0)>0 ? 'var(--positive)' : 'var(--text-faint)' }}>{entry.favoredHP??0}</span>
-            <button
-              onClick={() => favTotal < maxFav && set('favoredHP', (entry.favoredHP??0)+1)}
-              className="w-5 h-5 flex items-center justify-center rounded text-xs"
-              style={{ backgroundColor:'var(--bg-border)', color: favTotal < maxFav ? 'var(--text)' : 'var(--text-faint)' }}
-            >+</button>
+        <div className="pt-2 space-y-2" style={{ borderTop: '1px solid var(--bg-border)' }}>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>
+              ★ Favored Bonus
+            </span>
+            <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: remaining < 0 ? '#ef444422' : 'var(--bg-darker)', color: remaining < 0 ? '#ef4444' : 'var(--text-faint)', border: `1px solid ${remaining < 0 ? '#ef444466' : 'var(--bg-border)'}` }}>
+              {remaining >= 0 ? remaining : 0} unspent / {maxFav} lvls
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: 'var(--text-dim)' }}>+Skill Rank:</span>
-            <button onClick={() => set('favoredSkill', Math.max(0, (entry.favoredSkill??0)-1))} className="w-5 h-5 flex items-center justify-center rounded text-xs" style={{ backgroundColor:'var(--bg-border)', color:'var(--text)' }}>−</button>
-            <span className="text-sm font-bold w-5 text-center" style={{ color: (entry.favoredSkill??0)>0 ? 'var(--positive)' : 'var(--text-faint)' }}>{entry.favoredSkill??0}</span>
-            <button
-              onClick={() => favTotal < maxFav && set('favoredSkill', (entry.favoredSkill??0)+1)}
-              className="w-5 h-5 flex items-center justify-center rounded text-xs"
-              style={{ backgroundColor:'var(--bg-border)', color: favTotal < maxFav ? 'var(--text)' : 'var(--text-faint)' }}
-            >+</button>
+
+          {/* HP / Skill / Racial in a 3-col grid */}
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: '+HP', key: 'favoredHP', val: entry.favoredHP ?? 0, setter: v => set('favoredHP', v) },
+              { label: '+Skill', key: 'favoredSkill', val: entry.favoredSkill ?? 0, setter: v => set('favoredSkill', v) },
+              { label: 'Racial', key: 'favoredRacialCount', val: entry.favoredRacialCount ?? 0, setter: v => set('favoredRacialCount', v) },
+            ].map(({ label, val, setter }) => (
+              <div key={label} className="flex flex-col items-center gap-1 rounded-lg py-1.5 px-1"
+                style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
+                <span className="text-xs" style={{ color: 'var(--text-dim)' }}>{label}</span>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setter(Math.max(0, val - 1))} className="w-5 h-5 flex items-center justify-center rounded text-xs" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}>−</button>
+                  <span className="text-sm font-bold w-5 text-center" style={{ color: val > 0 ? 'var(--positive)' : 'var(--text-faint)' }}>{val}</span>
+                  <button onClick={() => favTotal < maxFav && setter(val + 1)} className="w-5 h-5 flex items-center justify-center rounded text-xs" style={{ backgroundColor: 'var(--bg-border)', color: favTotal < maxFav ? 'var(--text)' : 'var(--text-faint)' }}>+</button>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: 'var(--text-dim)' }}>Racial:</span>
-            <button onClick={() => set('favoredRacialCount', Math.max(0, (entry.favoredRacialCount??0)-1))} className="w-5 h-5 flex items-center justify-center rounded text-xs" style={{ backgroundColor:'var(--bg-border)', color:'var(--text)' }}>−</button>
-            <span className="text-sm font-bold w-5 text-center" style={{ color: (entry.favoredRacialCount??0)>0 ? 'var(--positive)' : 'var(--text-faint)' }}>{entry.favoredRacialCount??0}</span>
-            <button
-              onClick={() => favTotal < maxFav && set('favoredRacialCount', (entry.favoredRacialCount??0)+1)}
-              className="w-5 h-5 flex items-center justify-center rounded text-xs"
-              style={{ backgroundColor:'var(--bg-border)', color: favTotal < maxFav ? 'var(--text)' : 'var(--text-faint)' }}
-            >+</button>
-            <input
-              type="text"
-              value={entry.favoredRacial ?? ''}
-              onChange={e => set('favoredRacial', e.target.value)}
-              placeholder="describe the racial bonus..."
-              className="text-xs focus:outline-none rounded px-2 py-0.5"
-              style={{
-                backgroundColor: 'var(--bg-darker)',
-                color: 'var(--text)',
-                border: '1px solid var(--bg-border)',
-                minWidth: '220px',
-              }}
-              onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-              onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
-            />
-          </div>
-          {remaining < 0 && (
-            <span className="text-xs" style={{ color: '#ef4444' }}>Over budget by {Math.abs(remaining)}</span>
-          )}
+
+          {/* Racial description — full width */}
+          <input
+            type="text"
+            value={entry.favoredRacial ?? ''}
+            onChange={e => set('favoredRacial', e.target.value)}
+            placeholder="Describe the racial bonus..."
+            className="w-full text-xs focus:outline-none rounded px-2 py-1.5"
+            style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text)', border: '1px solid var(--bg-border)' }}
+            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+            onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
+          />
         </div>
       )}
     </div>
