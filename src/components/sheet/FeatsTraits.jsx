@@ -459,7 +459,7 @@ function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
 export default function FeatsTraits({ character, onChange, pins = {}, onTogglePin, pendingFeat = false }) {
   const [showLibrary, setShowLibrary] = useState(false)
   const [featSearch, setFeatSearch] = useState('')
-  const { feats = [], traits = [], drawbacks = [] } = character
+  const { feats = [], traits = [], drawbacks = [], features = [] } = character
 
   const addFeat    = (item) => onChange('feats', [...feats, item])
   const removeFeat = (i)    => onChange('feats', feats.filter((_, idx) => idx !== i))
@@ -472,6 +472,10 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
   const addDrawback    = (item) => onChange('drawbacks', [...drawbacks, item])
   const removeDrawback = (i)    => onChange('drawbacks', drawbacks.filter((_, idx) => idx !== i))
   const updateDrawback = (i, f, v) => onChange('drawbacks', drawbacks.map((x, idx) => idx === i ? { ...x, [f]: v } : x))
+
+  const addFeature    = (item) => onChange('features', [...features, item])
+  const removeFeature = (i)    => onChange('features', features.filter((_, idx) => idx !== i))
+  const updateFeature = (i, f, v) => onChange('features', features.map((x, idx) => idx === i ? { ...x, [f]: v } : x))
 
   return (
     <div className="space-y-4">
@@ -522,6 +526,18 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
               onAdd={addDrawback}
               onUpdate={updateDrawback}
               onRemove={removeDrawback}
+            />
+          </div>
+          <div style={{ borderTop: '1px solid #22c55e33', paddingTop: '1.5rem' }}>
+            <ListEditor
+              title="Features"
+              icon="🌟"
+              color="#22c55e"
+              items={features}
+              onAdd={addFeature}
+              onUpdate={updateFeature}
+              onRemove={removeFeature}
+              placeholder="Feature name (e.g. Bardic Performance)"
             />
           </div>
         </div>
