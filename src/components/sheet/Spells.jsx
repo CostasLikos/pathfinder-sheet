@@ -597,17 +597,15 @@ function SpellLibrary({ castingClass, onAdd, onClose }) {
 
 // ─── Spell Card Popup ─────────────────────────────────────────────────────────
 
-function SpellCardPopup({ spellName, anchorY, onClose }) {
+function SpellCardPopup({ spellName, onClose }) {
   const data = useMemo(() => SPELL_LIBRARY.find(s => s.name.toLowerCase() === spellName.toLowerCase()), [spellName])
   const color = SCHOOL_COLORS[data?.school] ?? 'var(--accent)'
-  const POPUP_H = 460
-  const top = Math.min(Math.max((anchorY ?? window.innerHeight / 2) - POPUP_H / 2, 10), window.innerHeight - POPUP_H - 10)
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/75" onClick={onClose}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/75" onClick={onClose}>
       <div
-        className="absolute left-4 right-4 flex flex-col rounded-xl shadow-2xl overflow-hidden"
-        style={{ top, maxHeight: POPUP_H, backgroundColor: 'var(--bg-surface)', border: `2px solid ${color}`, maxWidth: 520, margin: '0 auto' }}
+        className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-xl shadow-2xl overflow-hidden"
+        style={{ backgroundColor: 'var(--bg-surface)', border: `2px solid ${color}` }}
         onClick={e => e.stopPropagation()}
       >
         <div className="px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${color}33`, background: `linear-gradient(135deg, var(--bg-darker) 0%, ${color}18 100%)` }}>
@@ -702,7 +700,7 @@ function SpellRow({ spell, abilityModVal, dcBonuses, onUpdate, onRemove, onCast,
               onBlur={e => e.target.style.borderBottomColor = 'transparent'}
             />
             {spell.name && (
-              <button onClick={e => onShowCard(spell.name, e.currentTarget.getBoundingClientRect().top)} title="View spell card"
+              <button onClick={() => onShowCard(spell.name)} title="View spell card"
                 className="text-xs flex-shrink-0 leading-none opacity-60 hover:opacity-100 transition-opacity"
                 style={{ color: schoolColor }}>📖</button>
             )}
@@ -872,7 +870,7 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
   return (
     <div className="space-y-4">
       {showLibrary && <SpellLibrary castingClass={spellcasting.class} onAdd={addSpell} onClose={() => setShowLibrary(false)} />}
-      {spellCard && <SpellCardPopup spellName={spellCard.name} anchorY={spellCard.y} onClose={() => setSpellCard(null)} />}
+      {spellCard && <SpellCardPopup spellName={spellCard.name} onClose={() => setSpellCard(null)} />}
 
       {/* Cast result popup */}
       {castResult && (
@@ -1039,7 +1037,7 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
                   {lvlSpells.map((spell, i) => {
                     const ri = spells.findIndex(s => s.id === spell.id)
                     return <SpellRow key={spell.id} spell={spell} abilityModVal={abilityModVal} dcBonuses={dcBonuses} isEven={i % 2 === 0}
-                      onUpdate={(k, v) => updateSpell(ri, k, v)} onRemove={() => removeSpell(ri)} onCast={() => castSpell(ri)} onShowCard={(name, y) => setSpellCard({ name, y })} />
+                      onUpdate={(k, v) => updateSpell(ri, k, v)} onRemove={() => removeSpell(ri)} onCast={() => castSpell(ri)} onShowCard={name => setSpellCard({ name })} />
                   })}
                 </div>
               )
@@ -1047,7 +1045,7 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
           : filtered.map((spell, i) => {
               const ri = spells.findIndex(s => s.id === spell.id)
               return <SpellRow key={spell.id} spell={spell} abilityModVal={abilityModVal} dcBonuses={dcBonuses} isEven={i % 2 === 0}
-                onUpdate={(k, v) => updateSpell(ri, k, v)} onRemove={() => removeSpell(ri)} onCast={() => castSpell(ri)} onShowCard={(name, y) => setSpellCard({ name, y })} />
+                onUpdate={(k, v) => updateSpell(ri, k, v)} onRemove={() => removeSpell(ri)} onCast={() => castSpell(ri)} onShowCard={name => setSpellCard({ name })} />
             })
         }
       </div>

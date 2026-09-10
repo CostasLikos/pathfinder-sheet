@@ -219,15 +219,13 @@ function ItemDetail({ item }) {
 }
 
 // ── Item Card Popup (for equipped items) ──────────────────────────────────────
-function ItemCardPopup({ itemName, anchorY, onClose }) {
+function ItemCardPopup({ itemName, onClose }) {
   const data = useMemo(() => BROWSE_ITEMS.find(i => i.name.toLowerCase() === itemName.toLowerCase()), [itemName])
-  const POPUP_H = 420
-  const top = Math.min(Math.max((anchorY ?? window.innerHeight / 2) - POPUP_H / 2, 10), window.innerHeight - POPUP_H - 10)
   return (
-    <div className="fixed inset-0 z-50 bg-black/75" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75" onClick={onClose}>
       <div
-        className="absolute left-4 right-4 flex flex-col rounded-xl shadow-2xl overflow-hidden"
-        style={{ top, maxHeight: POPUP_H, backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)', maxWidth: 520, margin: '0 auto' }}
+        className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-xl shadow-2xl overflow-hidden"
+        style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="px-5 py-3 flex items-center justify-between flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
@@ -405,7 +403,7 @@ function ItemRow({ item, onUpdate, onRemove, onShowCard }) {
             onFocus={e => e.target.style.borderBottomColor = 'var(--accent)'}
             onBlur={e => e.target.style.borderBottomColor = 'transparent'}
           />
-          {item.name && <button onClick={e => onShowCard(item.name, e.currentTarget.getBoundingClientRect().top)} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)' }}>📖</button>}
+          {item.name && <button onClick={() => onShowCard(item.name)} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)' }}>📖</button>}
           <button onClick={() => setShowNotes(x => !x)} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: item.notes ? 'var(--accent)' : 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>📝</button>
           <button onClick={onRemove} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
         </div>
@@ -460,7 +458,7 @@ function ItemRow({ item, onUpdate, onRemove, onShowCard }) {
         <div className="w-16 text-right text-sm font-bold flex-shrink-0" style={{ color: totalWeight > 0 ? 'var(--text)' : 'var(--text-faint)' }}>
           {totalWeight > 0 ? `${totalWeight} lb` : '—'}
         </div>
-        {item.name && <button onClick={e => onShowCard(item.name, e.currentTarget.getBoundingClientRect().top)} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)', opacity: 0.7 }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7}>📖</button>}
+        {item.name && <button onClick={() => onShowCard(item.name)} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)', opacity: 0.7 }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7}>📖</button>}
         <button onClick={() => setShowNotes(x => !x)} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: item.notes ? 'var(--accent)' : 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>📝</button>
         <button onClick={onRemove} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
       </div>
@@ -631,7 +629,7 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
       {showBrowser && <ItemBrowser character={character} onChange={onChange} onClose={() => setShowBrowser(false)} />}
 
       {/* Item card popup */}
-      {itemCard && <ItemCardPopup itemName={itemCard.name} anchorY={itemCard.y} onClose={() => setItemCard(null)} />}
+      {itemCard && <ItemCardPopup itemName={itemCard.name} onClose={() => setItemCard(null)} />}
 
       {/* Inventory */}
       <div className="card">
@@ -729,7 +727,7 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
               item={item}
               onUpdate={(key, value) => updateItem(getRealIndex(item), key, value)}
               onRemove={() => removeItem(getRealIndex(item))}
-              onShowCard={(name, y) => setItemCard({ name, y })}
+              onShowCard={name => setItemCard({ name })}
             />
           ))}
         </div>
