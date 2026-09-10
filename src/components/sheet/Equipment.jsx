@@ -498,12 +498,12 @@ function ArmorPropertiesPanel({ armorProps = {}, onChange }) {
             <span className="text-2xl font-bold w-8 text-center" style={{ color: checkPenalty>0 ? '#ef4444' : 'var(--text)' }}>{checkPenalty}</span>
             <button onClick={() => set('checkPenalty', checkPenalty+1)} className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-bold" style={{ border:'1px solid var(--bg-border)', color:'var(--accent)' }}>+</button>
           </div>
-          <div className="text-xs space-y-0.5" style={{ color: 'var(--text-faint)' }}>
+          <div className="text-xs space-y-0.5">
             <div className="font-semibold mb-1" style={{ color: 'var(--text-dim)' }}>Penalizes:</div>
-            <div>• Acrobatics, Climb, Escape Artist</div>
-            <div>• Fly, Ride, Sleight of Hand</div>
-            <div>• Stealth</div>
-            <div style={{ color: checkPenalty>0 ? '#f59e0b' : 'var(--text-faint)' }}>• Swim (×2 penalty)</div>
+            <div style={{ color: checkPenalty>0 ? '#f59e0b' : 'var(--text-faint)' }}>• Acrobatics, Climb, Escape Artist</div>
+            <div style={{ color: checkPenalty>0 ? '#f59e0b' : 'var(--text-faint)' }}>• Fly, Ride, Sleight of Hand</div>
+            <div style={{ color: checkPenalty>0 ? '#f59e0b' : 'var(--text-faint)' }}>• Stealth</div>
+            <div style={{ color: checkPenalty>0 ? '#ef4444' : 'var(--text-faint)' }}>• Swim (×2 penalty)</div>
           </div>
         </div>
         <div className="stat-box flex flex-col items-center">
