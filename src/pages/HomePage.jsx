@@ -12,6 +12,36 @@ export default function HomePage() {
   const importRef = useRef()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(null) // char id pending delete
+
+  // Typewriter quote animation
+  const QUOTE = `"Hell hath no limits, nor is circumscribed\nIn one self place, for where we are is hell,\nAnd where hell is there must we ever be."`
+  const AUTHOR = 'Mephistopheles'
+  const QUOTE_DURATION = 26000 // ms for the quote to type out
+  const [typedLen, setTypedLen] = useState(0)
+  const [showAuthor, setShowAuthor] = useState(false)
+  const [authorFlash, setAuthorFlash] = useState(false)
+  useEffect(() => {
+    const total = QUOTE.length
+    const interval = QUOTE_DURATION / total
+    let i = 0
+    const t = setInterval(() => {
+      i++
+      setTypedLen(i)
+      if (i >= total) {
+        clearInterval(t)
+        setTimeout(() => {
+          setShowAuthor(true)
+          let flashes = 0
+          const flashT = setInterval(() => {
+            setAuthorFlash(f => !f)
+            flashes++
+            if (flashes >= 8) { clearInterval(flashT); setAuthorFlash(false) }
+          }, 300)
+        }, 400)
+      }
+    }, interval)
+    return () => clearInterval(t)
+  }, [])
   const { activeTheme } = useThemeStore()
 
   // derive accent + bg colors from active theme for the hero
@@ -316,16 +346,24 @@ export default function HomePage() {
               fontSize: '0.78rem', fontStyle: 'italic',
               lineHeight: 1.75, fontFamily: 'Georgia, serif',
               letterSpacing: '0.01em',
+              whiteSpace: 'pre-wrap', textAlign: 'left',
+              minHeight: '4.5em',
             }}>
-              "Hell hath no limits, nor is circumscribed<br />
-              In one self place, for where we are is hell,<br />
-              And where hell is there must we ever be."
+              {QUOTE.slice(0, typedLen)}
+              {typedLen < QUOTE.length && (
+                <span style={{ borderRight: `2px solid ${accentHex}`, marginLeft: '1px', animation: 'blink-cursor 0.7s step-end infinite' }}> </span>
+              )}
             </p>
-            <p style={{
-              color: accentHex, fontSize: '0.65rem', letterSpacing: '0.2em',
-              textTransform: 'uppercase', marginTop: '0.6rem',
-              opacity: 0.7,
-            }}>Mephistopheles</p>
+            {showAuthor && (
+              <p style={{
+                color: authorFlash ? '#fff' : accentHex,
+                fontSize: '0.65rem', letterSpacing: '0.2em',
+                textTransform: 'uppercase', marginTop: '0.6rem',
+                opacity: authorFlash ? 1 : 0.7,
+                transition: 'color 0.1s, opacity 0.1s',
+                fontFamily: 'Georgia, serif',
+              }}>{AUTHOR}</p>
+            )}
           </div>
 
           {characters.length === 0 ? (

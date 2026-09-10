@@ -118,6 +118,12 @@ body {
   .page-bg { background-color: var(--bg-darker); }
 }
 
+/* ── Typewriter cursor ───────────────────────────────────────────────────── */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
 /* ── Sigil animations ────────────────────────────────────── */
 @keyframes sigil-spin {
   from { transform: rotate(0deg); }
