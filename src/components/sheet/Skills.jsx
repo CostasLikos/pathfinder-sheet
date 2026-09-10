@@ -2,6 +2,27 @@ import { useRef, useState } from 'react'
 import { SKILLS, DEFAULT_SKILL_ORDER, abilityMod, formatMod, computeClassTotals } from '../../data/pf1eData'
 import PinButton from '../PinButton'
 
+// Renders 1-4 badge letters in triangle/square spatial layout
+function BadgeCluster({ badges }) {
+  if (!badges.length) return null
+  const S = { fontSize: '0.5rem', fontWeight: 700, lineHeight: 1, width: '8px', textAlign: 'center' }
+  const rows = badges.length === 1 ? [[badges[0]]]
+    : badges.length === 2 ? [[badges[0], badges[1]]]
+    : badges.length === 3 ? [[badges[0], badges[1]], [badges[2]]]
+    : [[badges[0], badges[1]], [badges[2], badges[3]]]
+  return (
+    <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', verticalAlign: 'super', marginLeft: '2px', gap: '1px' }}>
+      {rows.map((row, ri) => (
+        <span key={ri} style={{ display: 'flex', gap: '1px', justifyContent: 'center' }}>
+          {row.map(({ label, color }) => (
+            <span key={label} style={{ ...S, color }}>{label}</span>
+          ))}
+        </span>
+      ))}
+    </span>
+  )
+}
+
 const ABILITY_OPTIONS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 const SKILL_MAP = Object.fromEntries(SKILLS.map(s => [s.key, s]))
 const ACP_SKILLS = new Set(['acrobatics','climb','escapeArtist','fly','ride','sleightOfHand','stealth','swim'])
@@ -353,11 +374,13 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                       border: `1px solid ${abColor}55`,
                     }}>
                     {formatMod(total)}
-                    {acp > 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: 'var(--warning)', verticalAlign: 'super' }}>A</span>}
-                    {misc !== 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: 'var(--text-faint)', verticalAlign: 'super' }}>M</span>}
-                    {skillBuff > 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: 'var(--positive)', verticalAlign: 'super' }}>B</span>}
-                    {skillBuff < 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: '#ef4444', verticalAlign: 'super' }}>D</span>}
-                    {(buffTotals[ab] ?? 0) !== 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: (buffTotals[ab] ?? 0) > 0 ? 'var(--positive)' : '#ef4444', verticalAlign: 'super' }}>{(buffTotals[ab] ?? 0) > 0 ? 'B' : 'D'}</span>}
+                    <BadgeCluster badges={[
+                      ...(acp > 0 ? [{ label: 'A', color: 'var(--warning)' }] : []),
+                      ...(misc !== 0 ? [{ label: 'M', color: 'var(--text-faint)' }] : []),
+                      ...(skillBuff > 0 ? [{ label: 'B', color: 'var(--positive)' }] : []),
+                      ...(skillBuff < 0 ? [{ label: 'D', color: '#ef4444' }] : []),
+                      ...((buffTotals[ab] ?? 0) !== 0 ? [{ label: (buffTotals[ab] ?? 0) > 0 ? 'B' : 'D', color: (buffTotals[ab] ?? 0) > 0 ? 'var(--positive)' : '#ef4444' }] : []),
+                    ]} />
                   </span>
 
                   {/* Breakdown tooltip */}
