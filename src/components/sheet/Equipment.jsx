@@ -679,21 +679,22 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
             ))}
           </div>
 
-          {/* Sort — separate row, underline style */}
-          <div className="flex items-center gap-3 pt-1" style={{ borderTop: '1px solid var(--bg-border)' }}>
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>Sort by</span>
+          {/* Sort */}
+          <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid var(--bg-border)' }}>
+            <span className="text-xs uppercase tracking-widest flex-shrink-0" style={{ color: 'var(--text-faint)', fontSize: '0.6rem' }}>Sort</span>
+            <div className="flex gap-1 flex-wrap">
             {[['none','Default'],['name','A–Z'],['weight','Weight'],['qty','Qty']].map(([v,l]) => (
               <button key={v} onClick={() => setSortBy(v)}
-                className="text-xs pb-0.5 transition-all"
+                className="text-xs px-2 py-0.5 rounded-full transition-all"
                 style={{
-                  color: sortBy===v ? 'var(--accent)' : 'var(--text-faint)',
-                  borderBottom: `2px solid ${sortBy===v ? 'var(--accent)' : 'transparent'}`,
-                  background: 'none', border: 'none',
-                  borderBottom: `2px solid ${sortBy===v ? 'var(--accent)' : 'transparent'}`,
+                  color: sortBy===v ? 'var(--bg-darker)' : 'var(--text-faint)',
+                  backgroundColor: sortBy===v ? 'var(--accent)' : 'transparent',
+                  border: `1px solid ${sortBy===v ? 'var(--accent)' : 'var(--bg-border)'}`,
                   fontWeight: sortBy===v ? 700 : 400,
                 }}
               >{l}</button>
             ))}
+            </div>
           </div>
         </div>
 
