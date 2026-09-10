@@ -339,14 +339,18 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
   }
 
   const color = '#C9A84C'
-  const title = `Feats${q && filtered.length !== feats.length ? ` (${filtered.length} / ${feats.length})` : ` (${feats.length})`}`
+  const countLabel = q && filtered.length !== feats.length ? `${filtered.length} / ${feats.length}` : `${feats.length}`
 
   return (
     <div>
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="text-base">⚔️</span>
-          <h3 className="font-bold text-sm" style={{ color, fontFamily: 'Georgia, serif' }}>{title}</h3>
+          <h3 className="font-bold text-sm" style={{ color, fontFamily: 'Georgia, serif' }}>Feats</h3>
+          <span className="text-xs px-1.5 py-0.5 rounded-full font-bold"
+            style={{ backgroundColor: `${color}18`, color, border: `1px solid ${color}44` }}>
+            {countLabel}
+          </span>
           {pendingFeat && (
             <span className="level-up-pulse text-xs px-1.5 py-0.5 rounded-full"
               style={{ backgroundColor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e66' }}>
@@ -510,7 +514,7 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
           />
           <div style={{ borderTop: '1px solid #60a5fa33', paddingTop: '1.5rem' }}>
             <ListEditor
-              title={`Traits (${traits.length}/2)`}
+              title="Traits"
               icon="✨"
               color="#60a5fa"
               items={traits}
