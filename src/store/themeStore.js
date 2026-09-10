@@ -175,27 +175,6 @@ export const THEMES = {
     }
   },
 
-  synthwave: {
-    id: 'synthwave',
-    name: 'Dream Realm',
-    preview: ['#0e0020', '#f72585'],
-    vars: {
-      '--bg-darker':  '#070010',
-      '--bg-dark':    '#0e0020',
-      '--bg-surface': '#160030',
-      '--bg-border':  '#300060',
-      '--accent':     '#f72585',
-      '--accent-dim': '#700040',
-      '--accent-hover': '#ff6eb0',
-      '--text':       '#ffe8ff',
-      '--text-dim':   '#b5179e',
-      '--text-faint': '#4a0060',
-      '--danger':     '#f72585',
-      '--danger-hover': '#ff6eb0',
-      '--positive':   '#7fff00',
-      '--warning':    '#ffb703',
-    }
-  },
 
   midnight: {
     id: 'midnight',
