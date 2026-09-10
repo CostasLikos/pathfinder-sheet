@@ -19,7 +19,6 @@ export default function HomePage() {
   const QUOTE_DURATION = 26000 // ms for the quote to type out
   const [typedLen, setTypedLen] = useState(0)
   const [showAuthor, setShowAuthor] = useState(false)
-  const [authorFlash, setAuthorFlash] = useState(false)
   useEffect(() => {
     const total = QUOTE.length
     const interval = QUOTE_DURATION / total
@@ -29,15 +28,7 @@ export default function HomePage() {
       setTypedLen(i)
       if (i >= total) {
         clearInterval(t)
-        setTimeout(() => {
-          setShowAuthor(true)
-          let flashes = 0
-          const flashT = setInterval(() => {
-            setAuthorFlash(f => !f)
-            flashes++
-            if (flashes >= 8) { clearInterval(flashT); setAuthorFlash(false) }
-          }, 300)
-        }, 400)
+        setTimeout(() => setShowAuthor(true), 400)
       }
     }, interval)
     return () => clearInterval(t)
@@ -346,7 +337,7 @@ export default function HomePage() {
               fontSize: '0.78rem', fontStyle: 'italic',
               lineHeight: 1.75, fontFamily: 'Georgia, serif',
               letterSpacing: '0.01em',
-              whiteSpace: 'pre-wrap', textAlign: 'left',
+              whiteSpace: 'pre-wrap', textAlign: 'center',
               minHeight: '4.5em',
             }}>
               {QUOTE.slice(0, typedLen)}
@@ -355,13 +346,10 @@ export default function HomePage() {
               )}
             </p>
             {showAuthor && (
-              <p style={{
-                color: authorFlash ? '#fff' : accentHex,
-                fontSize: '0.65rem', letterSpacing: '0.2em',
-                textTransform: 'uppercase', marginTop: '0.6rem',
-                opacity: authorFlash ? 1 : 0.7,
-                transition: 'color 0.1s, opacity 0.1s',
-                fontFamily: 'Georgia, serif',
+              <p className="mephisto-text" style={{
+                fontSize: '0.65rem',
+                textTransform: 'uppercase', marginTop: '0.8rem',
+                fontFamily: 'Georgia, serif', textAlign: 'center',
               }}>{AUTHOR}</p>
             )}
           </div>

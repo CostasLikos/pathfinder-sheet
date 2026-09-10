@@ -124,6 +124,20 @@ body {
   50%       { opacity: 0; }
 }
 
+/* ── Mephistopheles reveal ───────────────────────────────────────────────── */
+@keyframes mephisto-reveal {
+  0%   { opacity: 0; color: #8B0000; text-shadow: 0 0 0px #8B0000; letter-spacing: 0.1em; }
+  8%   { opacity: 0.1; }
+  12%  { opacity: 0.9; color: #cc0000; text-shadow: 0 0 18px #cc000099, 0 0 40px #8B000066; }
+  15%  { opacity: 0.3; }
+  20%  { opacity: 1;   color: #cc0000; text-shadow: 0 0 12px #cc000088; }
+  50%  { color: #b34a00; text-shadow: 0 0 8px #b34a0066; }
+  100% { color: var(--accent); text-shadow: 0 0 6px var(--accent-dim); letter-spacing: 0.25em; opacity: 0.85; }
+}
+.mephisto-text {
+  animation: mephisto-reveal 4s ease-out forwards;
+}
+
 /* ── Sigil animations ────────────────────────────────────── */
 @keyframes sigil-spin {
   from { transform: rotate(0deg); }
