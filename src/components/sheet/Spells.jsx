@@ -963,13 +963,7 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
       </div>
 
       {/* ── Spell List Panel ── */}
-      <div className="card" style={{
-        borderTop: '3px solid #fb923c',
-        borderLeft: '1px solid #fb923c55',
-        borderRight: '1px solid #fb923c22',
-        borderBottom: '1px solid #fb923c22',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.5), 0 0 20px #fb923c22, inset 0 1px 0 #fb923c33, inset 0 -1px 0 rgba(0,0,0,0.3)',
-      }}>
+      <div className="card">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className="text-lg">📜</span>
