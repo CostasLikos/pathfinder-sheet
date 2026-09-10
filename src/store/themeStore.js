@@ -286,6 +286,28 @@ export const THEMES = {
     }
   },
 
+  embers: {
+    id: 'embers',
+    name: 'Embers',
+    preview: ['#2b3149', '#F64668'],
+    vars: {
+      '--bg-darker':    '#181c2a',
+      '--bg-dark':      '#1e2336',
+      '--bg-surface':   '#252b40',
+      '--bg-border':    '#41436A',
+      '--accent':       '#F64668',
+      '--accent-dim':   '#984063',
+      '--accent-hover': '#FE9677',
+      '--text':         '#f0e8f0',
+      '--text-dim':     '#FE9677',
+      '--text-faint':   '#41436A',
+      '--danger':       '#F64668',
+      '--danger-hover': '#FE9677',
+      '--positive':     '#5ec47a',
+      '--warning':      '#FE9677',
+    }
+  },
+
   umbra: {
     id: 'umbra',
     name: 'Umbra',
