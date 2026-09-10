@@ -184,15 +184,6 @@ function FeatLibrary({ onAdd, onClose }) {
           </div>
         </div>
 
-        {/* Footer close */}
-        <div className="px-5 py-3 flex justify-end" style={{ borderTop: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-surface)' }}>
-          <button onClick={onClose} className="text-sm px-4 py-1.5 rounded-lg font-bold"
-            style={{ color: 'var(--text-dim)', border: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.color = '#ef4444' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bg-border)'; e.currentTarget.style.color = 'var(--text-dim)' }}>
-            ✕ Close Library
-          </button>
-        </div>
       </div>
     </div>,
     document.body
