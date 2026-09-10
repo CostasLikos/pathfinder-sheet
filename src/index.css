@@ -75,7 +75,7 @@ body {
   }
 
   .section-title {
-    @apply font-bold text-lg mb-3 uppercase tracking-wide;
+    @apply font-bold text-sm mb-3 uppercase tracking-wide;
     color: var(--accent);
     font-family: Georgia, serif;
   }
