@@ -350,10 +350,10 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                       fontSize: '1rem', whiteSpace: 'nowrap', fontFamily: 'Georgia, serif',
                       backgroundColor: `${abColor}18`,
                       color: total >= 10 ? 'var(--positive)' : total >= 5 ? 'var(--accent)' : 'var(--text)',
-                      border: `1px solid ${acp > 0 ? 'var(--warning)' : abColor + '55'}`,
+                      border: `1px solid ${abColor}55`,
                     }}>
                     {formatMod(total)}
-                    {acp > 0 && <span className="ml-0.5 text-xs" style={{ color: 'var(--warning)' }}>⚔</span>}
+                    {acp > 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: '#ef4444', verticalAlign: 'super' }}>A</span>}
                     {misc !== 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: 'var(--text-faint)', verticalAlign: 'super' }}>M</span>}
                     {skillBuff > 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: 'var(--positive)', verticalAlign: 'super' }}>B</span>}
                     {skillBuff < 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: '#ef4444', verticalAlign: 'super' }}>D</span>}
