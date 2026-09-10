@@ -332,7 +332,8 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
               computedBAB !== null
                 ? <><div className="text-2xl font-bold" style={{ color: '#ef4444', fontFamily: 'Georgia, serif' }}>+{computedBAB}</div>
                     <div className="text-xs" style={{ color: 'var(--text-faint)' }}>auto</div></>
-                : <SpinnerInput value={bab ?? 0} onChange={v => onChange('bab', v)} width="w-12" />
+                : <><div className="text-2xl font-bold" style={{ color: '#ef4444', fontFamily: 'Georgia, serif' }}>{bab >= 0 ? `+${bab}` : bab}</div>
+                    <SpinnerInput value={bab ?? 0} onChange={v => onChange('bab', v)} width="w-12" /></>
             )},
             { label: 'Initiative', icon: '⚡', color: '#f59e0b', content: (
               <><div className="text-2xl font-bold" style={{ color: '#f59e0b', fontFamily: 'Georgia, serif' }}>{formatMod(totalInit)}</div>
@@ -376,18 +377,18 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
                 <div className="font-bold leading-none" style={{ fontSize: '2rem', color, fontFamily: 'Georgia, serif' }}>{formatMod(total)}</div>
               </div>
               {/* Breakdown */}
-              <div className="px-2 py-2 text-xs space-y-1" style={{ color: 'var(--text-faint)' }}>
+              <div className="px-1.5 py-2 text-xs space-y-1" style={{ color: 'var(--text-faint)' }}>
                 {[
                   { label: 'Ability', el: <span style={{ color: 'var(--text-dim)', fontWeight: 'bold' }}>{formatMod(mod)}</span> },
                   { label: 'Base', el: computedSaveBases
                       ? <span style={{ color, fontWeight: 'bold' }}>+{computedSaveBases[key]} <span style={{ color: 'var(--text-faint)', fontWeight: 'normal' }}>(auto)</span></span>
-                      : <SpinnerInput value={saves[key]?.base ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], base: v } })} width="w-10" />
+                      : <SpinnerInput value={saves[key]?.base ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], base: v } })} width="w-9" />
                   },
-                  { label: 'Enhance', el: <SpinnerInput value={saves[key]?.enhance ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], enhance: v } })} width="w-10" /> },
-                  { label: 'Misc',    el: <SpinnerInput value={saves[key]?.misc    ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], misc:    v } })} width="w-10" /> },
+                  { label: 'Enh', el: <SpinnerInput value={saves[key]?.enhance ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], enhance: v } })} width="w-9" /> },
+                  { label: 'Misc', el: <SpinnerInput value={saves[key]?.misc    ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], misc:    v } })} width="w-9" /> },
                 ].map(({ label: lbl, el }) => (
                   <div key={lbl} className="flex items-center justify-between gap-1">
-                    <span style={{ color: 'var(--text-faint)', minWidth: '2.8rem' }}>{lbl}</span>
+                    <span style={{ color: 'var(--text-faint)', flexShrink: 0 }}>{lbl}</span>
                     <div className="flex justify-end">{el}</div>
                   </div>
                 ))}
