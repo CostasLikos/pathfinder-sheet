@@ -87,149 +87,180 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
     <div className="space-y-3">
 
       {/* ── HP ── */}
-      <div className="card">
+      <div className="card" style={{ borderTop: `3px solid ${hpColor}` }}>
+
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="section-title mb-0">Hit Points</h2>
+          <div className="flex items-center gap-2">
+            <span className="text-lg" style={{ filter: hpStatus === 'DEAD' ? 'grayscale(1)' : 'none' }}>❤️</span>
+            <h2 className="section-title mb-0" style={{ color: hpColor }}>Hit Points</h2>
+            {hpStatus && (
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                style={{
+                  color: hpStatusColor,
+                  backgroundColor: `${hpStatusColor}18`,
+                  border: `1px solid ${hpStatusColor}55`,
+                  animation: hpStatus !== 'Staggered' ? 'hp-danger 1.8s ease-in-out infinite' : 'none',
+                }}>
+                {hpStatus}
+              </span>
+            )}
+          </div>
           {onTogglePin && <PinButton pinned={pins.hp} onToggle={() => onTogglePin('hp')} />}
         </div>
 
-        <div className="flex flex-col gap-4">
-
-          {/* Current / Max row */}
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-
-            {/* Current HP */}
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: hpColor }}>❤ Current</div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) - 1 })}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
-                  style={{ border: `1px solid ${hpColor}66`, color: hpColor, backgroundColor: 'transparent' }}
-                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = hpColor; e.currentTarget.style.color = 'var(--bg-darker)' }}
-                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = hpColor }}
-                >−</button>
-                <input
-                  type="number"
-                  value={hp.current ?? 0}
-                  onChange={e => onChange('hp', { ...hp, current: Number(e.target.value) })}
-                  className="text-center font-bold focus:outline-none rounded-lg"
-                  style={{
-                    width: '76px', height: '60px', fontSize: '2.2rem',
-                    fontFamily: 'Georgia, serif',
-                    color: hpColor,
-                    backgroundColor: `${hpColor}12`,
-                    border: `2px solid ${hpColor}88`,
-                  }}
-                  onFocus={e => e.target.style.borderColor = hpColor}
-                  onBlur={e => e.target.style.borderColor = `${hpColor}88`}
-                />
-                <button
-                  onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) + 1 })}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
-                  style={{ border: `1px solid ${hpColor}66`, color: hpColor, backgroundColor: 'transparent' }}
-                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = hpColor; e.currentTarget.style.color = 'var(--bg-darker)' }}
-                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = hpColor }}
-                >+</button>
-              </div>
+        {/* Progress bar — prominent */}
+        {effectiveMaxHP > 0 && (
+          <div ref={hpFlashRef} className="mb-4">
+            <div className="rounded-full overflow-hidden" style={{ height: '22px', backgroundColor: 'var(--bg-border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.4)' }}>
+              <div
+                className={`h-full rounded-full transition-all duration-500${hpDanger ? ' hp-bar-danger' : ''}`}
+                style={{
+                  width: `${Math.max(0, hpPct)}%`,
+                  background: hpPct > 50
+                    ? `linear-gradient(90deg, #16a34a, ${hpColor})`
+                    : hpPct > 25
+                    ? `linear-gradient(90deg, #b45309, ${hpColor})`
+                    : `linear-gradient(90deg, #7f1d1d, ${hpColor})`,
+                  boxShadow: `0 0 8px ${hpColor}66`,
+                }}
+              />
             </div>
-
-            {/* Separator */}
-            <div className="flex flex-col items-center" style={{ paddingTop: '22px' }}>
-              <span className="text-3xl font-bold" style={{ color: 'var(--text-faint)', lineHeight: 1 }}>/</span>
+            <div className="flex justify-between text-xs mt-1.5">
+              <span className="font-bold" style={{ color: hpColor }}>
+                {hp.current} / {effectiveMaxHP} HP
+                {hpDanger && !hpStatus && <span className="ml-1">⚠</span>}
+              </span>
+              <span style={{ color: 'var(--text-faint)' }}>{Math.round(hpPct)}%</span>
             </div>
+          </div>
+        )}
 
-            {/* Max HP */}
-            <div className={`flex flex-col items-center gap-1.5 rounded-xl px-2 py-1 ${pendingHP ? 'level-up-pulse' : ''}`}
-              style={pendingHP ? { border: '2px solid #22c55e88' } : {}}>
-              <div className="text-xs font-bold uppercase tracking-widest flex items-center gap-1"
-                style={{ color: pendingHP ? '#22c55e' : 'var(--text-dim)' }}>
-                Max {pendingHP && <span>⬆ +HP?</span>} <BuffBadge val={bt.hp ?? 0} />
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onChange('hp', { ...hp, max: Math.max(0, (hp.max ?? 0) - 1) })}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
-                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent' }}
-                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
-                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
-                >−</button>
-                <input
-                  type="number"
-                  value={hp.max ?? 0}
-                  onChange={e => onChange('hp', { ...hp, max: Math.max(0, Number(e.target.value)) })}
-                  className="text-center font-bold focus:outline-none rounded-lg"
-                  style={{
-                    width: '76px', height: '60px', fontSize: '2.2rem',
-                    fontFamily: 'Georgia, serif',
-                    color: 'var(--text)',
-                    backgroundColor: 'var(--bg-darker)',
-                    border: '2px dashed var(--bg-border)',
-                  }}
-                  onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-                  onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
-                />
-                <button
-                  onClick={() => onChange('hp', { ...hp, max: (hp.max ?? 0) + 1 })}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
-                  style={{ border: '1px solid var(--bg-border)', color: 'var(--accent)', backgroundColor: 'transparent' }}
-                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
-                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
-                >+</button>
-              </div>
-              {(bt.hp ?? 0) !== 0 && (
-                <div className="text-xs font-bold" style={{ color: 'var(--positive)' }}>= {effectiveMaxHP} effective</div>
-              )}
+        {/* Current / Max inputs */}
+        <div className="flex items-center justify-center gap-4 mb-4">
+
+          {/* Current HP */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="text-xs font-bold uppercase tracking-widest" style={{ color: hpColor }}>Current</div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) - 1 })}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
+                style={{ border: `1px solid ${hpColor}66`, color: hpColor, backgroundColor: 'transparent' }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = hpColor; e.currentTarget.style.color = '#000' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = hpColor }}
+              >−</button>
+              <input
+                type="number"
+                value={hp.current ?? 0}
+                onChange={e => onChange('hp', { ...hp, current: Number(e.target.value) })}
+                className="text-center font-bold focus:outline-none rounded-xl"
+                style={{
+                  width: '80px', height: '64px', fontSize: '2.4rem',
+                  fontFamily: 'Georgia, serif',
+                  color: hpColor,
+                  backgroundColor: `${hpColor}10`,
+                  border: `2px solid ${hpColor}66`,
+                }}
+                onFocus={e => e.target.style.borderColor = hpColor}
+                onBlur={e => e.target.style.borderColor = `${hpColor}66`}
+              />
+              <button
+                onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) + 1 })}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
+                style={{ border: `1px solid ${hpColor}66`, color: hpColor, backgroundColor: 'transparent' }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = hpColor; e.currentTarget.style.color = '#000' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = hpColor }}
+              >+</button>
             </div>
           </div>
 
-          {/* Progress bar */}
-          {effectiveMaxHP > 0 && (
-            <div ref={hpFlashRef} style={{ borderRadius: 4 }}>
-              <div className="rounded-full overflow-hidden" style={{ height: '16px', backgroundColor: 'var(--bg-border)' }}>
-                <div
-                  className={`h-full rounded-full transition-all duration-500${hpDanger ? ' hp-bar-danger' : ''}`}
-                  style={{ width: `${Math.max(0, hpPct)}%`, backgroundColor: hpColor }}
-                />
-              </div>
-              <div className="flex justify-between text-xs mt-1 font-bold">
-                <span style={{ color: hpColor }}>
-                  {hp.current}/{effectiveMaxHP} HP{hpDanger && !hpStatus ? ' ⚠' : ''}
-                </span>
-                <span style={{ color: 'var(--text-faint)' }}>{Math.round(hpPct)}%</span>
-              </div>
-            </div>
-          )}
+          <div className="text-3xl font-bold" style={{ color: 'var(--text-faint)', paddingTop: '22px' }}>/</div>
 
-          {/* Nonlethal — secondary */}
-          <div className="flex items-center justify-center gap-3 pt-1" style={{ borderTop: '1px solid var(--bg-border)' }}>
-            <span className="text-xs uppercase tracking-widest font-bold"
-              style={{ color: (hp.nonlethal ?? 0) > 0 ? '#f59e0b' : 'var(--text-faint)' }}>
-              Nonlethal
-            </span>
-            <SpinnerInput value={hp.nonlethal ?? 0} onChange={v => onChange('hp', { ...hp, nonlethal: Math.max(0, v) })} min={0} width="w-14" />
-            {(hp.nonlethal ?? 0) > 0 && (
-              <span className="text-xs font-bold" style={{ color: '#f59e0b' }}>−{hp.nonlethal} effective</span>
+          {/* Max HP */}
+          <div className={`flex flex-col items-center gap-2 rounded-xl px-2 py-1 ${pendingHP ? 'level-up-pulse' : ''}`}
+            style={pendingHP ? { border: '2px solid #22c55e88' } : {}}>
+            <div className="text-xs font-bold uppercase tracking-widest flex items-center gap-1"
+              style={{ color: pendingHP ? '#22c55e' : 'var(--text-dim)' }}>
+              Max {pendingHP && '⬆'} <BuffBadge val={bt.hp ?? 0} />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => onChange('hp', { ...hp, max: Math.max(0, (hp.max ?? 0) - 1) })}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
+                style={{ border: '1px solid var(--bg-border)', color: 'var(--text-dim)', backgroundColor: 'transparent' }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = '#000' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-dim)' }}
+              >−</button>
+              <input
+                type="number"
+                value={hp.max ?? 0}
+                onChange={e => onChange('hp', { ...hp, max: Math.max(0, Number(e.target.value)) })}
+                className="text-center font-bold focus:outline-none rounded-xl"
+                style={{
+                  width: '80px', height: '64px', fontSize: '2.4rem',
+                  fontFamily: 'Georgia, serif',
+                  color: 'var(--text)',
+                  backgroundColor: 'var(--bg-darker)',
+                  border: '2px dashed var(--bg-border)',
+                }}
+                onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+                onBlur={e => e.target.style.borderColor = 'var(--bg-border)'}
+              />
+              <button
+                onClick={() => onChange('hp', { ...hp, max: (hp.max ?? 0) + 1 })}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all"
+                style={{ border: '1px solid var(--bg-border)', color: 'var(--text-dim)', backgroundColor: 'transparent' }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = '#000' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-dim)' }}
+              >+</button>
+            </div>
+            {(bt.hp ?? 0) !== 0 && (
+              <div className="text-xs font-bold" style={{ color: 'var(--positive)' }}>= {effectiveMaxHP} effective</div>
             )}
           </div>
-
-          {/* Status banner */}
-          {hpStatus && (
-            <div className="text-center font-bold tracking-widest rounded-lg py-2"
-              style={{
-                color: hpStatusColor,
-                fontSize: hpStatus === 'DEAD' ? '1.4rem' : '1rem',
-                textShadow: `0 0 16px ${hpStatusColor}`,
-                backgroundColor: `${hpStatusColor}11`,
-                border: `1px solid ${hpStatusColor}44`,
-                animation: hpStatus === 'DEAD' ? 'hp-danger 1.4s ease-in-out infinite' : hpStatus === 'Unconscious' ? 'hp-danger 2.5s ease-in-out infinite' : 'none',
-                letterSpacing: hpStatus === 'DEAD' ? '0.25em' : '0.1em',
-              }}>
-              {hpStatus}
-            </div>
-          )}
-
         </div>
+
+        {/* Quick adjust buttons */}
+        <div className="flex gap-1.5 justify-center mb-4">
+          {[-10, -5, -1].map(n => (
+            <button key={n}
+              onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) + n })}
+              className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors"
+              style={{ backgroundColor: '#ef444418', color: '#ef4444', border: '1px solid #ef444433' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#ef444430' }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ef444418' }}>
+              {n}
+            </button>
+          ))}
+          <div className="w-px mx-0.5" style={{ backgroundColor: 'var(--bg-border)' }} />
+          {[1, 5, 10].map(n => (
+            <button key={n}
+              onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) + n })}
+              className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors"
+              style={{ backgroundColor: '#22c55e18', color: '#22c55e', border: '1px solid #22c55e33' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#22c55e30' }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#22c55e18' }}>
+              +{n}
+            </button>
+          ))}
+        </div>
+
+        {/* Nonlethal */}
+        <div className="flex items-center justify-center gap-3 pt-3" style={{ borderTop: '1px solid var(--bg-border)' }}>
+          <span className="text-xs uppercase tracking-widest font-bold"
+            style={{ color: (hp.nonlethal ?? 0) > 0 ? '#f59e0b' : 'var(--text-faint)' }}>
+            🤕 Nonlethal
+          </span>
+          <SpinnerInput value={hp.nonlethal ?? 0} onChange={v => onChange('hp', { ...hp, nonlethal: Math.max(0, v) })} min={0} width="w-14" />
+          {(hp.nonlethal ?? 0) > 0 && (
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+              style={{ color: '#f59e0b', backgroundColor: '#f59e0b18', border: '1px solid #f59e0b44' }}>
+              −{hp.nonlethal} effective
+            </span>
+          )}
+        </div>
+
       </div>
 
       {/* ── AC ── */}

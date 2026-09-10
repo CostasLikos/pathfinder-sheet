@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { ABILITY_NAMES, abilityMod, formatMod } from '../../data/pf1eData'
 import PinButton from '../PinButton'
 import SpinnerInput from '../SpinnerInput'
@@ -25,15 +26,49 @@ const ABILITY_DESC = {
 
 function AbilityCard({ ab, base, buff, onChange }) {
   const [hovered, setHovered] = useState(false)
-  const score   = base + buff
-  const mod     = abilityMod(score)
-  const hasBuff = buff !== 0
-  const color   = ABILITY_COLOR[ab]
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 })
+  const cardRef = useRef(null)
+  const longPressTimer = useRef(null)
+  const score     = base + buff
+  const mod       = abilityMod(score)
+  const hasBuff   = buff !== 0
+  const color     = ABILITY_COLOR[ab]
   const buffColor = buff > 0 ? 'var(--positive)' : '#ef4444'
+
+  const computePos = useCallback(() => {
+    if (!cardRef.current) return
+    const r = cardRef.current.getBoundingClientRect()
+    setTooltipPos({
+      top: r.bottom + window.scrollY + 10,
+      left: r.left + window.scrollX + r.width / 2,
+    })
+  }, [])
+
+  const showTooltip = () => { computePos(); setHovered(true) }
+  const hideTooltip = () => setHovered(false)
+
+  const onTouchStart = (e) => {
+    longPressTimer.current = setTimeout(() => {
+      e.preventDefault()
+      showTooltip()
+    }, 500)
+  }
+  const cancelLongPress = () => clearTimeout(longPressTimer.current)
+
+  // Close on any outside tap while open
+  useEffect(() => {
+    if (!hovered) return
+    const handler = (e) => {
+      if (!cardRef.current?.contains(e.target)) hideTooltip()
+    }
+    document.addEventListener('touchstart', handler, { passive: true })
+    return () => document.removeEventListener('touchstart', handler)
+  }, [hovered])
 
   return (
     <div
-      className="relative flex flex-col items-center rounded-xl overflow-hidden"
+      ref={cardRef}
+      className="relative flex flex-col items-center rounded-xl"
       style={{
         backgroundColor: 'var(--bg-darker)',
         border: `1px solid ${hovered ? color : color + '44'}`,
@@ -41,9 +76,13 @@ function AbilityCard({ ab, base, buff, onChange }) {
         boxShadow: hovered ? `0 0 16px ${color}33` : 'none',
         transition: 'border-color 0.15s, box-shadow 0.15s',
         cursor: 'default',
+        overflow: 'visible',
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={showTooltip}
+      onMouseLeave={hideTooltip}
+      onTouchStart={onTouchStart}
+      onTouchEnd={cancelLongPress}
+      onTouchMove={cancelLongPress}
     >
       {/* Tinted background */}
       <div className="absolute inset-0 pointer-events-none"
@@ -87,12 +126,16 @@ function AbilityCard({ ab, base, buff, onChange }) {
         </div>
       </div>
 
-      {/* Hover tooltip — appears below the card */}
-      {hovered && (
-        <div className="absolute z-50 rounded-xl p-3 text-xs pointer-events-none"
+      {/* Tooltip via portal — renders above all content */}
+      {hovered && createPortal(
+        <div className="rounded-xl p-3 text-xs pointer-events-none"
           style={{
-            top: 'calc(100% + 10px)', left: '50%', transform: 'translateX(-50%)',
-            width: '200px',
+            position: 'absolute',
+            top: tooltipPos.top,
+            left: tooltipPos.left,
+            transform: 'translateX(-50%)',
+            width: '210px',
+            zIndex: 9999,
             backgroundColor: 'var(--bg-surface)',
             border: `2px solid ${color}`,
             boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 16px ${color}22`,
@@ -139,7 +182,8 @@ function AbilityCard({ ab, base, buff, onChange }) {
               {ABILITY_DESC[ab]}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
