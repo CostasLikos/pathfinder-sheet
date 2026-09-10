@@ -44,120 +44,153 @@ function FeatLibrary({ onAdd, onClose }) {
     onClose()
   }
 
+  const TYPE_COLORS = {
+    'Combat': '#ef4444', 'General': '#22c55e', 'Metamagic': '#a855f7',
+    'Item Creation': '#f59e0b', 'Teamwork': '#3b82f6', 'Critical': '#f97316',
+  }
+  const typeColor = selected ? (TYPE_COLORS[selected.type] ?? 'var(--accent)') : 'var(--accent)'
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
-      <div className="w-full max-w-4xl max-h-[90vh] flex flex-col rounded-xl shadow-2xl overflow-hidden"
-        style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)' }}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }}
+      onClick={onClose}>
+      <div className="w-full max-w-4xl flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+        style={{ maxHeight: '90vh', backgroundColor: 'var(--bg-darker)', border: '2px solid var(--accent)44', boxShadow: '0 0 60px rgba(0,0,0,0.8), 0 0 30px #C9A84C22' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--bg-border)' }}>
-          <div>
-            <h2 className="font-bold text-lg" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>⚔️ Feat Library</h2>
-            <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{ALL_FEATS_RAW.length} feats · showing {results.length}</p>
+        <div className="flex items-center justify-between px-5 py-3"
+          style={{ background: 'linear-gradient(135deg, #C9A84C22, transparent)', borderBottom: '1px solid var(--bg-border)' }}>
+          <div className="flex items-center gap-3">
+            <span style={{ fontSize: '1.5rem' }}>📖</span>
+            <div>
+              <h2 className="font-bold text-lg leading-none" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>Feat Library</h2>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>{ALL_FEATS_RAW.length} feats · {results.length} shown</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-xl" style={{ color: 'var(--text-dim)' }}>✕</button>
+          <button onClick={onClose}
+            className="flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm transition-all"
+            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#ef444433'; e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = '#ef4444' }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--bg-surface)'; e.currentTarget.style.color = 'var(--text-dim)'; e.currentTarget.style.borderColor = 'var(--bg-border)' }}>
+            ✕
+          </button>
         </div>
 
-        {/* Filters */}
-        <div className="px-5 py-3 flex flex-wrap gap-2" style={{ borderBottom: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
-          <input
-            ref={searchRef}
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search feats, prerequisites..."
-            className="input-field text-sm flex-1 min-w-40"
-          />
-          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="input-field text-sm" style={{ width: 'auto' }}>
+        {/* Search + filter */}
+        <div className="px-4 py-3 flex gap-2 flex-wrap" style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--bg-border)' }}>
+          <input ref={searchRef} type="text" value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="🔍 Search by name, prerequisite, benefit..."
+            className="input-field text-sm flex-1 min-w-40" />
+          <select value={filterType} onChange={e => setFilterType(e.target.value)}
+            className="input-field text-sm" style={{ width: 'auto' }}>
             <option value="">All Types</option>
             {FEAT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
+          {(search || filterType) && (
+            <button onClick={() => { setSearch(''); setFilterType('') }}
+              className="text-xs px-2 py-1 rounded"
+              style={{ color: 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>
+              Clear
+            </button>
+          )}
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
           {/* Feat list */}
-          <div className="w-1/2 overflow-y-auto" style={{ borderRight: '1px solid var(--bg-border)' }}>
+          <div className="overflow-y-auto" style={{ width: '42%', borderRight: '1px solid var(--bg-border)' }}>
             {results.length === 0 && (
               <div className="text-center py-10 text-sm" style={{ color: 'var(--text-faint)' }}>No feats found.</div>
             )}
-            {results.map((feat, i) => (
-              <div key={feat.name + i}
-                onClick={() => setSelected(feat)}
-                className="flex items-center gap-3 px-4 py-2 cursor-pointer"
-                style={{
-                  backgroundColor: selected?.name === feat.name ? 'var(--accent-dim)' : i % 2 === 0 ? 'var(--bg-darker)' : 'var(--bg-surface)',
-                  borderBottom: '1px solid var(--bg-border)',
-                }}>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold truncate" style={{ color: selected?.name === feat.name ? 'var(--accent)' : 'var(--text)' }}>{feat.name}</div>
-                  {feat.type && <div className="text-xs truncate" style={{ color: 'var(--text-faint)' }}>{feat.type}</div>}
+            {results.map((feat, i) => {
+              const isSelected = selected?.name === feat.name
+              const fc = TYPE_COLORS[feat.type] ?? '#C9A84C'
+              return (
+                <div key={feat.name + i} onClick={() => setSelected(feat)} className="flex items-center gap-2 px-3 py-2 cursor-pointer transition-all"
+                  style={{
+                    backgroundColor: isSelected ? '#C9A84C18' : 'transparent',
+                    borderBottom: '1px solid var(--bg-border)',
+                    borderLeft: `3px solid ${isSelected ? fc : 'transparent'}`,
+                  }}
+                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'var(--bg-surface)' }}
+                  onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent' }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold truncate" style={{ color: isSelected ? 'var(--accent)' : 'var(--text)' }}>{feat.name}</div>
+                    {feat.type && (
+                      <span className="text-xs px-1.5 py-0 rounded-full" style={{ backgroundColor: `${fc}18`, color: fc, border: `1px solid ${fc}44`, fontSize: '0.6rem' }}>
+                        {feat.type}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
             {results.length === 150 && (
-              <div className="text-center py-3 text-xs" style={{ color: 'var(--text-faint)' }}>Showing first 150 — refine your search</div>
+              <div className="text-center py-3 text-xs" style={{ color: 'var(--text-faint)' }}>Showing first 150 — refine search</div>
             )}
           </div>
 
           {/* Feat detail */}
-          <div className="w-1/2 overflow-y-auto p-5">
+          <div className="flex-1 overflow-y-auto" style={{ minWidth: 0 }}>
             {!selected ? (
-              <div className="text-center py-10" style={{ color: 'var(--text-faint)' }}>
-                <div className="text-4xl mb-3">⚔️</div>
-                <p className="text-sm">Select a feat to see details</p>
+              <div className="flex flex-col items-center justify-center h-full" style={{ color: 'var(--text-faint)' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '12px', opacity: 0.4 }}>📖</div>
+                <p className="text-sm">Select a feat from the list</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                <div>
-                  <h3 className="font-bold text-xl" style={{ color: 'var(--accent)', fontFamily: 'Georgia,serif' }}>{selected.name}</h3>
-                  {selected.type && <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)' }}>{selected.type}</span>}
+              <div>
+                {/* Detail header */}
+                <div className="px-5 py-4" style={{ background: `linear-gradient(135deg, ${typeColor}18, transparent)`, borderBottom: '1px solid var(--bg-border)' }}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-bold text-xl leading-tight" style={{ color: typeColor, fontFamily: 'Georgia,serif' }}>{selected.name}</h3>
+                      {selected.type && (
+                        <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-bold"
+                          style={{ backgroundColor: `${typeColor}22`, color: typeColor, border: `1px solid ${typeColor}55` }}>
+                          {selected.type}
+                        </span>
+                      )}
+                    </div>
+                    <button onClick={() => addFeat(selected)}
+                      className="flex-shrink-0 px-4 py-2 rounded-lg font-bold text-sm transition-all"
+                      style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-darker)' }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--accent-dim)'; e.currentTarget.style.color = 'var(--accent)' }}>
+                      + Add
+                    </button>
+                  </div>
                 </div>
 
-                {selected.description && (
-                  <p className="text-xs italic" style={{ color: 'var(--text-dim)' }}>{stripHtml(selected.description)}</p>
-                )}
-
-                {selected.prerequisite && (
-                  <div>
-                    <div className="text-xs font-bold mb-0.5" style={{ color: 'var(--accent)' }}>Prerequisites</div>
-                    <p className="text-xs" style={{ color: 'var(--text-dim)' }}>{stripHtml(selected.prerequisite)}</p>
-                  </div>
-                )}
-
-                {selected.benefit && (
-                  <div>
-                    <div className="text-xs font-bold mb-0.5" style={{ color: 'var(--accent)' }}>Benefit</div>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--text)' }}>{stripHtml(selected.benefit)}</p>
-                  </div>
-                )}
-
-                {selected.normal && (
-                  <div>
-                    <div className="text-xs font-bold mb-0.5" style={{ color: 'var(--text-dim)' }}>Normal</div>
-                    <p className="text-xs" style={{ color: 'var(--text-dim)' }}>{stripHtml(selected.normal)}</p>
-                  </div>
-                )}
-
-                {selected.special && (
-                  <div>
-                    <div className="text-xs font-bold mb-0.5" style={{ color: 'var(--text-dim)' }}>Special</div>
-                    <p className="text-xs" style={{ color: 'var(--text-dim)' }}>{stripHtml(selected.special)}</p>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => addFeat(selected)}
-                  className="w-full py-2 rounded font-bold text-sm mt-2"
-                  style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--accent)'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--accent-dim)'}
-                >
-                  + Add to Character
-                </button>
+                {/* Detail body */}
+                <div className="px-5 py-4 space-y-4">
+                  {selected.description && (
+                    <p className="text-sm italic leading-relaxed" style={{ color: 'var(--text-dim)' }}>{stripHtml(selected.description)}</p>
+                  )}
+                  {[
+                    { label: 'Prerequisites', value: selected.prerequisite, color: '#f59e0b' },
+                    { label: 'Benefit',       value: selected.benefit,      color: typeColor },
+                    { label: 'Normal',        value: selected.normal,       color: 'var(--text-dim)' },
+                    { label: 'Special',       value: selected.special,      color: 'var(--text-dim)' },
+                  ].filter(s => s.value).map(({ label, value, color: c }) => (
+                    <div key={label} className="rounded-lg p-3" style={{ backgroundColor: 'var(--bg-surface)', borderLeft: `3px solid ${c}55` }}>
+                      <div className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: c }}>{label}</div>
+                      <p className="text-sm leading-relaxed" style={{ color: 'var(--text)' }}>{stripHtml(value)}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
+        </div>
+
+        {/* Footer close */}
+        <div className="px-5 py-3 flex justify-end" style={{ borderTop: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-surface)' }}>
+          <button onClick={onClose} className="text-sm px-4 py-1.5 rounded-lg font-bold"
+            style={{ color: 'var(--text-dim)', border: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.color = '#ef4444' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--bg-border)'; e.currentTarget.style.color = 'var(--text-dim)' }}>
+            ✕ Close Library
+          </button>
         </div>
       </div>
     </div>
