@@ -239,27 +239,41 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
           {onTogglePin && <PinButton pinned={pins.ac} onToggle={() => onTogglePin('ac')} />}
         </div>
         {maxDex !== Infinity && rawDexMod > maxDex && (
-          <div className="mb-2 px-2 py-1 rounded text-xs" style={{ backgroundColor: 'rgba(245,158,11,0.1)', border: '1px solid var(--warning)', color: 'var(--warning)' }}>
+          <div className="mb-3 px-2 py-1 rounded text-xs" style={{ backgroundColor: 'rgba(245,158,11,0.1)', border: '1px solid var(--warning)', color: 'var(--warning)' }}>
             ⚠ Max Dex {maxDex} — your DEX mod ({rawDexMod >= 0 ? `+${rawDexMod}` : rawDexMod}) is capped for AC
           </div>
         )}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          {[['Total AC', totalAC, acFlashRef], ['Touch', touchAC, null], ['Flat-Footed', flatFooted, null]].map(([lbl, val, ref]) => (
-            <div key={lbl} ref={ref} className="stat-box text-center" style={{ borderRadius: '6px' }}>
-              <div className="text-xs mb-1 flex items-center justify-center gap-1" style={{ color: 'var(--text-dim)' }}>
-                {lbl} <BuffBadge val={bt.ac ?? 0} />
-              </div>
-              <div className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{val}</div>
+
+        {/* AC display — hero Total + secondary Touch/FF */}
+        <div className="flex items-stretch gap-3 mb-4">
+          {/* Total AC — hero */}
+          <div ref={acFlashRef} className="flex-1 flex flex-col items-center justify-center py-3 rounded-xl"
+            style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 8%, var(--bg-darker))', border: '2px solid var(--accent)55' }}>
+            <div className="text-xs font-bold uppercase tracking-widest mb-1 flex items-center gap-1" style={{ color: 'var(--accent)' }}>
+              🛡 Total AC <BuffBadge val={bt.ac ?? 0} />
             </div>
-          ))}
+            <div className="font-bold leading-none" style={{ fontSize: '3rem', color: 'var(--accent)', fontFamily: 'Georgia, serif' }}>{totalAC}</div>
+          </div>
+          {/* Touch + Flat-Footed — secondary */}
+          <div className="flex flex-col gap-2 justify-center" style={{ minWidth: '90px' }}>
+            {[['Touch', touchAC, '#3b82f6'], ['Flat-Footed', flatFooted, 'var(--text-dim)']].map(([lbl, val, col]) => (
+              <div key={lbl} className="stat-box text-center py-2" style={{ borderLeft: `3px solid ${col}55` }}>
+                <div className="text-xs mb-0.5" style={{ color: 'var(--text-faint)' }}>{lbl}</div>
+                <div className="text-xl font-bold" style={{ color: col }}>{val}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+
+        {/* AC components */}
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
           {[
-            ['Armor', 'armor'], ['Shield', 'shield'], ['Natural', 'natural'],
-            ['Deflection', 'deflect'], ['Misc', 'misc'],
-          ].map(([label, key]) => (
-            <div key={key} className="stat-box flex flex-col items-center gap-1">
-              <span className="text-xs text-center" style={{ color: 'var(--text-dim)' }}>{label}</span>
+            ['Armor', 'armor', '#94a3b8'], ['Shield', 'shield', '#c084fc'], ['Natural', 'natural', '#4ade80'],
+            ['Deflect', 'deflect', '#60a5fa'], ['Misc', 'misc', 'var(--text-dim)'],
+          ].map(([label, key, col]) => (
+            <div key={key} className="flex flex-col items-center gap-1 rounded-lg py-2"
+              style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid var(--bg-border)`, borderTop: `2px solid ${col}66` }}>
+              <span className="text-xs font-bold" style={{ color: col }}>{label}</span>
               <SpinnerInput value={ac[key] ?? 0} onChange={v => onChange('ac', { ...ac, [key]: v })} width="w-10" />
             </div>
           ))}
@@ -280,70 +294,78 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
           </div>
         </div>
 
+        {/* BAB / Init / CMB / CMD */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          <div className="stat-box flex flex-col items-center justify-center gap-1">
-            <div className="text-xs" style={{ color: 'var(--text-dim)' }}>BAB</div>
-            {computedBAB !== null
-              ? <div className="text-xl font-bold" style={{ color: 'var(--accent)' }}>+{computedBAB}</div>
-              : <SpinnerInput value={bab ?? 0} onChange={v => onChange('bab', v)} width="w-12" />
-            }
-            {computedBAB !== null && <div className="text-xs" style={{ color: 'var(--text-faint)' }}>auto</div>}
-          </div>
-          <div className="stat-box flex flex-col items-center justify-center gap-1">
-            <div className="text-xs" style={{ color: 'var(--text-dim)' }}>Initiative</div>
-            <div className="text-xl font-bold" style={{ color: 'var(--text)' }}>{formatMod(totalInit)}</div>
-            <div className="flex items-center justify-between gap-2 px-1 w-full text-xs" style={{ color: 'var(--text-faint)' }}>
-              <span>Misc</span>
-              <SpinnerInput value={initiative?.misc ?? 0} onChange={v => onChange('initiative', { ...initiative, misc: v })} width="w-10" />
+          {[
+            { label: 'BAB', icon: '⚔️', color: '#ef4444', content: (
+              computedBAB !== null
+                ? <><div className="text-2xl font-bold" style={{ color: '#ef4444', fontFamily: 'Georgia, serif' }}>+{computedBAB}</div>
+                    <div className="text-xs" style={{ color: 'var(--text-faint)' }}>auto</div></>
+                : <SpinnerInput value={bab ?? 0} onChange={v => onChange('bab', v)} width="w-12" />
+            )},
+            { label: 'Initiative', icon: '⚡', color: '#f59e0b', content: (
+              <><div className="text-2xl font-bold" style={{ color: '#f59e0b', fontFamily: 'Georgia, serif' }}>{formatMod(totalInit)}</div>
+                <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-faint)' }}>
+                  <span>misc</span>
+                  <SpinnerInput value={initiative?.misc ?? 0} onChange={v => onChange('initiative', { ...initiative, misc: v })} width="w-10" />
+                </div></>
+            )},
+            { label: 'CMB', icon: '🤜', color: '#a78bfa', content: (
+              <div className="text-2xl font-bold" style={{ color: '#a78bfa', fontFamily: 'Georgia, serif' }}>{formatMod(cmb)}</div>
+            )},
+            { label: 'CMD', icon: '🛡', color: '#60a5fa', content: (
+              <div className="text-2xl font-bold" style={{ color: '#60a5fa', fontFamily: 'Georgia, serif' }}>{cmd}</div>
+            )},
+          ].map(({ label, icon, color, content }) => (
+            <div key={label} className="flex flex-col items-center justify-center gap-1 rounded-xl py-3"
+              style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid var(--bg-border)`, borderTop: `3px solid ${color}` }}>
+              <div className="text-xs font-bold uppercase tracking-widest flex items-center gap-1" style={{ color }}>
+                <span>{icon}</span>{label}
+              </div>
+              {content}
             </div>
-          </div>
-          <div className="stat-box text-center">
-            <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>CMB</div>
-            <div className="text-xl font-bold" style={{ color: 'var(--text)' }}>{formatMod(cmb)}</div>
-          </div>
-          <div className="stat-box text-center">
-            <div className="text-xs mb-1" style={{ color: 'var(--text-dim)' }}>CMD</div>
-            <div className="text-xl font-bold" style={{ color: 'var(--text)' }}>{cmd}</div>
-          </div>
+          ))}
         </div>
 
         {/* Saving Throws */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { key: 'fort', label: 'Fortitude', mod: conMod, total: totalFort, buffVal: bt.fort ?? 0, flashRef: fortFlashRef },
-            { key: 'ref',  label: 'Reflex',    mod: dexMod, total: totalRef,  buffVal: bt.ref  ?? 0, flashRef: refFlashRef  },
-            { key: 'will', label: 'Will',       mod: wisMod, total: totalWill, buffVal: bt.will ?? 0, flashRef: willFlashRef },
-          ].map(({ key, label, mod, total, buffVal, flashRef }) => (
-            <div key={key} ref={flashRef} className="stat-box text-center" style={{ borderRadius: '6px' }}>
-              <div className="text-xs font-bold mb-1 flex items-center justify-center gap-1" style={{ color: 'var(--accent)' }}>
-                {label} <BuffBadge val={buffVal} />
+            { key: 'fort', label: 'Fort',  icon: '💪', mod: conMod, total: totalFort, buffVal: bt.fort ?? 0, flashRef: fortFlashRef, color: '#f59e0b' },
+            { key: 'ref',  label: 'Reflex', icon: '🏃', mod: dexMod, total: totalRef,  buffVal: bt.ref  ?? 0, flashRef: refFlashRef,  color: '#22c55e' },
+            { key: 'will', label: 'Will',   icon: '🔮', mod: wisMod, total: totalWill, buffVal: bt.will ?? 0, flashRef: willFlashRef, color: '#a855f7' },
+          ].map(({ key, label, icon, mod, total, buffVal, flashRef, color }) => (
+            <div key={key} ref={flashRef} className="flex flex-col rounded-xl overflow-hidden"
+              style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid var(--bg-border)`, borderTop: `3px solid ${color}` }}>
+              {/* Header */}
+              <div className="flex flex-col items-center justify-center py-3"
+                style={{ backgroundColor: `color-mix(in srgb, ${color} 8%, var(--bg-darker))` }}>
+                <div className="text-xs font-bold uppercase tracking-widest flex items-center gap-1 mb-1" style={{ color }}>
+                  {icon} {label} <BuffBadge val={buffVal} />
+                </div>
+                <div className="font-bold leading-none" style={{ fontSize: '2rem', color, fontFamily: 'Georgia, serif' }}>{formatMod(total)}</div>
               </div>
-              <div className="text-2xl font-bold mb-2" style={{ color: 'var(--text)' }}>{formatMod(total)}</div>
-
-              {/* aligned rows: label left, value right — all same width */}
-              <div className="text-xs space-y-1" style={{ color: 'var(--text-faint)' }}>
+              {/* Breakdown */}
+              <div className="px-2 py-2 text-xs space-y-1" style={{ color: 'var(--text-faint)' }}>
                 {[
-                  { label: 'Ability', el: <span style={{ color: 'var(--text-dim)' }}>{formatMod(mod)}</span> },
-                  { label: 'Base',    el: computedSaveBases
-                      ? <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>+{computedSaveBases[key]} <span style={{ color: 'var(--text-faint)', fontWeight: 'normal' }}>(auto)</span></span>
+                  { label: 'Ability', el: <span style={{ color: 'var(--text-dim)', fontWeight: 'bold' }}>{formatMod(mod)}</span> },
+                  { label: 'Base', el: computedSaveBases
+                      ? <span style={{ color, fontWeight: 'bold' }}>+{computedSaveBases[key]} <span style={{ color: 'var(--text-faint)', fontWeight: 'normal' }}>(auto)</span></span>
                       : <SpinnerInput value={saves[key]?.base ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], base: v } })} width="w-10" />
                   },
                   { label: 'Enhance', el: <SpinnerInput value={saves[key]?.enhance ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], enhance: v } })} width="w-10" /> },
                   { label: 'Misc',    el: <SpinnerInput value={saves[key]?.misc    ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], misc:    v } })} width="w-10" /> },
                 ].map(({ label: lbl, el }) => (
-                  <div key={lbl} className="flex items-center justify-between gap-2 px-1">
-                    <span style={{ color: 'var(--text-faint)', minWidth: '3rem', textAlign: 'left' }}>{lbl}</span>
+                  <div key={lbl} className="flex items-center justify-between gap-1">
+                    <span style={{ color: 'var(--text-faint)', minWidth: '2.8rem' }}>{lbl}</span>
                     <div className="flex justify-end">{el}</div>
                   </div>
                 ))}
-                <div className="px-1 pt-0.5">
-                  <input
-                    type="text"
-                    value={saves[key]?.notes ?? ''}
+                <div className="pt-0.5">
+                  <input type="text" value={saves[key]?.notes ?? ''}
                     onChange={e => onChange('saves', { ...saves, [key]: { ...saves[key], notes: e.target.value } })}
                     placeholder="notes..."
                     className="w-full rounded px-1 py-0.5 text-xs focus:outline-none"
-                    style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: 'var(--text-dim)' }}
+                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)', color: 'var(--text-dim)' }}
                   />
                 </div>
               </div>
