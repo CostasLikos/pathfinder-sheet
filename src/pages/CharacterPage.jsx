@@ -19,6 +19,18 @@ import SettingsPanel from '../components/SettingsPanel'
 
 const TABS = ['Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Helper', 'Notes', '📌 Dashboard']
 
+const MOBILE_NAV = [
+  { tab: 'Overview',      icon: '👤',  label: 'Overview' },
+  { tab: 'Attacks',       icon: '⚔️',  label: 'Attacks'  },
+  { tab: 'Skills',        icon: '📊',  label: 'Skills'   },
+  { tab: 'Feats & Traits',icon: '✨',  label: 'Feats'    },
+  { tab: 'Helper',        icon: '🧪',  label: 'Helper'   },
+  { tab: 'Spells',        icon: '🔮',  label: 'Spells'   },
+  { tab: 'Equipment',     icon: '🎒',  label: 'Items'    },
+  { tab: 'Notes',         icon: '📝',  label: 'Notes'    },
+  { tab: '📌 Dashboard',  icon: '📌',  label: 'Board'    },
+]
+
 export default function CharacterPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -222,12 +234,12 @@ export default function CharacterPage() {
             </div>
           </div>
           <div className="flex gap-2 flex-shrink-0 relative z-10">
-            <button onClick={() => exportCharacter(id)} className="btn-secondary text-xs py-1 px-3">Export</button>
+            <button onClick={() => exportCharacter(id)} className="btn-secondary text-xs py-1 px-3 hidden md:block">Export</button>
             <button onClick={() => setSettingsOpen(true)} className="btn-secondary text-xs py-1 px-3" title="Settings">⚙️</button>
           </div>
         </div>
 
-        <div className="tab-bar px-4 flex gap-0 overflow-x-auto">
+        <div className="desktop-tab-bar tab-bar px-4 flex gap-0 overflow-x-auto">
           {TABS.map(tab => {
             const tabPulse = (tab === 'Overview' && lusBump) ||
                              (tab === 'Skills' && lusRanks) ||
@@ -367,6 +379,28 @@ export default function CharacterPage() {
           </div>
         )}
       </div>
+
+      {/* Mobile bottom navigation */}
+      <nav className="mobile-bottom-nav">
+        {MOBILE_NAV.map(({ tab, icon, label }) => {
+          const pulse = (tab === 'Overview' && lusBump) ||
+                        (tab === 'Skills' && lusRanks) ||
+                        (tab === 'Feats & Traits' && lusFeat)
+          return (
+            <button
+              key={tab}
+              className={`nav-item ${activeTab === tab ? 'active' : ''} ${pulse && activeTab !== tab ? 'level-up-pulse' : ''}`}
+              onClick={() => handleTabChange(tab)}
+            >
+              <span className="nav-icon">{icon}</span>
+              {label}
+              {pulse && activeTab !== tab && (
+                <span style={{ position: 'absolute', top: '4px', right: '6px', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e' }} />
+              )}
+            </button>
+          )
+        })}
+      </nav>
     </div>
   )
 }

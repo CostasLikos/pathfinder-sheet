@@ -184,3 +184,79 @@ body {
 }
 .flash-positive { animation: flash-positive 0.7s ease-out; }
 .flash-negative { animation: flash-negative 0.7s ease-out; }
+
+/* ── Mobile bottom nav ───────────────────────────────────── */
+.mobile-bottom-nav {
+  display: none;
+}
+@media (max-width: 767px) {
+  /* Show bottom nav, hide top tab bar */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background-color: var(--bg-surface);
+    border-top: 1px solid var(--bg-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mobile-bottom-nav::-webkit-scrollbar { display: none; }
+
+  .mobile-bottom-nav .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 64px;
+    padding: 6px 4px 10px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--text-faint);
+    border-top: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+    position: relative;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    white-space: nowrap;
+  }
+  .mobile-bottom-nav .nav-item.active {
+    color: var(--accent);
+    border-top-color: var(--accent);
+  }
+  .mobile-bottom-nav .nav-item .nav-icon {
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+    line-height: 1;
+  }
+
+  /* Hide the desktop tab bar on mobile */
+  .desktop-tab-bar { display: none !important; }
+
+  /* Add padding so content isn't hidden under bottom nav */
+  .tab-content { padding-bottom: 72px !important; }
+
+  /* Prevent text overflow */
+  .card * { overflow-wrap: break-word; word-break: break-word; }
+
+  /* Larger tap targets for +/- buttons on mobile */
+  button.spinner-btn {
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  /* Prevent iOS auto-zoom on inputs (needs font-size >= 16px) */
+  input[type="number"],
+  input[type="text"],
+  textarea {
+    font-size: max(16px, 0.875rem) !important;
+  }
+}

@@ -1,15 +1,10 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState } from 'react'
 import { SKILLS, DEFAULT_SKILL_ORDER, abilityMod, formatMod, computeClassTotals } from '../../data/pf1eData'
 import PinButton from '../PinButton'
 
 const ABILITY_OPTIONS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
-
-// Build a lookup map from key → skill definition
 const SKILL_MAP = Object.fromEntries(SKILLS.map(s => [s.key, s]))
-
-// Skills affected by Armor Check Penalty (PF1e rules)
 const ACP_SKILLS = new Set(['acrobatics','climb','escapeArtist','fly','ride','sleightOfHand','stealth','swim'])
-// Swim gets double ACP
 const ACP_DOUBLE = new Set(['swim'])
 
 export default function Skills({ character, onChange, pinnedSkills = [], onToggleSkillPin, armorCheckPenalty = 0, buffTotals = {}, pendingRanks = 0 }) {
@@ -19,20 +14,26 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
     ? computeClassTotals(character.classes).totalLevel
     : (character.level || 1)
 
-  // effective ability scores after buffs/debuffs
   const effAbilities = Object.fromEntries(
     Object.keys(abilities).map(k => [k, (abilities[k] ?? 10) + (buffTotals[k] ?? 0)])
   )
 
-  // Skill order stored in character, falls back to default
   const skillOrder = character.skillOrder ?? DEFAULT_SKILL_ORDER
 
   const dragKey = useRef(null)
   const dragOverKey = useRef(null)
   const [dragging, setDragging] = useState(null)
   const [tooltip, setTooltip] = useState(null)
+  const longPressTimer = useRef(null)
+  const hideTimer = useRef(null)
 
-  // ── helpers ──────────────────────────────────────────────────────────────
+  const showTooltip = (key) => {
+    clearTimeout(hideTimer.current)
+    setTooltip(key)
+  }
+  const hideTooltip = () => {
+    hideTimer.current = setTimeout(() => setTooltip(null), 120)
+  }
 
   const getSkillData = (key) => skills[key] || {}
 
@@ -43,39 +44,32 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
   }
 
   const getTotal = (skill) => {
-    const s     = getSkillData(skill.key)
-    const ab    = s.ability ?? skill.ability
-    const ranks = s.ranks ?? 0
-    const mod   = abilityMod(effAbilities[ab] ?? 10)
-    const isCS  = s.classSkill ?? false
-    const misc  = s.misc ?? 0
+    const s      = getSkillData(skill.key)
+    const ab     = s.ability ?? skill.ability
+    const ranks  = s.ranks ?? 0
+    const mod    = abilityMod(effAbilities[ab] ?? 10)
+    const isCS   = s.classSkill ?? false
+    const misc   = s.misc ?? 0
     const csBonus = isCS && ranks > 0 ? 3 : 0
-    const acp   = ACP_SKILLS.has(skill.key) ? (ACP_DOUBLE.has(skill.key) ? armorCheckPenalty * 2 : armorCheckPenalty) : 0
+    const acp    = ACP_SKILLS.has(skill.key) ? (ACP_DOUBLE.has(skill.key) ? armorCheckPenalty * 2 : armorCheckPenalty) : 0
     const skillBuff = skill.key === 'stealth' ? (buffTotals.stealth ?? 0)
                     : skill.key === 'fly'     ? (buffTotals.fly ?? 0)
                     : 0
     return ranks + mod + csBonus + misc - acp + skillBuff
   }
 
-  const getACP = (skill) => ACP_SKILLS.has(skill.key) ? (ACP_DOUBLE.has(skill.key) ? armorCheckPenalty * 2 : armorCheckPenalty) : 0
+  const getACP = (skill) => ACP_SKILLS.has(skill.key)
+    ? (ACP_DOUBLE.has(skill.key) ? armorCheckPenalty * 2 : armorCheckPenalty)
+    : 0
 
   const updateSkill = (key, field, value) => {
     onChange('skills', { ...skills, [key]: { ...(skills[key] || {}), [field]: value } })
   }
 
-  // ── drag and drop ─────────────────────────────────────────────────────────
-
-  const onDragStart = (key) => {
-    dragKey.current = key
-    setDragging(key)
-  }
-
-  const onDragOver = (e, key) => {
-    e.preventDefault()
-    dragOverKey.current = key
-  }
-
-  const onDrop = () => {
+  // ── drag ──────────────────────────────────────────────────────────────────
+  const onDragStart = (key) => { dragKey.current = key; setDragging(key) }
+  const onDragOver  = (e, key) => { e.preventDefault(); dragOverKey.current = key }
+  const onDrop      = () => {
     if (!dragKey.current || dragKey.current === dragOverKey.current) return
     const order = [...skillOrder]
     const fromIdx = order.indexOf(dragKey.current)
@@ -84,25 +78,24 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
     order.splice(fromIdx, 1)
     order.splice(toIdx, 0, dragKey.current)
     onChange('skillOrder', order)
-    dragKey.current = null
-    dragOverKey.current = null
-    setDragging(null)
+    dragKey.current = null; dragOverKey.current = null; setDragging(null)
   }
-
   const onDragEnd = () => setDragging(null)
 
-  // ── totals for header ─────────────────────────────────────────────────────
+  // ── long press (mobile) ───────────────────────────────────────────────────
+  const startLongPress = (key) => {
+    longPressTimer.current = setTimeout(() => setTooltip(key), 500)
+  }
+  const cancelLongPress = () => {
+    clearTimeout(longPressTimer.current)
+  }
 
   const totalRanks = Object.values(skills).reduce((s, v) => s + (v.ranks ?? 0), 0)
-
-  // ── render ────────────────────────────────────────────────────────────────
-
-  const orderedSkills = skillOrder
-    .map(key => SKILL_MAP[key])
-    .filter(Boolean)
+  const orderedSkills = skillOrder.map(key => SKILL_MAP[key]).filter(Boolean)
 
   return (
     <div className="card">
+      {/* Header */}
       <div className="flex items-center justify-between mb-1">
         <h2 className="section-title mb-0">Skills</h2>
         <div className="flex items-center gap-2">
@@ -112,43 +105,58 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
               +{pendingRanks} rank{pendingRanks > 1 ? 's' : ''} to spend
             </span>
           )}
-          <span className="text-xs" style={{ color: 'var(--text-faint)' }}>
+          <span className="text-xs hidden md:inline" style={{ color: 'var(--text-faint)' }}>
             {totalRanks} spent · drag ☰ to reorder
+          </span>
+          <span className="text-xs md:hidden" style={{ color: 'var(--text-faint)' }}>
+            {totalRanks} ranks used
           </span>
         </div>
       </div>
       <div className="text-xs mb-3" style={{ color: 'var(--text-faint)' }}>
-        SC = Class Skill (+3 when trained) · * = Trained Only
+        <span className="hidden md:inline">CS = Class Skill (+3 when trained) · * = Trained Only · Tap total for breakdown</span>
+        <span className="md:hidden">CS = Class Skill · * = Trained Only · Hold total for breakdown</span>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm" style={{ borderCollapse: 'separate', borderSpacing: '0 2px' }}>
           <thead>
             <tr className="text-xs" style={{ color: 'var(--text-dim)' }}>
-              <th className="w-5 pb-2" />
-              <th className="w-5 pb-2" />
-              <th className="text-left pb-2 w-5" title="Class Skill (+3 bonus when trained)">SC</th>
+              {/* Drag + Pin hidden on mobile */}
+              <th className="w-5 pb-2 hidden md:table-cell" />
+              <th className="w-5 pb-2 hidden md:table-cell" />
+              <th className="text-left pb-2 w-5" title="Class Skill (+3 bonus when trained)">CS</th>
               <th className="text-left pb-2">Skill</th>
-              <th className="text-center pb-2 w-10">Ab</th>
-              <th className="text-center pb-2 w-10">Mod</th>
+              {/* Ab + Mod combined on mobile */}
+              <th className="text-center pb-2 w-16 hidden md:table-cell">Ability</th>
+              <th className="text-center pb-2 w-10 hidden md:table-cell">Mod</th>
+              <th className="text-center pb-2 w-8 md:hidden" title="Ability Modifier">Mod</th>
               <th className={`text-center pb-2 w-16 ${pendingRanks > 0 ? 'level-up-pulse' : ''}`}
                 style={pendingRanks > 0 ? { color: '#22c55e', borderRadius: '4px' } : {}}>
-                Ranks</th>
-              <th className="text-center pb-2 w-12">Misc</th>
+                Ranks
+              </th>
               <th className="text-center pb-2 w-14">Total</th>
             </tr>
           </thead>
           <tbody>
             {orderedSkills.map((skill, rowIndex) => {
-              const s      = getSkillData(skill.key)
-              const isCS   = s.classSkill ?? false
-              const ab     = s.ability ?? skill.ability
-              const mod    = abilityMod(effAbilities[ab] ?? 10)
-              const total  = getTotal(skill)
-              const acp    = getACP(skill)
-              const isDrag = dragging === skill.key
-              const isDragOver = dragOverKey.current === skill.key && dragging && dragging !== skill.key
-              const isEven = rowIndex % 2 === 0
+              const s       = getSkillData(skill.key)
+              const isCS    = s.classSkill ?? false
+              const ab      = s.ability ?? skill.ability
+              const mod     = abilityMod(effAbilities[ab] ?? 10)
+              const total   = getTotal(skill)
+              const acp     = getACP(skill)
+              const misc    = s.misc ?? 0
+              const ranks   = s.ranks ?? 0
+              const csBonus = isCS && ranks > 0 ? 3 : 0
+              const skillBuff = skill.key === 'stealth' ? (buffTotals.stealth ?? 0)
+                              : skill.key === 'fly'     ? (buffTotals.fly ?? 0)
+                              : 0
+              const isDrag  = dragging === skill.key
+              const isEven  = rowIndex % 2 === 0
+              const showTip = tooltip === skill.key
+
+              const rowBg = isEven ? 'var(--bg-darker)' : 'var(--bg-surface)'
 
               return (
                 <tr
@@ -160,22 +168,17 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                   onDragEnd={onDragEnd}
                   style={{
                     opacity: isDrag ? 0.4 : 1,
-                    cursor: 'grab',
-                    backgroundColor: isDragOver
-                      ? 'var(--accent-dim)'
-                      : isEven
-                      ? 'var(--bg-darker)'
-                      : 'var(--bg-surface)',
+                    backgroundColor: dragOverKey.current === skill.key && dragging && dragging !== skill.key
+                      ? 'var(--accent-dim)' : rowBg,
                     borderBottom: '1px solid var(--bg-border)',
                   }}
                 >
-                  {/* Drag handle */}
-                  <td className="pr-1 text-center select-none px-1" style={{ color: 'var(--text-faint)', fontSize: '10px' }}>
-                    ☰
-                  </td>
+                  {/* Drag handle — desktop only */}
+                  <td className="pr-1 text-center select-none px-1 hidden md:table-cell"
+                    style={{ color: 'var(--text-faint)', fontSize: '10px', cursor: 'grab' }}>☰</td>
 
-                  {/* Pin button */}
-                  <td className="text-center px-1">
+                  {/* Pin — desktop only */}
+                  <td className="text-center px-1 hidden md:table-cell">
                     {onToggleSkillPin && (
                       <PinButton
                         pinned={pinnedSkills.includes(skill.key)}
@@ -195,7 +198,7 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                     />
                   </td>
 
-                  {/* Name — editable for customizable/custom skills */}
+                  {/* Name */}
                   <td className="py-1.5 pr-2">
                     {(skill.customizable || skill.custom) ? (
                       <div className="flex items-center gap-1">
@@ -209,7 +212,7 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                           placeholder={skill.custom ? 'Skill name...' : '(specialty)'}
                           className="text-xs px-1 py-0 rounded focus:outline-none flex-1 min-w-0"
                           style={{
-                            backgroundColor: isEven ? 'var(--bg-darker)' : 'var(--bg-surface)',
+                            backgroundColor: rowBg,
                             border: '1px solid var(--bg-border)',
                             color: 'var(--text)',
                           }}
@@ -225,8 +228,8 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                     )}
                   </td>
 
-                  {/* Ability selector — editable for custom skills */}
-                  <td className="py-1.5 text-center">
+                  {/* Ability — desktop shows selector + label, mobile shows just mod */}
+                  <td className="py-1.5 text-center hidden md:table-cell">
                     {skill.custom ? (
                       <select
                         value={ab}
@@ -241,9 +244,20 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                     )}
                   </td>
 
-                  {/* Ability mod */}
-                  <td className="py-1.5 text-center text-xs" style={{ color: mod >= 0 ? 'var(--positive)' : '#ef4444' }}>
+                  {/* Ability mod — desktop */}
+                  <td className="py-1.5 text-center text-xs hidden md:table-cell"
+                    style={{ color: mod >= 0 ? 'var(--positive)' : '#ef4444' }}>
                     {formatMod(mod)}
+                  </td>
+
+                  {/* Ability mod — mobile (compact: "DEX +2") */}
+                  <td className="py-1.5 text-center md:hidden">
+                    <div className="flex flex-col items-center leading-none">
+                      <span className="text-xs" style={{ color: 'var(--text-faint)', fontSize: '0.6rem' }}>{ab}</span>
+                      <span className="text-xs font-bold" style={{ color: mod >= 0 ? 'var(--positive)' : '#ef4444' }}>
+                        {formatMod(mod)}
+                      </span>
+                    </div>
                   </td>
 
                   {/* Ranks */}
@@ -251,43 +265,36 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                     <div className="flex items-center justify-center gap-0.5">
                       <button
                         onClick={() => updateSkill(skill.key, 'ranks', Math.max(0, (s.ranks ?? 0) - 1))}
-                        className="w-4 h-4 flex items-center justify-center rounded text-xs"
-                        style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}
+                        className="flex items-center justify-center rounded text-xs"
+                        style={{ width: '20px', height: '20px', backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}
                       >−</button>
                       <input
                         type="number"
                         value={s.ranks ?? 0}
                         min={0}
                         onChange={e => updateSkill(skill.key, 'ranks', Math.max(0, Math.min(maxRanks, Number(e.target.value))))}
-                        className="w-10 text-center text-sm font-bold focus:outline-none rounded"
-                        style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text)', border: '1px solid var(--bg-border)' }}
+                        className="text-center text-sm font-bold focus:outline-none rounded"
+                        style={{ width: '36px', backgroundColor: 'var(--bg-surface)', color: 'var(--text)', border: '1px solid var(--bg-border)' }}
                       />
                       <button
                         onClick={() => updateSkill(skill.key, 'ranks', Math.min(maxRanks, (s.ranks ?? 0) + 1))}
-                        className="w-4 h-4 flex items-center justify-center rounded text-xs"
-                        style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}
+                        className="flex items-center justify-center rounded text-xs"
+                        style={{ width: '20px', height: '20px', backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}
                       >+</button>
                     </div>
                   </td>
 
-                  {/* Misc */}
-                  <td className="py-1.5 text-center">
-                    <input
-                      type="number"
-                      value={s.misc ?? 0}
-                      onChange={e => updateSkill(skill.key, 'misc', Number(e.target.value))}
-                      className="w-10 text-center text-sm focus:outline-none rounded"
-                      style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}
-                    />
-                  </td>
-
-                  {/* Total + breakdown tooltip */}
+                  {/* Total with breakdown tooltip */}
                   <td className="py-1.5 text-center">
                     <div className="relative inline-block"
-                      onMouseEnter={() => setTooltip(skill.key)}
-                      onMouseLeave={() => setTooltip(null)}>
+                      onMouseEnter={() => showTooltip(skill.key)}
+                      onMouseLeave={hideTooltip}
+                      onTouchStart={() => startLongPress(skill.key)}
+                      onTouchEnd={() => { cancelLongPress(); setTimeout(() => setTooltip(null), 2500) }}
+                      onTouchCancel={cancelLongPress}
+                    >
                       <span
-                        className="font-bold text-sm px-2 py-0.5 rounded cursor-help"
+                        className="font-bold text-sm px-2 py-0.5 rounded cursor-help select-none"
                         style={{
                           backgroundColor: 'var(--bg-darker)',
                           color: total >= 10 ? 'var(--positive)' : total >= 5 ? 'var(--accent)' : 'var(--text)',
@@ -296,46 +303,107 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
                       >
                         {formatMod(total)}
                         {acp > 0 && <span className="ml-0.5 text-xs" style={{ color: 'var(--warning)' }}>⚔</span>}
+                        {misc !== 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: 'var(--text-faint)', verticalAlign: 'super' }}>M</span>}
+                        {skillBuff > 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: 'var(--positive)', verticalAlign: 'super' }}>B</span>}
+                        {skillBuff < 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: '#ef4444', verticalAlign: 'super' }}>D</span>}
+                        {(buffTotals[ab] ?? 0) !== 0 && <span className="ml-0.5" style={{ fontSize: '0.55rem', color: (buffTotals[ab] ?? 0) > 0 ? 'var(--positive)' : '#ef4444', verticalAlign: 'super' }}>{(buffTotals[ab] ?? 0) > 0 ? 'B' : 'D'}</span>}
                       </span>
 
-                      {tooltip === skill.key && (() => {
-                        const ranks    = s.ranks ?? 0
-                        const misc     = s.misc ?? 0
-                        const csBonus  = isCS && ranks > 0 ? 3 : 0
-                        const skillBuff = skill.key === 'stealth' ? (buffTotals.stealth ?? 0)
-                                        : skill.key === 'fly'     ? (buffTotals.fly ?? 0)
-                                        : 0
+                      {/* Breakdown tooltip */}
+                      {showTip && (() => {
+                        const buffAbStr  = buffTotals[ab] ?? 0
                         const skillBuffLabel = skill.key === 'fly' ? 'Size (Fly)' : 'Size (Stealth)'
-                        const buffStr  = buffTotals[ab] ?? 0
                         const lines = [
                           { label: `${ab.toUpperCase()} mod`, value: mod, always: true },
                           { label: 'Ranks', value: ranks, always: true },
                           { label: 'Class Skill', value: csBonus, always: false },
-                          { label: 'Misc', value: misc, always: false },
+                          { label: 'Misc', value: misc, always: false, editable: true },
                           acp !== 0 && { label: 'Armor Penalty', value: -acp, always: false },
-                          buffStr !== 0 && { label: `${ab.toUpperCase()} buff`, value: Math.floor(buffStr / 2), always: false },
+                          buffAbStr !== 0 && { label: `${ab.toUpperCase()} buff`, value: Math.floor(buffAbStr / 2), always: false },
                           skillBuff !== 0 && { label: skillBuffLabel, value: skillBuff, always: false },
                         ].filter(Boolean).filter(l => l.always || l.value !== 0)
+
                         return (
-                          <div className={`absolute z-50 right-0 w-44 rounded-lg p-2 shadow-2xl pointer-events-none ${rowIndex < 3 ? 'top-full mt-2' : 'bottom-full mb-2'}`}
-                            style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)', color: 'var(--text-dim)', fontSize: '0.72rem', minWidth: '160px' }}>
-                            <div className="font-bold mb-1.5 text-xs uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+                          <div
+                            className={`absolute z-50 right-0 rounded-lg shadow-2xl pointer-events-auto ${rowIndex < 4 ? 'top-full mt-2' : 'bottom-full mb-2'}`}
+                            style={{
+                              backgroundColor: 'var(--bg-darker)',
+                              border: '1px solid var(--accent)',
+                              color: 'var(--text-dim)',
+                              fontSize: '0.72rem',
+                              minWidth: '180px',
+                              padding: '10px',
+                            }}
+                            onMouseEnter={() => showTooltip(skill.key)}
+                            onMouseLeave={hideTooltip}
+                          >
+                            <div className="font-bold mb-2 text-xs uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
                               {getDisplayName(skill)} Breakdown
                             </div>
-                            {lines.map(({ label, value }) => (
-                              <div key={label} className="flex justify-between items-center py-0.5" style={{ borderBottom: '1px solid var(--bg-border)' }}>
+                            {lines.map(({ label, value, editable }) => (
+                              <div key={label} className="flex justify-between items-center py-1" style={{ borderBottom: '1px solid var(--bg-border)' }}>
                                 <span style={{ color: 'var(--text-faint)' }}>{label}</span>
-                                <span className="font-bold" style={{ color: value > 0 ? 'var(--positive)' : value < 0 ? '#ef4444' : 'var(--text-dim)' }}>
-                                  {value > 0 ? `+${value}` : value}
-                                </span>
+                                {editable ? (
+                                  <input
+                                    type="number"
+                                    value={misc}
+                                    onChange={e => updateSkill(skill.key, 'misc', Number(e.target.value))}
+                                    onClick={e => e.stopPropagation()}
+                                    className="text-center font-bold rounded focus:outline-none"
+                                    style={{
+                                      width: '44px',
+                                      backgroundColor: 'var(--bg-surface)',
+                                      border: '1px solid var(--accent)',
+                                      color: value > 0 ? 'var(--positive)' : value < 0 ? '#ef4444' : 'var(--text-dim)',
+                                      fontSize: '0.72rem',
+                                    }}
+                                  />
+                                ) : (
+                                  <span className="font-bold" style={{ color: value > 0 ? 'var(--positive)' : value < 0 ? '#ef4444' : 'var(--text-dim)' }}>
+                                    {value > 0 ? `+${value}` : value}
+                                  </span>
+                                )}
                               </div>
                             ))}
-                            <div className="flex justify-between items-center pt-1 mt-0.5 font-bold text-xs">
+                            {/* Misc row if not already shown (when misc = 0, it's filtered out; still allow editing) */}
+                            {misc === 0 && (
+                              <div className="flex justify-between items-center py-1" style={{ borderBottom: '1px solid var(--bg-border)' }}>
+                                <span style={{ color: 'var(--text-faint)' }}>Misc</span>
+                                <input
+                                  type="number"
+                                  value={misc}
+                                  onChange={e => updateSkill(skill.key, 'misc', Number(e.target.value))}
+                                  onClick={e => e.stopPropagation()}
+                                  className="text-center font-bold rounded focus:outline-none"
+                                  style={{
+                                    width: '44px',
+                                    backgroundColor: 'var(--bg-surface)',
+                                    border: '1px solid var(--bg-border)',
+                                    color: 'var(--text-dim)',
+                                    fontSize: '0.72rem',
+                                  }}
+                                />
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center pt-1.5 mt-0.5 font-bold text-xs">
                               <span style={{ color: 'var(--text-dim)' }}>Total</span>
                               <span style={{ color: total >= 10 ? 'var(--positive)' : total >= 5 ? 'var(--accent)' : 'var(--text)' }}>
                                 {formatMod(total)}
                               </span>
                             </div>
+                            {onToggleSkillPin && (
+                              <button
+                                onClick={e => { e.stopPropagation(); onToggleSkillPin(skill.key) }}
+                                className="mt-2 w-full text-xs py-1 rounded transition-all"
+                                style={{
+                                  backgroundColor: pinnedSkills.includes(skill.key) ? 'var(--accent-dim)' : 'var(--bg-surface)',
+                                  color: pinnedSkills.includes(skill.key) ? 'var(--accent)' : 'var(--text-faint)',
+                                  border: `1px solid ${pinnedSkills.includes(skill.key) ? 'var(--accent)' : 'var(--bg-border)'}`,
+                                }}
+                              >
+                                {pinnedSkills.includes(skill.key) ? '📌 Pinned to Dashboard' : '📌 Pin to Dashboard'}
+                              </button>
+                            )}
                           </div>
                         )
                       })()}

@@ -177,17 +177,31 @@ function CombatWidget({ character }) {
 
 function AttacksWidget({ character }) {
   const weapons = character.weapons ?? []
+  const [hovered, setHovered] = useState(null)
   if (!weapons.length) return <p className="text-xs text-center py-2" style={{ color: 'var(--text-faint)' }}>No weapons added.</p>
   return (
     <div className="space-y-2">
       {weapons.map((w, i) => (
-        <div key={i} className="p-2 rounded" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
-          <div className="font-semibold text-sm" style={{ color: 'var(--text)' }}>{w.name || 'Unnamed Weapon'}</div>
-          <div className="text-xs flex gap-3 mt-0.5" style={{ color: 'var(--text-dim)' }}>
-            {w.attackBonus !== undefined && <span>Atk: {formatMod(w.attackBonus ?? 0)}</span>}
-            {w.damage && <span>Dmg: {w.damage}</span>}
-            {w.critical && <span>Crit: {w.critical}</span>}
+        <div key={i} className="relative p-2 rounded cursor-default"
+          style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}
+          onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-sm" style={{ color: 'var(--text)' }}>{w.name || 'Unnamed Weapon'}</span>
+            <span className="text-sm font-bold" style={{ color: 'var(--accent)' }}>{formatMod(w.attackBonus ?? 0)}</span>
           </div>
+          <div className="text-xs mt-0.5" style={{ color: 'var(--text-dim)' }}>
+            {w.damage && <span>{w.damage}</span>}
+            {w.critical && <span className="ml-2" style={{ color: 'var(--text-faint)' }}>× {w.critical}</span>}
+          </div>
+          {hovered === i && (w.type || w.range || w.notes || w.special) && (
+            <div className="absolute z-50 left-0 top-full mt-1 rounded-lg p-2 shadow-2xl pointer-events-none"
+              style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)', color: 'var(--text-dim)', fontSize: '0.72rem', minWidth: '180px', maxWidth: '260px', lineHeight: 1.6 }}>
+              {w.type    && <div><span style={{ color: 'var(--text-faint)' }}>Type: </span>{w.type}</div>}
+              {w.range   && <div><span style={{ color: 'var(--text-faint)' }}>Range: </span>{w.range}</div>}
+              {w.special && <div><span style={{ color: 'var(--text-faint)' }}>Special: </span>{w.special}</div>}
+              {w.notes   && <div className="mt-1" style={{ color: 'var(--text-dim)' }}>{w.notes}</div>}
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -281,14 +295,29 @@ function BardicWidget({ character, onChange }) {
   )
 }
 
+function HoverTooltip({ text }) {
+  if (!text) return null
+  return (
+    <div className="absolute z-50 left-0 top-full mt-1 rounded-lg p-2 shadow-2xl pointer-events-none"
+      style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)', color: 'var(--text-dim)', fontSize: '0.72rem', minWidth: '180px', maxWidth: '260px', lineHeight: 1.5 }}>
+      {text}
+    </div>
+  )
+}
+
 function FeatsWidget({ character }) {
   const feats = character.feats ?? []
+  const [hovered, setHovered] = useState(null)
   if (!feats.length) return <p className="text-xs text-center py-2" style={{ color: 'var(--text-faint)' }}>No feats added.</p>
   return (
     <div className="space-y-1">
       {feats.map((f, i) => (
-        <div key={i} className="text-xs py-1 px-2 rounded" style={{ backgroundColor: i%2===0?'var(--bg-darker)':'var(--bg-surface)', color: 'var(--text)' }}>
-          {f.name}
+        <div key={i} className="relative text-xs py-1 px-2 rounded cursor-default"
+          style={{ backgroundColor: i%2===0?'var(--bg-darker)':'var(--bg-surface)', color: 'var(--text)' }}
+          onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+          <span className="font-semibold">{f.name}</span>
+          {f.type && <span className="ml-1 text-xs" style={{ color: 'var(--text-faint)' }}>({f.type})</span>}
+          {hovered === i && f.desc && <HoverTooltip text={f.desc} />}
         </div>
       ))}
     </div>
@@ -297,12 +326,17 @@ function FeatsWidget({ character }) {
 
 function TraitsWidget({ character }) {
   const traits = character.traits ?? []
+  const [hovered, setHovered] = useState(null)
   if (!traits.length) return <p className="text-xs text-center py-2" style={{ color: 'var(--text-faint)' }}>No traits added.</p>
   return (
     <div className="space-y-1">
       {traits.map((t, i) => (
-        <div key={i} className="text-xs py-1 px-2 rounded" style={{ backgroundColor: i%2===0?'var(--bg-darker)':'var(--bg-surface)', color: 'var(--text)' }}>
-          {t.name}
+        <div key={i} className="relative text-xs py-1 px-2 rounded cursor-default"
+          style={{ backgroundColor: i%2===0?'var(--bg-darker)':'var(--bg-surface)', color: 'var(--text)' }}
+          onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+          <span className="font-semibold">{t.name}</span>
+          {t.type && <span className="ml-1 text-xs" style={{ color: 'var(--accent)', opacity: 0.7 }}>({t.type})</span>}
+          {hovered === i && t.desc && <HoverTooltip text={t.desc} />}
         </div>
       ))}
     </div>
@@ -412,20 +446,42 @@ function BasicInfoWidget({ character }) {
 
 function StatBuffsWidget({ character, onChange }) {
   const buffs = character.statBuffs ?? []
+  const [hovered, setHovered] = useState(null)
   if (!buffs.length) return <p className="text-xs text-center py-2" style={{ color: 'var(--text-faint)' }}>No stat buffs added.</p>
   const toggle = (id) => onChange('statBuffs', buffs.map(b => b.id === id ? { ...b, active: !b.active } : b))
-  const STAT_KEYS = ['str','dex','con','int','wis','cha','ac','fort','ref','will','attackRoll','damage','hp']
+  const STAT_KEYS = ['str','dex','con','int','wis','cha','ac','fort','ref','will','attackRoll','damage','hp','cmb','initiative','stealth','fly']
   return (
     <div className="space-y-1">
       {buffs.map(b => {
         const activeMods = STAT_KEYS.filter(k => (b.mods?.[k] ?? 0) !== 0)
+        const preview = activeMods.slice(0, 2).map(k => `${b.mods[k]>0?'+':''}${b.mods[k]} ${k}`).join(', ')
+        const hasMore = activeMods.length > 2
         return (
-          <div key={b.id} className="flex items-center gap-2 p-2 rounded text-xs" style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid ${b.active ? 'var(--accent)' : 'var(--bg-border)'}`, opacity: b.active ? 1 : 0.5 }}>
+          <div key={b.id} className="relative flex items-center gap-2 p-2 rounded text-xs"
+            style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid ${b.active ? 'var(--accent)' : 'var(--bg-border)'}`, opacity: b.active ? 1 : 0.55 }}
+            onMouseEnter={() => setHovered(b.id)} onMouseLeave={() => setHovered(null)}>
             <button onClick={() => toggle(b.id)} className="w-4 h-4 rounded-full flex-shrink-0 border" style={{ backgroundColor: b.active ? 'var(--accent)' : 'transparent', borderColor: 'var(--accent)' }} />
             <span className="flex-1 font-semibold truncate" style={{ color: 'var(--text)' }}>{b.name}</span>
             <span style={{ color: 'var(--text-faint)' }}>
-              {activeMods.map(k => `${(b.mods[k]>0?'+':'')}${b.mods[k]} ${k}`).join(', ')}
+              {preview}{hasMore && <span style={{ color: 'var(--accent)' }}> +{activeMods.length - 2}</span>}
             </span>
+            {hovered === b.id && activeMods.length > 0 && (
+              <div className="absolute z-50 right-0 top-full mt-1 rounded-lg p-2 shadow-2xl pointer-events-none"
+                style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)', color: 'var(--text-dim)', fontSize: '0.72rem', minWidth: '160px' }}>
+                <div className="font-bold mb-1 uppercase tracking-widest" style={{ color: b.type === 'debuff' ? '#ef4444' : 'var(--accent)', fontSize: '0.65rem' }}>
+                  {b.name} {b.type === 'debuff' ? '(debuff)' : ''}
+                </div>
+                {activeMods.map(k => {
+                  const val = b.mods[k] * (b.type === 'debuff' ? -1 : 1)
+                  return (
+                    <div key={k} className="flex justify-between py-0.5" style={{ borderBottom: '1px solid var(--bg-border)' }}>
+                      <span style={{ color: 'var(--text-faint)' }}>{k}</span>
+                      <span className="font-bold" style={{ color: val > 0 ? 'var(--positive)' : '#ef4444' }}>{val > 0 ? `+${val}` : val}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         )
       })}
@@ -459,6 +515,8 @@ function PinnedSkillsWidget({ character, onUnpin }) {
     return def.name
   }
 
+  const [hovered, setHovered] = useState(null)
+
   if (!pinnedSkills.length)
     return <p className="text-xs text-center py-2" style={{ color: 'var(--text-faint)' }}>Pin individual skills from the Skills tab.</p>
 
@@ -468,14 +526,41 @@ function PinnedSkillsWidget({ character, onUnpin }) {
         const total = getTotal(key)
         const def = SKILL_MAP[key]
         const s = skills[key] || {}
+        const ab = s.ability ?? def?.ability ?? 'str'
+        const mod = abilityMod(abilities[ab] ?? 10)
+        const ranks = s.ranks ?? 0
+        const csBonus = (s.classSkill && ranks > 0) ? 3 : 0
+        const misc = s.misc ?? 0
         return (
-          <div key={key} className="flex items-center gap-2 px-2 py-1.5 rounded text-xs group"
-            style={{ backgroundColor: i%2===0?'var(--bg-darker)':'var(--bg-surface)', border: '1px solid var(--bg-border)' }}>
+          <div key={key} className="relative flex items-center gap-2 px-2 py-1.5 rounded text-xs group"
+            style={{ backgroundColor: i%2===0?'var(--bg-darker)':'var(--bg-surface)', border: '1px solid var(--bg-border)' }}
+            onMouseEnter={() => setHovered(key)} onMouseLeave={() => setHovered(null)}>
             <span className="flex-1 font-semibold" style={{ color: 'var(--text)' }}>{getDisplayName(key)}</span>
-            <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{def?.ability?.toUpperCase()}</span>
-            {s.classSkill && <span className="text-xs" style={{ color: 'var(--accent)' }}>SC</span>}
+            <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{ab.toUpperCase()}</span>
+            {s.classSkill && <span className="text-xs" style={{ color: 'var(--accent)' }}>CS</span>}
             <span className="font-bold w-8 text-right" style={{ color: total >= 0 ? 'var(--positive)' : '#ef4444' }}>{formatMod(total)}</span>
             <button onClick={() => onUnpin(key)} className="opacity-0 group-hover:opacity-100 text-xs" style={{ color: 'var(--text-faint)' }} title="Unpin skill">✕</button>
+            {hovered === key && (
+              <div className="absolute z-50 right-0 top-full mt-1 rounded-lg p-2 shadow-2xl pointer-events-none"
+                style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)', color: 'var(--text-dim)', fontSize: '0.72rem', minWidth: '160px' }}>
+                <div className="font-bold mb-1 uppercase tracking-widest" style={{ color: 'var(--accent)', fontSize: '0.65rem' }}>{getDisplayName(key)} Breakdown</div>
+                {[
+                  [`${ab.toUpperCase()} mod`, mod],
+                  ['Ranks', ranks],
+                  csBonus ? ['Class Skill', csBonus] : null,
+                  misc    ? ['Misc', misc] : null,
+                ].filter(Boolean).map(([lbl, val]) => (
+                  <div key={lbl} className="flex justify-between py-0.5" style={{ borderBottom: '1px solid var(--bg-border)' }}>
+                    <span style={{ color: 'var(--text-faint)' }}>{lbl}</span>
+                    <span className="font-bold" style={{ color: val > 0 ? 'var(--positive)' : val < 0 ? '#ef4444' : 'var(--text-dim)' }}>{val > 0 ? `+${val}` : val}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between pt-1 font-bold" style={{ fontSize: '0.72rem' }}>
+                  <span style={{ color: 'var(--text-dim)' }}>Total</span>
+                  <span style={{ color: total >= 0 ? 'var(--positive)' : '#ef4444' }}>{formatMod(total)}</span>
+                </div>
+              </div>
+            )}
           </div>
         )
       })}
@@ -489,9 +574,9 @@ const DASH_SIZES = [
   { id:'fine',       label:'Fine',       icon:'🔬', acAtk:+8,  cmb:-8  },
   { id:'diminutive', label:'Diminutive', icon:'🐜', acAtk:+4,  cmb:-4  },
   { id:'tiny',       label:'Tiny',       icon:'🐭', acAtk:+2,  cmb:-2  },
-  { id:'small',      label:'Small',      icon:'🧒', acAtk:+1,  cmb:-1  },
+  { id:'small',      label:'Small',      icon:'🐕', acAtk:+1,  cmb:-1  },
   { id:'medium',     label:'Medium',     icon:'🧍', acAtk: 0,  cmb: 0  },
-  { id:'large',      label:'Large',      icon:'🧌', acAtk:-1,  cmb:+1  },
+  { id:'large',      label:'Large',      icon:'🦍', acAtk:-1,  cmb:+1  },
   { id:'huge',       label:'Huge',       icon:'🦖', acAtk:-2,  cmb:+2  },
   { id:'gargantuan', label:'Gargantuan', icon:'🐉', acAtk:-4,  cmb:+4  },
   { id:'colossal',   label:'Colossal',   icon:'🌋', acAtk:-8,  cmb:+8  },
