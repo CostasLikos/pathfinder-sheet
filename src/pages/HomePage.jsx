@@ -11,6 +11,7 @@ export default function HomePage() {
   const { characters, addCharacter, deleteCharacter, exportCharacter, importCharacter } = useCharacterStore()
   const importRef = useRef()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(null) // char id pending delete
   const { activeTheme } = useThemeStore()
 
   // derive accent + bg colors from active theme for the hero
@@ -462,15 +463,25 @@ export default function HomePage() {
                     onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
                     onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
                   >Export</button>
-                  <button onClick={e => {
-                    e.stopPropagation()
-                    if (confirm(`Delete ${char.name || 'this character'}?`)) deleteCharacter(char.id)
-                  }}
-                    className="text-xs py-1 px-3 rounded transition-colors"
-                    style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: '#f87171' }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#450a0a'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--bg-darker)'}
-                  >✕</button>
+                  {confirmDelete === char.id ? (
+                    <>
+                      <button onClick={e => { e.stopPropagation(); deleteCharacter(char.id); setConfirmDelete(null) }}
+                        className="text-xs py-1 px-2 rounded font-bold"
+                        style={{ backgroundColor: '#7f1d1d', border: '1px solid #ef4444', color: '#fca5a5' }}
+                      >Delete</button>
+                      <button onClick={e => { e.stopPropagation(); setConfirmDelete(null) }}
+                        className="text-xs py-1 px-2 rounded"
+                        style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: 'var(--text-dim)' }}
+                      >Cancel</button>
+                    </>
+                  ) : (
+                    <button onClick={e => { e.stopPropagation(); setConfirmDelete(char.id) }}
+                      className="text-xs py-1 px-3 rounded transition-colors"
+                      style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: '#f87171' }}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#450a0a'}
+                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--bg-darker)'}
+                    >✕</button>
+                  )}
                 </div>
               </div>
             ))}
