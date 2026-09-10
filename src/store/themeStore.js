@@ -286,6 +286,28 @@ export const THEMES = {
     }
   },
 
+  crimsonTide: {
+    id: 'crimsonTide',
+    name: 'Crimson Tide',
+    preview: ['#181A2F', '#B4182D'],
+    vars: {
+      '--bg-darker':    '#0e0f1a',
+      '--bg-dark':      '#181A2F',
+      '--bg-surface':   '#242E49',
+      '--bg-border':    '#37415C',
+      '--accent':       '#B4182D',
+      '--accent-dim':   '#54162B',
+      '--accent-hover': '#FDA481',
+      '--text':         '#f5e6e0',
+      '--text-dim':     '#FDA481',
+      '--text-faint':   '#37415C',
+      '--danger':       '#B4182D',
+      '--danger-hover': '#d4203a',
+      '--positive':     '#4a9e7a',
+      '--warning':      '#FDA481',
+    }
+  },
+
   embers: {
     id: 'embers',
     name: 'Embers',
