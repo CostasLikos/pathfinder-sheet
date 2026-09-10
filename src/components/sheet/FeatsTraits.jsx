@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import PinButton from '../PinButton'
 import ALL_FEATS_RAW from '../../data/feats.json'
 
@@ -50,9 +51,9 @@ function FeatLibrary({ onAdd, onClose }) {
   }
   const typeColor = selected ? (TYPE_COLORS[selected.type] ?? 'var(--accent)') : 'var(--accent)'
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }}
+  return createPortal(
+    <div className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }}
       onClick={onClose}>
       <div className="w-full max-w-4xl flex flex-col rounded-2xl shadow-2xl overflow-hidden"
         style={{ maxHeight: '90vh', backgroundColor: 'var(--bg-darker)', border: '2px solid var(--accent)44', boxShadow: '0 0 60px rgba(0,0,0,0.8), 0 0 30px #C9A84C22' }}
@@ -193,7 +194,8 @@ function FeatLibrary({ onAdd, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
