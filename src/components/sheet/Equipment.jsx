@@ -392,70 +392,86 @@ function ItemRow({ item, onUpdate, onRemove, onShowCard }) {
   const totalWeight = (item.qty ?? 1) * (item.weight ?? 0)
   return (
     <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
-      <div className="flex items-center gap-2 p-2">
+
+      {/* ── Mobile layout ── */}
+      <div className="md:hidden">
+        {/* Row 1: icon + name + action buttons */}
+        <div className="flex items-center gap-2 px-2 pt-2 pb-1">
+          <span className="text-base flex-shrink-0 w-6 text-center">{CATEGORY_ICONS[item.category] ?? '📦'}</span>
+          <input
+            type="text" value={item.name} onChange={e => onUpdate('name', e.target.value)}
+            placeholder="Item name..."
+            className="flex-1 bg-transparent text-sm font-semibold focus:outline-none min-w-0"
+            style={{ color: 'var(--text)', borderBottom: '1px solid transparent' }}
+            onFocus={e => e.target.style.borderBottomColor = 'var(--accent)'}
+            onBlur={e => e.target.style.borderBottomColor = 'transparent'}
+          />
+          {item.name && <button onClick={() => onShowCard(item.name)} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)' }}>📖</button>}
+          <button onClick={() => setShowNotes(x => !x)} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: item.notes ? 'var(--accent)' : 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>📝</button>
+          <button onClick={onRemove} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
+        </div>
+        {/* Row 2: qty + weight + total */}
+        <div className="flex items-center gap-2 px-2 pb-2">
+          <span className="text-xs flex-shrink-0" style={{ color: 'var(--text-faint)' }}>Qty</span>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button onClick={() => onUpdate('qty', Math.max(0, (item.qty ?? 1) - 1))} className="w-5 h-5 flex items-center justify-center rounded text-xs font-bold" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}>−</button>
+            <input type="number" value={item.qty ?? 1} min={0} onChange={e => onUpdate('qty', Math.max(0, Number(e.target.value)))}
+              className="w-9 text-center text-xs font-bold focus:outline-none rounded" style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text)', border: '1px solid var(--bg-border)' }} />
+            <button onClick={() => onUpdate('qty', (item.qty ?? 1) + 1)} className="w-5 h-5 flex items-center justify-center rounded text-xs font-bold" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}>+</button>
+          </div>
+          <span className="text-xs flex-shrink-0" style={{ color: 'var(--text-faint)' }}>Wt</span>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <input type="number" value={item.weight ?? 0} min={0} step={0.5} onChange={e => onUpdate('weight', Number(e.target.value))}
+              className="w-12 text-center text-xs focus:outline-none rounded" style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }} />
+            <span className="text-xs" style={{ color: 'var(--text-faint)' }}>lb</span>
+          </div>
+          <div className="ml-auto text-sm font-bold flex-shrink-0" style={{ color: totalWeight > 0 ? 'var(--text)' : 'var(--text-faint)' }}>
+            {totalWeight > 0 ? `${totalWeight} lb` : '—'}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Desktop layout ── */}
+      <div className="hidden md:flex items-center gap-2 p-2">
         <span className="text-lg flex-shrink-0 w-7 text-center">{CATEGORY_ICONS[item.category] ?? '📦'}</span>
         <input
-          type="text"
-          value={item.name}
-          onChange={e => onUpdate('name', e.target.value)}
+          type="text" value={item.name} onChange={e => onUpdate('name', e.target.value)}
           placeholder="Item name..."
           className="flex-1 bg-transparent text-sm font-semibold focus:outline-none min-w-0"
           style={{ color: 'var(--text)', borderBottom: '1px solid transparent' }}
           onFocus={e => e.target.style.borderBottomColor = 'var(--accent)'}
           onBlur={e => e.target.style.borderBottomColor = 'transparent'}
         />
-        <select
-          value={item.category}
-          onChange={e => onUpdate('category', e.target.value)}
-          className="text-xs px-1 py-0.5 rounded focus:outline-none hidden md:block"
-          style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}
-        >
+        <select value={item.category} onChange={e => onUpdate('category', e.target.value)}
+          className="text-xs px-1 py-0.5 rounded focus:outline-none w-24"
+          style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
           {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         <div className="flex items-center gap-1 flex-shrink-0">
           <button onClick={() => onUpdate('qty', Math.max(0, (item.qty ?? 1) - 1))} className="w-6 h-6 flex items-center justify-center rounded text-sm font-bold" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}>−</button>
-          <input
-            type="number" value={item.qty ?? 1} min={0}
-            onChange={e => onUpdate('qty', Math.max(0, Number(e.target.value)))}
-            className="w-10 text-center text-sm font-bold focus:outline-none rounded"
-            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text)', border: '1px solid var(--bg-border)' }}
-          />
+          <input type="number" value={item.qty ?? 1} min={0} onChange={e => onUpdate('qty', Math.max(0, Number(e.target.value)))}
+            className="w-10 text-center text-sm font-bold focus:outline-none rounded" style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text)', border: '1px solid var(--bg-border)' }} />
           <button onClick={() => onUpdate('qty', (item.qty ?? 1) + 1)} className="w-6 h-6 flex items-center justify-center rounded text-sm font-bold" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}>+</button>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
-          <input
-            type="number" value={item.weight ?? 0} min={0} step={0.5}
-            onChange={e => onUpdate('weight', Number(e.target.value))}
-            className="w-14 text-center text-sm focus:outline-none rounded"
-            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}
-          />
+          <input type="number" value={item.weight ?? 0} min={0} step={0.5} onChange={e => onUpdate('weight', Number(e.target.value))}
+            className="w-14 text-center text-sm focus:outline-none rounded" style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }} />
           <span className="text-xs" style={{ color: 'var(--text-faint)' }}>lb ea</span>
         </div>
         <div className="w-16 text-right text-sm font-bold flex-shrink-0" style={{ color: totalWeight > 0 ? 'var(--text)' : 'var(--text-faint)' }}>
           {totalWeight > 0 ? `${totalWeight} lb` : '—'}
         </div>
-        {item.name && (
-          <button onClick={() => onShowCard(item.name)} title="View item details" className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
-            style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)', opacity: 0.7 }}
-            onMouseEnter={e => e.currentTarget.style.opacity = 1}
-            onMouseLeave={e => e.currentTarget.style.opacity = 0.7}
-          >📖</button>
-        )}
-        <button
-          onClick={() => setShowNotes(x => !x)}
-          className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
-          style={{ color: item.notes ? 'var(--accent)' : 'var(--text-faint)', border: '1px solid var(--bg-border)' }}
-        >📝</button>
+        {item.name && <button onClick={() => onShowCard(item.name)} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)', opacity: 0.7 }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7}>📖</button>}
+        <button onClick={() => setShowNotes(x => !x)} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: item.notes ? 'var(--accent)' : 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>📝</button>
         <button onClick={onRemove} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
       </div>
+
       {showNotes && (
         <div className="px-3 pb-2" style={{ borderTop: '1px solid var(--bg-border)' }}>
-          <textarea
-            value={item.notes} onChange={e => onUpdate('notes', e.target.value)}
+          <textarea value={item.notes} onChange={e => onUpdate('notes', e.target.value)}
             placeholder="Notes..." rows={2}
             className="w-full text-xs resize-none focus:outline-none mt-2 p-2 rounded"
-            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}
-          />
+            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }} />
         </div>
       )}
     </div>
@@ -674,16 +690,16 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
           </div>
         </div>
 
-        {/* Column headers */}
+        {/* Column headers — desktop only */}
         {displayed.length > 0 && (
-          <div className="flex items-center gap-2 px-2 mb-1 text-xs" style={{ color:'var(--text-faint)' }}>
+          <div className="hidden md:flex items-center gap-2 px-2 mb-1 text-xs" style={{ color:'var(--text-faint)' }}>
             <span className="w-7" />
             <span className="flex-1">Item</span>
-            <span className="hidden md:block w-24">Category</span>
+            <span className="w-24">Category</span>
             <span className="w-24 text-center">Quantity</span>
             <span className="w-24 text-center">Weight ea</span>
             <span className="w-16 text-right">Total</span>
-            <span className="w-6" /><span className="w-6" />
+            <span className="w-6" /><span className="w-6" /><span className="w-6" />
           </div>
         )}
 
