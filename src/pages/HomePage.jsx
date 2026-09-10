@@ -486,16 +486,6 @@ export default function HomePage() {
               </div>
             ))}
 
-            <div onClick={handleCreate}
-              className="card border-dashed cursor-pointer transition-all duration-200 flex items-center justify-center min-h-[140px]"
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bg-border)'}
-            >
-              <div className="text-center">
-                <div className="text-4xl mb-2" style={{ color: 'var(--bg-border)' }}>+</div>
-                <p className="text-sm" style={{ color: 'var(--text-faint)' }}>New Character</p>
-              </div>
-            </div>
           </div>
         </div>
       )}
