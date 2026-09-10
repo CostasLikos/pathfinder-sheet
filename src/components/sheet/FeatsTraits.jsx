@@ -166,11 +166,17 @@ function FeatLibrary({ onAdd, onClose }) {
 
 // ─── Item Row ─────────────────────────────────────────────────────────────────
 
-function ItemRow({ item, index, onUpdate, onRemove, isEven }) {
+function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
   const [expanded, setExpanded] = useState(false)
+  const hasDesc = !!item.desc
 
   return (
-    <div className="rounded-lg overflow-hidden" style={{ backgroundColor: isEven ? 'var(--bg-darker)' : 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}>
+    <div className="rounded-lg overflow-hidden transition-all"
+      style={{
+        backgroundColor: 'var(--bg-darker)',
+        border: `1px solid var(--bg-border)`,
+        borderLeft: `3px solid ${color}66`,
+      }}>
       <div className="flex items-center gap-2 px-3 py-2">
         <input
           type="text"
@@ -178,38 +184,47 @@ function ItemRow({ item, index, onUpdate, onRemove, isEven }) {
           onChange={e => onUpdate(index, 'name', e.target.value)}
           placeholder="Name..."
           className="flex-1 bg-transparent font-semibold text-sm focus:outline-none min-w-0"
-          style={{ color: 'var(--text)', borderBottom: '1px solid transparent' }}
-          onFocus={e => e.target.style.borderBottomColor = 'var(--accent)'}
-          onBlur={e => e.target.style.borderBottomColor = 'transparent'}
+          style={{ color: 'var(--text)' }}
         />
         <button onClick={() => setExpanded(x => !x)}
-          className="text-xs px-2 py-0.5 rounded flex-shrink-0"
-          style={{ color: item.desc ? 'var(--accent)' : 'var(--text-faint)', border: `1px solid ${item.desc ? 'var(--accent)' : 'var(--bg-border)'}` }}
-          title="View/edit description">
-          {expanded ? '▲' : '📝'}
+          className="text-xs px-2 py-0.5 rounded-full flex-shrink-0 transition-all"
+          style={{
+            color: hasDesc ? color : 'var(--text-faint)',
+            backgroundColor: hasDesc ? `${color}18` : 'transparent',
+            border: `1px solid ${hasDesc ? color + '55' : 'var(--bg-border)'}`,
+          }}>
+          {expanded ? '▲' : hasDesc ? '▾ desc' : '+ desc'}
         </button>
-        <button onClick={() => onRemove(index)} className="text-xs px-2 py-0.5 rounded flex-shrink-0" style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
+        <button onClick={() => onRemove(index)}
+          className="text-xs w-6 h-6 flex items-center justify-center rounded-full flex-shrink-0"
+          style={{ color: '#ef444488', border: '1px solid #ef444433' }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.backgroundColor = '#ef444422' }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#ef444488'; e.currentTarget.style.backgroundColor = 'transparent' }}>
+          ✕
+        </button>
       </div>
 
-      {(expanded || item.desc) && (
-        <div className="px-3 pb-2" style={{ borderTop: '1px solid var(--bg-border)' }}>
-          {expanded ? (
-            <textarea
-              autoFocus
-              value={item.desc}
-              onChange={e => onUpdate(index, 'desc', e.target.value)}
-              placeholder="Description, effect, prerequisites..."
-              rows={4}
-              className="w-full text-xs resize-none focus:outline-none mt-2 p-2 rounded"
-              style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}
-              onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-              onBlur={e => { e.target.style.borderColor = 'var(--bg-border)'; if (!item.desc) setExpanded(false) }}
-            />
-          ) : (
-            <p className="text-xs mt-2 cursor-pointer whitespace-pre-line" style={{ color: 'var(--text-dim)' }} onClick={() => setExpanded(true)} title="Click to edit">
-              {item.desc}
-            </p>
-          )}
+      {/* Description preview (collapsed) */}
+      {!expanded && hasDesc && (
+        <div className="px-3 pb-2 cursor-pointer" onClick={() => setExpanded(true)}>
+          <p className="text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--text-faint)' }}>{item.desc}</p>
+        </div>
+      )}
+
+      {/* Description editor (expanded) */}
+      {expanded && (
+        <div className="px-3 pb-3" style={{ borderTop: `1px solid ${color}22` }}>
+          <textarea
+            autoFocus
+            value={item.desc}
+            onChange={e => onUpdate(index, 'desc', e.target.value)}
+            placeholder="Description, effect, prerequisites..."
+            rows={4}
+            className="w-full text-xs resize-none focus:outline-none mt-2 p-2 rounded"
+            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: `1px solid ${color}33` }}
+            onFocus={e => e.target.style.borderColor = color}
+            onBlur={e => e.target.style.borderColor = `${color}33`}
+          />
         </div>
       )}
     </div>
@@ -218,7 +233,7 @@ function ItemRow({ item, index, onUpdate, onRemove, isEven }) {
 
 // ─── List Editor ──────────────────────────────────────────────────────────────
 
-function ListEditor({ title, items, onAdd, onUpdate, onRemove, placeholder, showLibrary }) {
+function ListEditor({ title, icon, items, onAdd, onUpdate, onRemove, placeholder, showLibrary, color = 'var(--accent)' }) {
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
@@ -232,21 +247,30 @@ function ListEditor({ title, items, onAdd, onUpdate, onRemove, placeholder, show
   return (
     <div>
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-        <h3 className="font-bold text-sm" style={{ color: 'var(--accent)' }}>{title}</h3>
+        <div className="flex items-center gap-2">
+          <span className="text-base">{icon}</span>
+          <h3 className="font-bold text-sm" style={{ color, fontFamily: 'Georgia, serif' }}>{title}</h3>
+          <span className="text-xs px-1.5 py-0.5 rounded-full font-bold"
+            style={{ backgroundColor: `${color}18`, color, border: `1px solid ${color}44` }}>
+            {items.length}
+          </span>
+        </div>
         <div className="flex gap-2">
           {showLibrary && (
-            <button onClick={showLibrary} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--accent)', border: '1px solid var(--accent)', backgroundColor: 'var(--accent-dim)' }}>
+            <button onClick={showLibrary} className="text-xs px-2 py-1 rounded-lg font-bold"
+              style={{ color, border: `1px solid ${color}`, backgroundColor: `${color}18` }}>
               ⚔️ Library
             </button>
           )}
-          <button onClick={() => setAdding(true)} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--accent)', border: '1px solid var(--accent)' }}>
+          <button onClick={() => setAdding(true)} className="text-xs px-2 py-1 rounded-lg font-bold"
+            style={{ color, border: `1px solid ${color}55`, backgroundColor: `${color}0d` }}>
             + Add
           </button>
         </div>
       </div>
 
       {adding && (
-        <div className="rounded-lg p-3 mb-2 space-y-2" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)' }}>
+        <div className="rounded-lg p-3 mb-2 space-y-2" style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid ${color}` }}>
           <input autoFocus type="text" placeholder={placeholder || 'Name'} value={newName}
             onChange={e => setNewName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
             className="input-field text-sm" />
@@ -259,9 +283,9 @@ function ListEditor({ title, items, onAdd, onUpdate, onRemove, placeholder, show
         </div>
       )}
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {items.map((item, i) => (
-          <ItemRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} isEven={i % 2 === 0} />
+          <ItemRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} color={color} />
         ))}
         {items.length === 0 && <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>None added yet</div>}
       </div>
@@ -288,13 +312,15 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
     setNewName(''); setNewDesc(''); setAdding(false)
   }
 
-  const title = `Feats (${feats.length}${q && filtered.length !== feats.length ? ` · ${filtered.length} shown` : ''})`
+  const color = 'var(--accent)'
+  const title = `Feats${q && filtered.length !== feats.length ? ` (${filtered.length} / ${feats.length})` : ` (${feats.length})`}`
 
   return (
     <div>
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <h3 className="font-bold text-sm" style={{ color: 'var(--accent)' }}>{title}</h3>
+          <span className="text-base">⚔️</span>
+          <h3 className="font-bold text-sm" style={{ color, fontFamily: 'Georgia, serif' }}>{title}</h3>
           {pendingFeat && (
             <span className="level-up-pulse text-xs px-1.5 py-0.5 rounded-full"
               style={{ backgroundColor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e66' }}>
@@ -303,19 +329,20 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
           )}
         </div>
         <div className="flex gap-2">
-          <button onClick={showLibrary} className="text-xs px-2 py-0.5 rounded" style={{ color: 'var(--accent)', border: '1px solid var(--accent)', backgroundColor: 'var(--accent-dim)' }}>
+          <button onClick={showLibrary} className="text-xs px-2 py-1 rounded-lg font-bold"
+            style={{ color, border: `1px solid ${color}`, backgroundColor: 'var(--accent-dim)' }}>
             ⚔️ Library
           </button>
           <button onClick={() => setAdding(true)}
-            className={`text-xs px-2 py-0.5 rounded ${pendingFeat ? 'level-up-pulse' : ''}`}
-            style={{ color: pendingFeat ? '#22c55e' : 'var(--accent)', border: `1px solid ${pendingFeat ? '#22c55e' : 'var(--accent)'}` }}>
+            className={`text-xs px-2 py-1 rounded-lg font-bold ${pendingFeat ? 'level-up-pulse' : ''}`}
+            style={{ color: pendingFeat ? '#22c55e' : color, border: `1px solid ${pendingFeat ? '#22c55e' : color + '55'}`, backgroundColor: pendingFeat ? '#22c55e18' : `${color}0d` }}>
             + Add
           </button>
         </div>
       </div>
 
       {adding && (
-        <div className="rounded-lg p-3 mb-2 space-y-2" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)' }}>
+        <div className="rounded-lg p-3 mb-2 space-y-2" style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid ${color}` }}>
           <input autoFocus type="text" placeholder="Feat name (e.g. Power Attack)" value={newName}
             onChange={e => setNewName(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
@@ -329,12 +356,12 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
         </div>
       )}
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {filtered.map((item, i) => (
           <ItemRow key={item._realIndex} item={item} index={i}
             onUpdate={(_, f, v) => onUpdate(item._realIndex, f, v)}
             onRemove={() => onRemove(item._realIndex)}
-            isEven={i % 2 === 0} />
+            color={color} />
         ))}
         {filtered.length === 0 && (
           <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>
@@ -346,86 +373,13 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
   )
 }
 
-// ─── Drawback Row (with hover tooltip for description) ────────────────────────
-
-function DrawbackRow({ item, index, onUpdate, onRemove, isEven }) {
-  const [hovered, setHovered] = useState(false)
-  const [editing, setEditing] = useState(false)
-
-  return (
-    <div className="relative rounded-lg overflow-visible"
-      style={{ backgroundColor: isEven ? 'var(--bg-darker)' : 'var(--bg-surface)', border: '1px solid #ef444433' }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => { setHovered(false); setEditing(false) }}>
-
-      <div className="flex items-center gap-2 px-3 py-2">
-        <input
-          type="text"
-          value={item.name ?? ''}
-          onChange={e => onUpdate(index, 'name', e.target.value)}
-          placeholder="Drawback name..."
-          className="flex-1 bg-transparent font-semibold text-sm focus:outline-none min-w-0"
-          style={{ color: '#ef4444', borderBottom: '1px solid transparent' }}
-          onFocus={e => e.target.style.borderBottomColor = '#ef4444'}
-          onBlur={e => e.target.style.borderBottomColor = 'transparent'}
-        />
-        {item.desc && (
-          <span className="text-xs flex-shrink-0" style={{ color: '#ef444488' }} title="Has description">📝</span>
-        )}
-        <button onClick={() => setEditing(x => !x)}
-          className="text-xs px-2 py-0.5 rounded flex-shrink-0"
-          style={{ color: '#ef4444', border: '1px solid #ef444466' }}>
-          {editing ? '▲' : 'edit'}
-        </button>
-        <button onClick={() => onRemove(index)}
-          className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
-          style={{ color: '#ef4444', border: '1px solid #ef444433' }}>✕</button>
-      </div>
-
-      {/* Hover tooltip showing description */}
-      {hovered && !editing && item.desc && (
-        <div className="absolute z-50 rounded-lg p-3 text-xs pointer-events-none"
-          style={{
-            top: 'calc(100% + 6px)', left: 0, minWidth: '220px', maxWidth: '320px',
-            backgroundColor: 'var(--bg-darker)',
-            border: '1px solid #ef444466',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-            color: 'var(--text-dim)',
-          }}>
-          <div style={{ position: 'absolute', top: '-6px', left: '16px', width: 0, height: 0,
-            borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
-            borderBottom: '6px solid #ef444466' }} />
-          <div className="font-bold mb-1" style={{ color: '#ef4444' }}>{item.name}</div>
-          <div className="whitespace-pre-line leading-relaxed">{item.desc}</div>
-        </div>
-      )}
-
-      {/* Inline edit for description */}
-      {editing && (
-        <div className="px-3 pb-3" style={{ borderTop: '1px solid #ef444433' }}>
-          <textarea
-            autoFocus
-            value={item.desc ?? ''}
-            onChange={e => onUpdate(index, 'desc', e.target.value)}
-            placeholder="Description, penalty, effect..."
-            rows={3}
-            className="w-full text-xs resize-none focus:outline-none mt-2 p-2 rounded"
-            style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: '1px solid #ef444433' }}
-            onFocus={e => e.target.style.borderColor = '#ef4444'}
-            onBlur={e => e.target.style.borderColor = '#ef444433'}
-          />
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ─── Drawback Editor ──────────────────────────────────────────────────────────
+// ─── Drawback Editor (reuses ItemRow with red color) ─────────────────────────
 
 function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
+  const color = '#ef4444'
 
   const handleAdd = () => {
     if (!newName.trim()) return
@@ -436,17 +390,22 @@ function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-        <h3 className="font-bold text-sm flex items-center gap-1.5" style={{ color: '#ef4444' }}>
-          ⚠ Drawbacks ({drawbacks.length})
-        </h3>
-        <button onClick={() => setAdding(true)} className="text-xs px-2 py-0.5 rounded"
-          style={{ color: '#ef4444', border: '1px solid #ef4444' }}>
+        <div className="flex items-center gap-2">
+          <span className="text-base">⚠️</span>
+          <h3 className="font-bold text-sm" style={{ color, fontFamily: 'Georgia, serif' }}>Drawbacks</h3>
+          <span className="text-xs px-1.5 py-0.5 rounded-full font-bold"
+            style={{ backgroundColor: `${color}18`, color, border: `1px solid ${color}44` }}>
+            {drawbacks.length}
+          </span>
+        </div>
+        <button onClick={() => setAdding(true)} className="text-xs px-2 py-1 rounded-lg font-bold"
+          style={{ color, border: `1px solid ${color}55`, backgroundColor: `${color}0d` }}>
           + Add
         </button>
       </div>
 
       {adding && (
-        <div className="rounded-lg p-3 mb-2 space-y-2" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid #ef4444' }}>
+        <div className="rounded-lg p-3 mb-2 space-y-2" style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid ${color}` }}>
           <input autoFocus type="text" placeholder="Drawback name (e.g. Dependent)" value={newName}
             onChange={e => setNewName(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
@@ -460,9 +419,9 @@ function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
         </div>
       )}
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {drawbacks.map((item, i) => (
-          <DrawbackRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} isEven={i % 2 === 0} />
+          <ItemRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} color={color} />
         ))}
         {drawbacks.length === 0 && <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>No drawbacks</div>}
       </div>
@@ -520,9 +479,11 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
             showLibrary={() => setShowLibrary(true)}
             pendingFeat={pendingFeat}
           />
-          <div style={{ borderTop: '1px solid var(--bg-border)', paddingTop: '1.5rem' }}>
+          <div style={{ borderTop: '1px solid #60a5fa33', paddingTop: '1.5rem' }}>
             <ListEditor
               title={`Traits (${traits.length}/2)`}
+              icon="✨"
+              color="#60a5fa"
               items={traits}
               onAdd={addTrait}
               onUpdate={updateTrait}
