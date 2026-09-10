@@ -286,6 +286,28 @@ export const THEMES = {
     }
   },
 
+  phoenix: {
+    id: 'phoenix',
+    name: 'Phoenix',
+    preview: ['#1a0a12', '#FF5733'],
+    vars: {
+      '--bg-darker':    '#0e0509',
+      '--bg-dark':      '#1a0a0f',
+      '--bg-surface':   '#220d14',
+      '--bg-border':    '#581845',
+      '--accent':       '#FF5733',
+      '--accent-dim':   '#900C3F',
+      '--accent-hover': '#FFCC00',
+      '--text':         '#ffe8d6',
+      '--text-dim':     '#FF5733',
+      '--text-faint':   '#581845',
+      '--danger':       '#C70039',
+      '--danger-hover': '#FF5733',
+      '--positive':     '#FFCC00',
+      '--warning':      '#FF5733',
+    }
+  },
+
   mephisto: {
     id: 'mephisto',
     name: 'Mephisto',
