@@ -318,7 +318,7 @@ export default function HomePage() {
             fontWeight: 900, fontFamily: 'Georgia, serif', lineHeight: 1.05,
             marginBottom: '1.5rem',
           }}>
-            <span style={{
+            <span key={activeTheme} style={{
               background: `linear-gradient(180deg, ${textColor} 0%, ${accentHex} 45%, ${accentDim} 100%)`,
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
               display: 'inline-block',
