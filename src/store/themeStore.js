@@ -286,6 +286,28 @@ export const THEMES = {
     }
   },
 
+  twilight: {
+    id: 'twilight',
+    name: 'Twilight',
+    preview: ['#0d2240', '#3b6cb5'],
+    vars: {
+      '--bg-darker':    '#070f1a',
+      '--bg-dark':      '#0d2240',
+      '--bg-surface':   '#1a3a6e',
+      '--bg-border':    '#3b6cb5',
+      '--accent':       '#3b6cb5',
+      '--accent-dim':   '#1a3a6e',
+      '--accent-hover': '#c08898',
+      '--text':         '#e8dff0',
+      '--text-dim':     '#c08898',
+      '--text-faint':   '#3b4f6a',
+      '--danger':       '#a0446a',
+      '--danger-hover': '#c08898',
+      '--positive':     '#5ba898',
+      '--warning':      '#c08898',
+    }
+  },
+
   crimsonTide: {
     id: 'crimsonTide',
     name: 'Crimson Tide',
