@@ -58,14 +58,26 @@ function AbilityCard({ ab, base, buff, onChange }) {
           <span className="text-xs font-bold uppercase tracking-widest" style={{ color }}>{ab}</span>
         </div>
 
-        {/* Modifier — hero */}
-        <div className="font-bold leading-none" style={{ fontSize: '2.2rem', color, fontFamily: 'Georgia, serif' }}>
-          {formatMod(mod)}
+        {/* Score — hero, with modifier badge top-right */}
+        <div className="relative flex items-center justify-center" style={{ marginLeft: '14px' }}>
+          <div className="font-bold leading-none" style={{ fontSize: '2.6rem', color: hasBuff ? buffColor : 'var(--text)', fontFamily: 'Georgia, serif' }}>
+            {score}
+          </div>
+          <div className="absolute font-bold text-xs px-1.5 py-0.5 rounded-full leading-none"
+            style={{
+              top: '-6px', right: '-22px',
+              backgroundColor: mod >= 0 ? 'rgba(34,197,94,0.18)' : 'rgba(239,68,68,0.18)',
+              color: mod >= 0 ? 'var(--positive)' : '#ef4444',
+              border: `1px solid ${mod >= 0 ? 'var(--positive)' : '#ef4444'}`,
+              minWidth: '1.5rem', textAlign: 'center',
+            }}>
+            {formatMod(mod)}
+          </div>
         </div>
 
-        {/* Score + buff */}
-        <div className="flex items-center gap-1">
-          <span className="text-xs font-bold" style={{ color: hasBuff ? buffColor : 'var(--text-dim)' }}>{score}</span>
+        {/* Spinner + buff badge */}
+        <div className="flex items-center gap-1 mt-1">
+          <SpinnerInput value={base} onChange={v => onChange(ab, Math.max(1, Math.min(30, v)))} min={1} max={30} width="w-10" />
           {hasBuff && (
             <span className="text-xs px-1 rounded font-bold leading-none"
               style={{ color: buffColor, backgroundColor: buff > 0 ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)', border: `1px solid ${buffColor}44` }}>
@@ -73,9 +85,6 @@ function AbilityCard({ ab, base, buff, onChange }) {
             </span>
           )}
         </div>
-
-        {/* Spinner */}
-        <SpinnerInput value={base} onChange={v => onChange(ab, Math.max(1, Math.min(30, v)))} min={1} max={30} width="w-10" />
       </div>
 
       {/* Hover tooltip */}
