@@ -12,7 +12,7 @@ function BadgeCluster({ badges }) {
     : badges.length === 4 ? [[badges[0], badges[1]], [badges[2], badges[3]]]
     : [[badges[0], badges[1]], [badges[2]], [badges[3], badges[4]]]
   return (
-    <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', verticalAlign: 'super', marginLeft: '2px', gap: '1px' }}>
+    <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', verticalAlign: 'super', marginLeft: '5px', gap: '1px' }}>
       {rows.map((row, ri) => (
         <span key={ri} style={{ display: 'flex', gap: '1px', justifyContent: 'center' }}>
           {row.map(({ label, color }) => (
