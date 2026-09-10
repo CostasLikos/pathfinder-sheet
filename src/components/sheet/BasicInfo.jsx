@@ -206,18 +206,19 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
         <div className="relative flex-shrink-0" style={{ width: '80px', height: '80px' }}>
           <div
             onClick={() => setPortraitOpen(true)}
-            className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
+            className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-all group"
             style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}
             onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
             onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bg-border)'}
           >
             {character.portrait
-              ? <img src={character.portrait} alt="" className="w-full h-full object-cover" />
+              ? <img src={character.portrait} alt="" className="w-full h-full object-cover transition-all duration-300 group-hover:brightness-50 group-hover:scale-105" />
               : <span className="text-3xl">🧙</span>
             }
-            <div className="absolute bottom-0 left-0 right-0 text-center py-0.5" style={{ backgroundColor:'rgba(0,0,0,0.55)', fontSize:'0.55rem', color:'var(--text-dim)' }}>
-              {character.portrait ? 'view' : 'add photo'}
-            </div>
+            {character.portrait
+              ? <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ color: 'var(--accent)', fontSize: '1.4rem' }}>👁</div>
+              : <div className="absolute bottom-0 left-0 right-0 text-center py-0.5" style={{ backgroundColor:'rgba(0,0,0,0.55)', fontSize:'0.55rem', color:'var(--text-dim)' }}>add photo</div>
+            }
           </div>
           <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={e => { handlePortrait(e); setPortraitOpen(false) }} />
         </div>
@@ -254,18 +255,19 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
         <div className="relative flex-shrink-0 self-stretch" style={{ width: '120px' }}>
           <div
             onClick={() => setPortraitOpen(true)}
-            className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
+            className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-all group"
             style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-darker)', minHeight: '100%' }}
             onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
             onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bg-border)'}
           >
             {character.portrait
-              ? <img src={character.portrait} alt="" className="w-full h-full object-cover" />
+              ? <img src={character.portrait} alt="" className="w-full h-full object-cover transition-all duration-300 group-hover:brightness-50 group-hover:scale-105" />
               : <span className="text-4xl">🧙</span>
             }
-            <div className="absolute bottom-0 left-0 right-0 text-center py-0.5" style={{ backgroundColor:'rgba(0,0,0,0.55)', fontSize:'0.6rem', color:'var(--text-dim)', letterSpacing:'0.05em' }}>
-              {character.portrait ? 'view' : 'add photo'}
-            </div>
+            {character.portrait
+              ? <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ color: 'var(--accent)', fontSize: '2rem' }}>👁</div>
+              : <div className="absolute bottom-0 left-0 right-0 text-center py-0.5" style={{ backgroundColor:'rgba(0,0,0,0.55)', fontSize:'0.6rem', color:'var(--text-dim)', letterSpacing:'0.05em' }}>add photo</div>
+            }
           </div>
           <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={e => { handlePortrait(e); setPortraitOpen(false) }} />
         </div>
