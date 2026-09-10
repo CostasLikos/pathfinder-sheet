@@ -613,7 +613,7 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
           <div className="card" style={{ backgroundColor:'var(--bg-darker)', minWidth:'220px' }}>
             <div className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color:'var(--accent)' }}>💰 Currency</div>
             <div className="grid grid-cols-2 gap-2">
-              {[{key:'pp',label:'Platinum',color:'#e2e8f0'},{key:'gp',label:'Gold',color:'#f59e0b'},{key:'sp',label:'Silver',color:'#94a3b8'},{key:'cp',label:'Copper',color:'#c2855a'}].map(({key,label,color}) => (
+              {[{key:'cp',label:'Copper',color:'#c2855a'},{key:'sp',label:'Silver',color:'#94a3b8'},{key:'gp',label:'Gold',color:'#f59e0b'},{key:'pp',label:'Platinum',color:'#e2e8f0'}].map(({key,label,color}) => (
                 <div key={key} className="flex flex-col gap-0.5">
                   <label className="text-xs" style={{ color }}>{label}</label>
                   <input type="number" min={0} value={currency[key]??0} onChange={e => updateCurrency(key,e.target.value)} className="w-full text-center rounded text-sm font-bold focus:outline-none py-1" style={{ backgroundColor:'var(--bg-surface)', color, border:'1px solid var(--bg-border)' }} />
