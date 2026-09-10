@@ -514,11 +514,11 @@ function ArmorPropertiesPanel({ armorProps = {}, onChange }) {
             <button onClick={() => set('maxDex', maxDex===''||maxDex===null ? 0 : Number(maxDex)+1)} className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-bold" style={{ border:'1px solid var(--bg-border)', color:'var(--accent)' }}>+</button>
           </div>
           <button onClick={() => set('maxDex', null)} className="text-xs px-3 py-1 rounded mb-2 font-semibold" style={{ backgroundColor:'var(--bg-border)', color:'var(--text)', border:'1px solid var(--accent)44' }}>Reset to ∞</button>
-          <div className="text-xs space-y-0.5" style={{ color:'var(--text-faint)' }}>
+          <div className="text-xs space-y-0.5">
             <div className="font-semibold mb-1" style={{ color:'var(--text-dim)' }}>Affects:</div>
-            <div>• Caps DEX bonus applied to AC</div>
-            <div>• Does NOT affect saves, skills,</div>
-            <div>&nbsp; attack rolls, or initiative</div>
+            <div style={{ color: maxDex!==''&&maxDex!==null ? '#f59e0b' : 'var(--text-faint)' }}>• Caps DEX bonus applied to AC</div>
+            <div style={{ color: maxDex!==''&&maxDex!==null ? '#f59e0b' : 'var(--text-faint)' }}>• Does NOT affect saves, skills,</div>
+            <div style={{ color: maxDex!==''&&maxDex!==null ? '#f59e0b' : 'var(--text-faint)' }}>&nbsp; attack rolls, or initiative</div>
           </div>
         </div>
         <div className="stat-box flex flex-col items-center">
@@ -534,10 +534,10 @@ function ArmorPropertiesPanel({ armorProps = {}, onChange }) {
               Rolled {sfRoll.roll} — {sfRoll.failed ? '✗ Spell FAILS' : '✓ Spell succeeds'}
             </div>
           )}
-          <div className="text-xs space-y-0.5" style={{ color:'var(--text-faint)' }}>
+          <div className="text-xs space-y-0.5">
             <div className="font-semibold mb-1" style={{ color:'var(--text-dim)' }}>Affects:</div>
-            <div>• Arcane spells only</div>
-            <div>• Roll d100 before casting — fail if ≤ %</div>
+            <div style={{ color: spellFailure>0 ? '#f59e0b' : 'var(--text-faint)' }}>• Arcane spells only</div>
+            <div style={{ color: spellFailure>0 ? '#f59e0b' : 'var(--text-faint)' }}>• Roll d100 before casting — fail if ≤ %</div>
           </div>
         </div>
       </div>
