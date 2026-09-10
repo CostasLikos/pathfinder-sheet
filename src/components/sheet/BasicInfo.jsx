@@ -210,7 +210,7 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
       {/* Desktop: portrait tall sidebar beside all fields */}
 
       {/* Portrait + top fields row */}
-      <div className="flex gap-3 mb-3 md:hidden">
+      <div className="flex items-center gap-3 mb-3 md:hidden">
         <div className="relative flex-shrink-0" style={{ width: '80px', height: '80px' }}>
           <div
             onClick={() => portraitRef.current.click()}
@@ -229,7 +229,7 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           </div>
           <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={handlePortrait} />
         </div>
-        <div className="flex-1 flex flex-col gap-2">
+        <div className="flex-1 flex flex-col justify-center gap-2">
           {field('Character Name', 'name')}
           {field('Player Name', 'playerName')}
         </div>
