@@ -513,7 +513,7 @@ function ArmorPropertiesPanel({ armorProps = {}, onChange }) {
             <span className="text-2xl font-bold w-8 text-center" style={{ color: maxDex===''||maxDex===null ? 'var(--text-faint)' : 'var(--text)' }}>{maxDex===''||maxDex===null ? '∞' : maxDex}</span>
             <button onClick={() => set('maxDex', maxDex===''||maxDex===null ? 0 : Number(maxDex)+1)} className="h-6 w-6 flex items-center justify-center rounded-full text-xs font-bold" style={{ border:'1px solid var(--bg-border)', color:'var(--accent)' }}>+</button>
           </div>
-          <button onClick={() => set('maxDex', null)} className="text-xs px-2 py-0.5 rounded mb-2" style={{ backgroundColor:'var(--bg-border)', color:'var(--text-faint)' }}>Reset to ∞</button>
+          <button onClick={() => set('maxDex', null)} className="text-xs px-3 py-1 rounded mb-2 font-semibold" style={{ backgroundColor:'var(--bg-border)', color:'var(--text)', border:'1px solid var(--accent)44' }}>Reset to ∞</button>
           <div className="text-xs space-y-0.5" style={{ color:'var(--text-faint)' }}>
             <div className="font-semibold mb-1" style={{ color:'var(--text-dim)' }}>Affects:</div>
             <div>• Caps DEX bonus applied to AC</div>
