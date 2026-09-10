@@ -312,7 +312,7 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
     setNewName(''); setNewDesc(''); setAdding(false)
   }
 
-  const color = 'var(--accent)'
+  const color = '#C9A84C'
   const title = `Feats${q && filtered.length !== feats.length ? ` (${filtered.length} / ${feats.length})` : ` (${feats.length})`}`
 
   return (
