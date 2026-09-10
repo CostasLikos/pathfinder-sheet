@@ -219,33 +219,36 @@ function ItemDetail({ item }) {
 }
 
 // ── Item Card Popup (for equipped items) ──────────────────────────────────────
-function ItemCardPopup({ itemName, anchorY, onClose }) {
+function ItemCardPopup({ itemName, onClose }) {
   const data = useMemo(() => BROWSE_ITEMS.find(i => i.name.toLowerCase() === itemName.toLowerCase()), [itemName])
-  const paddingTop = Math.max((anchorY ?? window.innerHeight / 2) - 80, 16)
+  const inner = (
+    <>
+      <div className="px-5 py-3 flex items-center justify-between flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
+        <span className="font-bold text-sm" style={{ color: 'var(--accent)' }}>📖 Item Details</span>
+        <button onClick={onClose} style={{ color: 'var(--text-dim)' }}>✕</button>
+      </div>
+      <div className="overflow-y-auto p-5">
+        {data ? <ItemDetail item={data} /> : (
+          <div className="text-center py-10">
+            <div className="text-4xl mb-3">📦</div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{itemName}</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--text-faint)' }}>No database entry found for this item.</p>
+          </div>
+        )}
+      </div>
+    </>
+  )
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 overflow-y-auto" onClick={onClose}>
-      <div style={{ paddingTop, paddingBottom: 24 }} className="flex justify-center px-4">
-        <div
-          className="w-full max-w-lg flex flex-col rounded-xl shadow-2xl overflow-hidden"
-          style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)' }}
-          onClick={e => e.stopPropagation()}
-        >
-          <div className="px-5 py-3 flex items-center justify-between flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
-            <span className="font-bold text-sm" style={{ color: 'var(--accent)' }}>📖 Item Details</span>
-            <button onClick={onClose} style={{ color: 'var(--text-dim)' }}>✕</button>
-          </div>
-          <div className="p-5">
-            {data
-              ? <ItemDetail item={data} />
-              : (
-                <div className="text-center py-10">
-                  <div className="text-4xl mb-3">📦</div>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{itemName}</p>
-                  <p className="text-xs mt-2" style={{ color: 'var(--text-faint)' }}>No database entry found for this item.</p>
-                </div>
-              )
-            }
-          </div>
+    <div className="fixed inset-0 z-50 bg-black/75" onClick={onClose}>
+      {/* Mobile: bottom sheet */}
+      <div className="md:hidden absolute bottom-0 left-0 right-0 rounded-t-2xl overflow-hidden flex flex-col" style={{ maxHeight: '80vh', backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)', borderBottom: 'none' }} onClick={e => e.stopPropagation()}>
+        <div className="flex justify-center pt-2 pb-1"><div className="w-10 h-1 rounded-full" style={{ backgroundColor: 'var(--bg-border)' }} /></div>
+        {inner}
+      </div>
+      {/* Desktop: centered modal */}
+      <div className="hidden md:flex items-center justify-center h-full px-4">
+        <div className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-xl shadow-2xl overflow-hidden" style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)' }} onClick={e => e.stopPropagation()}>
+          {inner}
         </div>
       </div>
     </div>
@@ -635,7 +638,7 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
       {showBrowser && <ItemBrowser character={character} onChange={onChange} onClose={() => setShowBrowser(false)} />}
 
       {/* Item card popup */}
-      {itemCard && <ItemCardPopup itemName={itemCard.name} anchorY={itemCard.y} onClose={() => setItemCard(null)} />}
+      {itemCard && <ItemCardPopup itemName={itemCard.name} onClose={() => setItemCard(null)} />}
 
       {/* Inventory */}
       <div className="card">

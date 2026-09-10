@@ -597,73 +597,76 @@ function SpellLibrary({ castingClass, onAdd, onClose }) {
 
 // ─── Spell Card Popup ─────────────────────────────────────────────────────────
 
-function SpellCardPopup({ spellName, anchorY, onClose }) {
+function SpellCardPopup({ spellName, onClose }) {
   const data = useMemo(() => SPELL_LIBRARY.find(s => s.name.toLowerCase() === spellName.toLowerCase()), [spellName])
   const color = SCHOOL_COLORS[data?.school] ?? 'var(--accent)'
-  const paddingTop = Math.max((anchorY ?? window.innerHeight / 2) - 80, 16)
 
-  return (
-    <div className="fixed inset-0 z-[9999] bg-black/75 overflow-y-auto" onClick={onClose}>
-      <div style={{ paddingTop, paddingBottom: 24 }} className="flex justify-center px-4">
-      <div className="w-full max-w-lg flex flex-col rounded-xl shadow-2xl overflow-hidden"
-        style={{ backgroundColor: 'var(--bg-surface)', border: `2px solid ${color}` }}
-        onClick={e => e.stopPropagation()}>
-        <div className="px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${color}33`, background: `linear-gradient(135deg, var(--bg-darker) 0%, ${color}18 100%)` }}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="font-bold text-xl leading-tight" style={{ color, fontFamily: 'Georgia,serif' }}>{data?.name ?? spellName}</h2>
-              {data && (
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${color}25`, color, border: `1px solid ${color}55` }}>
-                    {SCHOOL_ICONS[data.school]} {data.school}
-                  </span>
-                  <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{data.source}</span>
-                </div>
-              )}
-            </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-lg flex-shrink-0" style={{ color: 'var(--text-dim)', backgroundColor: 'var(--bg-border)' }}>✕</button>
-          </div>
-        </div>
-        <div className="px-5 py-4 space-y-4">
-          {!data ? (
-            <div className="text-center py-8">
-              <div className="text-4xl mb-3">📜</div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{spellName}</p>
-              <p className="text-xs mt-2" style={{ color: 'var(--text-faint)' }}>No database entry found for this spell.</p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs rounded-xl p-3" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
-                {[
-                  ['Casting Time', data.casting_time],
-                  ['Components',   data.components],
-                  ['Range',        data.range],
-                  ['Targets',      data.targets],
-                  ['Duration',     data.duration],
-                  ['Saving Throw', data.saving_throw],
-                ].filter(([, v]) => v).map(([label, val]) => (
-                  <div key={label}>
-                    <span className="font-bold" style={{ color }}>{label}: </span>
-                    <span style={{ color: 'var(--text-dim)' }}>{val}</span>
-                  </div>
-                ))}
+  const inner = (
+    <>
+      <div className="px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${color}33`, background: `linear-gradient(135deg, var(--bg-darker) 0%, ${color}18 100%)` }}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="font-bold text-xl leading-tight" style={{ color, fontFamily: 'Georgia,serif' }}>{data?.name ?? spellName}</h2>
+            {data && (
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${color}25`, color, border: `1px solid ${color}55` }}>
+                  {SCHOOL_ICONS[data.school]} {data.school}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{data.source}</span>
               </div>
-              {data.spell_level && (
-                <div className="text-xs rounded-xl p-3" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
-                  <span className="font-bold" style={{ color }}>Spell Level: </span>
-                  <span style={{ color: 'var(--text-dim)' }}>{data.spell_level}</span>
-                </div>
-              )}
-              {data.description && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--text-faint)' }}>Description</p>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text)' }}>{data.description}</p>
-                </div>
-              )}
-            </>
-          )}
+            )}
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-lg flex-shrink-0" style={{ color: 'var(--text-dim)', backgroundColor: 'var(--bg-border)' }}>✕</button>
         </div>
       </div>
+      <div className="overflow-y-auto px-5 py-4 space-y-4">
+        {!data ? (
+          <div className="text-center py-8">
+            <div className="text-4xl mb-3">📜</div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{spellName}</p>
+            <p className="text-xs mt-2" style={{ color: 'var(--text-faint)' }}>No database entry found for this spell.</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs rounded-xl p-3" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
+              {[['Casting Time', data.casting_time],['Components', data.components],['Range', data.range],['Targets', data.targets],['Duration', data.duration],['Saving Throw', data.saving_throw]].filter(([, v]) => v).map(([label, val]) => (
+                <div key={label}><span className="font-bold" style={{ color }}>{label}: </span><span style={{ color: 'var(--text-dim)' }}>{val}</span></div>
+              ))}
+            </div>
+            {data.spell_level && (
+              <div className="text-xs rounded-xl p-3" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
+                <span className="font-bold" style={{ color }}>Spell Level: </span>
+                <span style={{ color: 'var(--text-dim)' }}>{data.spell_level}</span>
+              </div>
+            )}
+            {data.description && (
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--text-faint)' }}>Description</p>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text)' }}>{data.description}</p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </>
+  )
+
+  return (
+    <div className="fixed inset-0 z-[9999] bg-black/75" onClick={onClose}>
+      {/* Mobile: bottom sheet */}
+      <div className="md:hidden absolute bottom-0 left-0 right-0 rounded-t-2xl overflow-hidden flex flex-col"
+        style={{ maxHeight: '80vh', backgroundColor: 'var(--bg-surface)', border: `2px solid ${color}`, borderBottom: 'none' }}
+        onClick={e => e.stopPropagation()}>
+        <div className="flex justify-center pt-2 pb-1"><div className="w-10 h-1 rounded-full" style={{ backgroundColor: 'var(--bg-border)' }} /></div>
+        {inner}
+      </div>
+      {/* Desktop: centered modal */}
+      <div className="hidden md:flex items-center justify-center h-full px-4">
+        <div className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-xl shadow-2xl overflow-hidden"
+          style={{ backgroundColor: 'var(--bg-surface)', border: `2px solid ${color}` }}
+          onClick={e => e.stopPropagation()}>
+          {inner}
+        </div>
       </div>
     </div>
   )
@@ -881,7 +884,7 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
   return (
     <div className="space-y-4">
       {showLibrary && <SpellLibrary castingClass={spellcasting.class} onAdd={addSpell} onClose={() => setShowLibrary(false)} />}
-      {spellCard && <SpellCardPopup spellName={spellCard.name} anchorY={spellCard.y} onClose={() => setSpellCard(null)} />}
+      {spellCard && <SpellCardPopup spellName={spellCard.name} onClose={() => setSpellCard(null)} />}
 
       {/* Cast result popup */}
       {castResult && (
