@@ -666,7 +666,8 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
             {invSearch && <button onClick={() => setInvSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs" style={{ color:'var(--text-faint)' }}>✕</button>}
           </div>
 
-          <div className="flex gap-1 flex-wrap items-center">
+          {/* Category filter pills */}
+          <div className="flex gap-1 flex-wrap">
             {['All', ...CATEGORIES].map(cat => (
               <button
                 key={cat}
@@ -679,14 +680,23 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
                 }}
               >{cat === 'All' ? 'All' : `${CATEGORY_ICONS[cat]} ${cat}`}</button>
             ))}
-            <div className="ml-auto flex items-center gap-1">
-              <span className="text-xs" style={{ color:'var(--text-faint)' }}>Sort:</span>
-              {[['none','Default'],['name','Name'],['weight','Weight'],['qty','Qty']].map(([v,l]) => (
-                <button key={v} onClick={() => setSortBy(v)} className="text-xs px-2 py-0.5 rounded"
-                  style={{ backgroundColor:sortBy===v?'var(--accent-dim)':'var(--bg-darker)', color:sortBy===v?'var(--accent)':'var(--text-dim)', border:`1px solid ${sortBy===v?'var(--accent)':'var(--bg-border)'}` }}
-                >{l}</button>
-              ))}
-            </div>
+          </div>
+
+          {/* Sort — separate row, underline style */}
+          <div className="flex items-center gap-3 pt-1" style={{ borderTop: '1px solid var(--bg-border)' }}>
+            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>Sort by</span>
+            {[['none','Default'],['name','A–Z'],['weight','Weight'],['qty','Qty']].map(([v,l]) => (
+              <button key={v} onClick={() => setSortBy(v)}
+                className="text-xs pb-0.5 transition-all"
+                style={{
+                  color: sortBy===v ? 'var(--accent)' : 'var(--text-faint)',
+                  borderBottom: `2px solid ${sortBy===v ? 'var(--accent)' : 'transparent'}`,
+                  background: 'none', border: 'none',
+                  borderBottom: `2px solid ${sortBy===v ? 'var(--accent)' : 'transparent'}`,
+                  fontWeight: sortBy===v ? 700 : 400,
+                }}
+              >{l}</button>
+            ))}
           </div>
         </div>
 
