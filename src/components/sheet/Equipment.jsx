@@ -219,30 +219,33 @@ function ItemDetail({ item }) {
 }
 
 // ── Item Card Popup (for equipped items) ──────────────────────────────────────
-function ItemCardPopup({ itemName, onClose }) {
+function ItemCardPopup({ itemName, anchorY, onClose }) {
   const data = useMemo(() => BROWSE_ITEMS.find(i => i.name.toLowerCase() === itemName.toLowerCase()), [itemName])
+  const paddingTop = Math.max((anchorY ?? window.innerHeight / 2) - 80, 16)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75" onClick={onClose}>
-      <div
-        className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-xl shadow-2xl overflow-hidden"
-        style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)' }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="px-5 py-3 flex items-center justify-between flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
-          <span className="font-bold text-sm" style={{ color: 'var(--accent)' }}>📖 Item Details</span>
-          <button onClick={onClose} style={{ color: 'var(--text-dim)' }}>✕</button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-5">
-          {data
-            ? <ItemDetail item={data} />
-            : (
-              <div className="text-center py-10">
-                <div className="text-4xl mb-3">📦</div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{itemName}</p>
-                <p className="text-xs mt-2" style={{ color: 'var(--text-faint)' }}>No database entry found for this item.</p>
-              </div>
-            )
-          }
+    <div className="fixed inset-0 z-50 bg-black/75 overflow-y-auto" onClick={onClose}>
+      <div style={{ paddingTop, paddingBottom: 24 }} className="flex justify-center px-4">
+        <div
+          className="w-full max-w-lg flex flex-col rounded-xl shadow-2xl overflow-hidden"
+          style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)' }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="px-5 py-3 flex items-center justify-between flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
+            <span className="font-bold text-sm" style={{ color: 'var(--accent)' }}>📖 Item Details</span>
+            <button onClick={onClose} style={{ color: 'var(--text-dim)' }}>✕</button>
+          </div>
+          <div className="p-5">
+            {data
+              ? <ItemDetail item={data} />
+              : (
+                <div className="text-center py-10">
+                  <div className="text-4xl mb-3">📦</div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{itemName}</p>
+                  <p className="text-xs mt-2" style={{ color: 'var(--text-faint)' }}>No database entry found for this item.</p>
+                </div>
+              )
+            }
+          </div>
         </div>
       </div>
     </div>
@@ -406,7 +409,7 @@ function ItemRow({ item, onUpdate, onRemove, onShowCard }) {
             onFocus={e => e.target.style.borderBottomColor = 'var(--accent)'}
             onBlur={e => e.target.style.borderBottomColor = 'transparent'}
           />
-          {item.name && <button onClick={() => onShowCard(item.name)} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)' }}>📖</button>}
+          {item.name && <button onClick={e => onShowCard(item.name, e.clientY)} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)' }}>📖</button>}
           <button onClick={() => setShowNotes(x => !x)} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: item.notes ? 'var(--accent)' : 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>📝</button>
           <button onClick={onRemove} className="text-xs px-1 py-0.5 rounded flex-shrink-0" style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
         </div>
@@ -461,7 +464,7 @@ function ItemRow({ item, onUpdate, onRemove, onShowCard }) {
         <div className="w-16 text-right text-sm font-bold flex-shrink-0" style={{ color: totalWeight > 0 ? 'var(--text)' : 'var(--text-faint)' }}>
           {totalWeight > 0 ? `${totalWeight} lb` : '—'}
         </div>
-        {item.name && <button onClick={() => onShowCard(item.name)} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)', opacity: 0.7 }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7}>📖</button>}
+        {item.name && <button onClick={e => onShowCard(item.name, e.clientY)} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: 'var(--accent)', border: '1px solid var(--bg-border)', opacity: 0.7 }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7}>📖</button>}
         <button onClick={() => setShowNotes(x => !x)} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: item.notes ? 'var(--accent)' : 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>📝</button>
         <button onClick={onRemove} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
       </div>
@@ -557,7 +560,7 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
   const [sortBy, setSortBy]         = useState('none')
   const [invSearch, setInvSearch]   = useState('')
   const [showBrowser, setShowBrowser] = useState(false)
-  const [itemCard, setItemCard]     = useState(null)
+  const [itemCard, setItemCard]     = useState(null) // { name, y }
 
   const totalWeight = gear.reduce((sum, g) => sum + (g.qty??1)*(g.weight??0), 0)
   const enc    = getEncumbrance(str, totalWeight)
@@ -632,7 +635,7 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
       {showBrowser && <ItemBrowser character={character} onChange={onChange} onClose={() => setShowBrowser(false)} />}
 
       {/* Item card popup */}
-      {itemCard && <ItemCardPopup itemName={itemCard} onClose={() => setItemCard(null)} />}
+      {itemCard && <ItemCardPopup itemName={itemCard.name} anchorY={itemCard.y} onClose={() => setItemCard(null)} />}
 
       {/* Inventory */}
       <div className="card">
@@ -730,7 +733,7 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
               item={item}
               onUpdate={(key, value) => updateItem(getRealIndex(item), key, value)}
               onRemove={() => removeItem(getRealIndex(item))}
-              onShowCard={setItemCard}
+              onShowCard={(name, y) => setItemCard({ name, y })}
             />
           ))}
         </div>
