@@ -377,29 +377,43 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
                 <div className="font-bold leading-none" style={{ fontSize: '2rem', color, fontFamily: 'Georgia, serif' }}>{formatMod(total)}</div>
               </div>
               {/* Breakdown */}
-              <div className="px-1.5 py-2 text-xs space-y-1" style={{ color: 'var(--text-faint)' }}>
-                {[
-                  { label: 'Ability', el: <span style={{ color: 'var(--text-dim)', fontWeight: 'bold' }}>{formatMod(mod)}</span> },
-                  { label: 'Base', el: computedSaveBases
-                      ? <span style={{ color, fontWeight: 'bold' }}>+{computedSaveBases[key]} <span style={{ color: 'var(--text-faint)', fontWeight: 'normal' }}>(auto)</span></span>
-                      : <SpinnerInput value={saves[key]?.base ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], base: v } })} width="w-9" />
-                  },
-                  { label: 'Enh', el: <SpinnerInput value={saves[key]?.enhance ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], enhance: v } })} width="w-9" /> },
-                  { label: 'Misc', el: <SpinnerInput value={saves[key]?.misc    ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], misc:    v } })} width="w-9" /> },
-                ].map(({ label: lbl, el }) => (
-                  <div key={lbl} className="flex items-center justify-between gap-1">
-                    <span style={{ color: 'var(--text-faint)', flexShrink: 0 }}>{lbl}</span>
-                    <div className="flex justify-end">{el}</div>
+              <div className="px-1.5 py-2 text-xs space-y-1.5" style={{ color: 'var(--text-faint)' }}>
+                {/* Ability + Base in one row */}
+                <div className="grid grid-cols-2 gap-1">
+                  <div className="flex flex-col items-center rounded py-1" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                    <span style={{ color: 'var(--text-faint)', fontSize: '0.6rem' }}>Ability</span>
+                    <span className="font-bold" style={{ color: 'var(--text-dim)' }}>{formatMod(mod)}</span>
                   </div>
-                ))}
-                <div className="pt-0.5">
-                  <input type="text" value={saves[key]?.notes ?? ''}
-                    onChange={e => onChange('saves', { ...saves, [key]: { ...saves[key], notes: e.target.value } })}
-                    placeholder="notes..."
-                    className="w-full rounded px-1 py-0.5 text-xs focus:outline-none"
-                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)', color: 'var(--text-dim)' }}
-                  />
+                  <div className="flex flex-col items-center rounded py-1" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                    <span style={{ color: 'var(--text-faint)', fontSize: '0.6rem' }}>Base</span>
+                    {computedSaveBases
+                      ? <span className="font-bold" style={{ color }}>{computedSaveBases[key] >= 0 ? '+' : ''}{computedSaveBases[key]}</span>
+                      : <SpinnerInput value={saves[key]?.base ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], base: v } })} width="w-7" />
+                    }
+                  </div>
                 </div>
+                {/* Enh + Misc in one row */}
+                <div className="grid grid-cols-2 gap-1">
+                  {[
+                    { lbl: 'Enh', field: 'enhance' },
+                    { lbl: 'Misc', field: 'misc' },
+                  ].map(({ lbl, field }) => (
+                    <div key={field} className="flex flex-col items-center rounded py-1" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                      <span style={{ color: 'var(--text-faint)', fontSize: '0.6rem' }}>{lbl}</span>
+                      <div className="flex items-center gap-0.5">
+                        <button onClick={() => onChange('saves', { ...saves, [key]: { ...saves[key], [field]: (saves[key]?.[field] ?? 0) - 1 } })} className="w-4 h-4 flex items-center justify-center rounded-full text-xs font-bold" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--accent)', lineHeight: 1 }}>−</button>
+                        <span className="font-bold w-5 text-center" style={{ color: (saves[key]?.[field] ?? 0) !== 0 ? color : 'var(--text-dim)' }}>{saves[key]?.[field] ?? 0}</span>
+                        <button onClick={() => onChange('saves', { ...saves, [key]: { ...saves[key], [field]: (saves[key]?.[field] ?? 0) + 1 } })} className="w-4 h-4 flex items-center justify-center rounded-full text-xs font-bold" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--accent)', lineHeight: 1 }}>+</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <input type="text" value={saves[key]?.notes ?? ''}
+                  onChange={e => onChange('saves', { ...saves, [key]: { ...saves[key], notes: e.target.value } })}
+                  placeholder="notes..."
+                  className="w-full rounded px-1 py-0.5 text-xs focus:outline-none"
+                  style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)', color: 'var(--text-dim)' }}
+                />
               </div>
             </div>
           ))}
