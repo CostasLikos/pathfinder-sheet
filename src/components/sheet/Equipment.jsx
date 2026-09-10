@@ -222,10 +222,10 @@ function ItemDetail({ item }) {
 function ItemCardPopup({ itemName, onClose }) {
   const data = useMemo(() => BROWSE_ITEMS.find(i => i.name.toLowerCase() === itemName.toLowerCase()), [itemName])
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black/75" onClick={onClose}>
       <div
-        className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-xl shadow-2xl overflow-hidden"
-        style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)' }}
+        className="flex flex-col rounded-xl shadow-2xl overflow-hidden"
+        style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100% - 32px)', maxWidth: 520, maxHeight: '85vh', backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="px-5 py-3 flex items-center justify-between flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
