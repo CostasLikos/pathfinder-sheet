@@ -202,12 +202,12 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
       {/* Desktop: portrait tall sidebar beside all fields */}
 
       {/* Portrait + top fields row */}
-      <div className="flex items-center gap-3 mb-3 md:hidden">
-        <div className="relative flex-shrink-0" style={{ width: '80px', height: '80px' }}>
+      <div className="flex items-stretch gap-3 mb-3 md:hidden">
+        <div className="relative flex-shrink-0" style={{ width: '80px', minHeight: '80px' }}>
           <div
             onClick={() => setPortraitOpen(true)}
-            className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-all group"
-            style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}
+            className="w-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-all group"
+            style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-darker)', position: 'absolute', inset: 0 }}
             onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
             onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bg-border)'}
           >
@@ -222,7 +222,7 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           </div>
           <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={e => { handlePortrait(e); setPortraitOpen(false) }} />
         </div>
-        <div className="flex-1 flex flex-col justify-center gap-2">
+        <div className="flex-1 flex flex-col justify-between gap-2">
           {field('Name', 'name')}
           {field('Player Name', 'playerName')}
         </div>
