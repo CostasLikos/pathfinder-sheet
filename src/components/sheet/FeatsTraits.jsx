@@ -346,10 +346,9 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
         </div>
         <div className="flex gap-2">
           <LibraryButton onClick={showLibrary} color={color} />
-          <button onClick={() => setAdding(true)}
-            className={`text-xs px-2 py-1 rounded-lg font-bold ${pendingFeat ? 'level-up-pulse' : ''}`}
-            style={{ color: pendingFeat ? '#22c55e' : color, border: `1px solid ${pendingFeat ? '#22c55e' : color + '55'}`, backgroundColor: pendingFeat ? '#22c55e18' : `${color}0d` }}>
-            + Add
+          <button onClick={() => setAdding(true)} className="text-xs px-2 py-1 rounded-lg font-bold"
+            style={{ color, border: `1px solid ${color}55`, backgroundColor: `${color}0d` }}>
+            {pendingFeat ? <span className="level-up-pulse" style={{ color: '#22c55e' }}>+ Add</span> : '+ Add'}
           </button>
         </div>
       </div>
