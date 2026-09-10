@@ -259,7 +259,7 @@ function ListEditor({ title, icon, items, onAdd, onUpdate, onRemove, placeholder
           {showLibrary && (
             <button onClick={showLibrary} className="text-xs px-2 py-0.5 rounded font-bold"
               style={{ color: 'var(--accent)', border: '1px solid var(--accent)', backgroundColor: 'var(--accent-dim)' }}>
-              ⚔️ Library
+              📖 Library
             </button>
           )}
           <button onClick={() => setAdding(true)} className="text-xs px-2 py-1 rounded-lg font-bold"
@@ -331,7 +331,7 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
         <div className="flex gap-2">
           <button onClick={showLibrary} className="text-xs px-2 py-0.5 rounded font-bold"
             style={{ color: 'var(--accent)', border: '1px solid var(--accent)', backgroundColor: 'var(--accent-dim)' }}>
-            ⚔️ Library
+            📖 Library
           </button>
           <button onClick={() => setAdding(true)} className="text-xs px-2 py-1 rounded-lg font-bold"
             style={{ color, border: `1px solid ${color}55`, backgroundColor: `${color}0d` }}>
