@@ -191,14 +191,9 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
 
   return (
     <div className="card">
-      {onTogglePin && (
-        <div className="flex justify-end mb-2">
-          <PinButton pinned={pinned} onToggle={onTogglePin} />
-        </div>
-      )}
-      {/* Section title */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--accent)' }}>Character</span>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="section-title mb-0">Character</h2>
+        {onTogglePin && <PinButton pinned={pinned} onToggle={onTogglePin} />}
       </div>
 
       {/* Mobile: portrait + name row, then fields below */}
