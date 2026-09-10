@@ -286,6 +286,28 @@ export const THEMES = {
     }
   },
 
+  bloodMoon: {
+    id: 'bloodMoon',
+    name: 'Blood Moon',
+    preview: ['#330006', '#DF0000'],
+    vars: {
+      '--bg-darker':    '#1a0003',
+      '--bg-dark':      '#330006',
+      '--bg-surface':   '#4E0506',
+      '--bg-border':    '#900000',
+      '--accent':       '#DF0000',
+      '--accent-dim':   '#900000',
+      '--accent-hover': '#ff3333',
+      '--text':         '#ffe8e8',
+      '--text-dim':     '#B70000',
+      '--text-faint':   '#4E0506',
+      '--danger':       '#DF0000',
+      '--danger-hover': '#ff3333',
+      '--positive':     '#5e9e6a',
+      '--warning':      '#e06030',
+    }
+  },
+
   twilight: {
     id: 'twilight',
     name: 'Twilight',
