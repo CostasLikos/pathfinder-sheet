@@ -206,9 +206,60 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           <PinButton pinned={pinned} onToggle={onTogglePin} />
         </div>
       )}
-      <div className="flex gap-4">
-        {/* Portrait */}
-        <div className="relative flex-shrink-0 self-stretch hidden sm:block" style={{ width: '120px' }}>
+      {/* Mobile: portrait + name row, then fields below */}
+      {/* Desktop: portrait tall sidebar beside all fields */}
+
+      {/* Portrait + top fields row */}
+      <div className="flex gap-3 mb-3 md:hidden">
+        <div className="relative flex-shrink-0" style={{ width: '80px', height: '80px' }}>
+          <div
+            onClick={() => portraitRef.current.click()}
+            className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
+            style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bg-border)'}
+          >
+            {character.portrait
+              ? <img src={character.portrait} alt="" className="w-full h-full object-cover" />
+              : <span className="text-3xl">🧙</span>
+            }
+            <div className="absolute bottom-0 left-0 right-0 text-center py-0.5" style={{ backgroundColor:'rgba(0,0,0,0.55)', fontSize:'0.55rem', color:'var(--text-dim)' }}>
+              {character.portrait ? 'change' : 'add photo'}
+            </div>
+          </div>
+          <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={handlePortrait} />
+        </div>
+        <div className="flex-1 flex flex-col gap-2">
+          {field('Character Name', 'name')}
+          {field('Player Name', 'playerName')}
+        </div>
+      </div>
+
+      {/* Mobile: rest of fields full width */}
+      <div className="grid grid-cols-2 gap-3 md:hidden">
+        {field('Race', 'race', 'text', RACES)}
+        {field('Alignment', 'alignment', 'text', ALIGNMENTS)}
+        {field('Deity', 'deity')}
+        {field('Homeland', 'homeland')}
+        {field('Experience', 'experience', 'number')}
+        {field('Age', 'age', 'number')}
+        {field('Gender', 'gender')}
+        {field('Height', 'height')}
+        {field('Weight', 'weight')}
+        {field('Background', 'background')}
+        <div className="col-span-2 flex flex-col gap-1">
+          <label className="text-gray-400 text-xs uppercase tracking-wide">Languages</label>
+          <input type="text" value={character.languages||''} onChange={e => onChange('languages', e.target.value)} placeholder="e.g. Common, Elvish, Draconic..." className="input-field text-sm" />
+        </div>
+        <div className="col-span-2 flex flex-col gap-1">
+          <label className="text-gray-400 text-xs uppercase tracking-wide">Description</label>
+          <textarea value={character.description || ''} onChange={e => { onChange('description', e.target.value); e.target.style.height='auto'; e.target.style.height=e.target.scrollHeight+'px' }} onFocus={e => { e.target.style.height='auto'; e.target.style.height=e.target.scrollHeight+'px' }} placeholder="Appearance, personality, mannerisms..." rows={2} className="input-field text-sm resize-none overflow-hidden" style={{ minHeight:'2.5rem', transition:'height 0.1s ease' }} />
+        </div>
+      </div>
+
+      {/* Desktop: original tall portrait + all fields side by side */}
+      <div className="hidden md:flex gap-4">
+        <div className="relative flex-shrink-0 self-stretch" style={{ width: '120px' }}>
           <div
             onClick={() => portraitRef.current.click()}
             className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
@@ -226,9 +277,7 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           </div>
           <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={handlePortrait} />
         </div>
-
-        {/* Fields */}
-        <div className="flex-1 grid grid-cols-2 gap-3">
+        <div className="flex-1 grid grid-cols-3 gap-3">
           {field('Character Name', 'name')}
           {field('Player Name', 'playerName')}
           {field('Race', 'race', 'text', RACES)}
@@ -241,11 +290,11 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           {field('Height', 'height')}
           {field('Weight', 'weight')}
           {field('Background', 'background')}
-          <div className="col-span-2 flex flex-col gap-1">
+          <div className="col-span-3 flex flex-col gap-1">
             <label className="text-gray-400 text-xs uppercase tracking-wide">Languages</label>
             <input type="text" value={character.languages||''} onChange={e => onChange('languages', e.target.value)} placeholder="e.g. Common, Elvish, Draconic..." className="input-field text-sm" />
           </div>
-          <div className="col-span-2 flex flex-col gap-1">
+          <div className="col-span-3 flex flex-col gap-1">
             <label className="text-gray-400 text-xs uppercase tracking-wide">Description</label>
             <textarea
               value={character.description || ''}
