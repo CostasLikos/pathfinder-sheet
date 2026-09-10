@@ -256,7 +256,12 @@ function ListEditor({ title, icon, items, onAdd, onUpdate, onRemove, placeholder
           </span>
         </div>
         <div className="flex gap-2">
-          {showLibrary && <LibraryButton onClick={showLibrary} color={color} />}
+          {showLibrary && (
+            <button onClick={showLibrary} className="text-xs px-2 py-0.5 rounded font-bold"
+              style={{ color: 'var(--accent)', border: '1px solid var(--accent)', backgroundColor: 'var(--accent-dim)' }}>
+              ⚔️ Library
+            </button>
+          )}
           <button onClick={() => setAdding(true)} className="text-xs px-2 py-1 rounded-lg font-bold"
             style={{ color, border: `1px solid ${color}55`, backgroundColor: `${color}0d` }}>
             + Add
@@ -285,27 +290,6 @@ function ListEditor({ title, icon, items, onAdd, onUpdate, onRemove, placeholder
         {items.length === 0 && <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>None added yet</div>}
       </div>
     </div>
-  )
-}
-
-// ─── Library Button ───────────────────────────────────────────────────────────
-
-function LibraryButton({ onClick, color = 'var(--accent)' }) {
-  const [hov, setHov] = useState(false)
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      className="text-xs px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all"
-      style={{
-        color: hov ? 'var(--bg-darker)' : color,
-        border: `1px solid ${color}`,
-        backgroundColor: hov ? color : `${color}18`,
-        boxShadow: hov ? `0 0 10px ${color}55` : 'none',
-      }}>
-      📖 Library
-    </button>
   )
 }
 
@@ -345,7 +329,10 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
           )}
         </div>
         <div className="flex gap-2">
-          <LibraryButton onClick={showLibrary} color={color} />
+          <button onClick={showLibrary} className="text-xs px-2 py-0.5 rounded font-bold"
+            style={{ color: 'var(--accent)', border: '1px solid var(--accent)', backgroundColor: 'var(--accent-dim)' }}>
+            ⚔️ Library
+          </button>
           <button onClick={() => setAdding(true)} className="text-xs px-2 py-1 rounded-lg font-bold"
             style={{ color, border: `1px solid ${color}55`, backgroundColor: `${color}0d` }}>
             {pendingFeat ? <span className="level-up-pulse" style={{ color: '#22c55e' }}>+ Add</span> : '+ Add'}

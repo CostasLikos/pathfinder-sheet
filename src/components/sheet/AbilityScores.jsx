@@ -87,40 +87,57 @@ function AbilityCard({ ab, base, buff, onChange }) {
         </div>
       </div>
 
-      {/* Hover tooltip */}
+      {/* Hover tooltip — appears below the card */}
       {hovered && (
-        <div className="absolute z-50 rounded-lg p-3 text-xs pointer-events-none"
+        <div className="absolute z-50 rounded-xl p-3 text-xs pointer-events-none"
           style={{
-            bottom: 'calc(100% + 8px)', left: '50%', transform: 'translateX(-50%)',
-            width: '180px',
-            backgroundColor: 'var(--bg-darker)',
-            border: `1px solid ${color}`,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+            top: 'calc(100% + 10px)', left: '50%', transform: 'translateX(-50%)',
+            width: '200px',
+            backgroundColor: 'var(--bg-surface)',
+            border: `2px solid ${color}`,
+            boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 16px ${color}22`,
             color: 'var(--text-dim)',
           }}
         >
-          <div style={{ position: 'absolute', bottom: '-6px', left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: `6px solid ${color}` }} />
-          <div className="font-bold mb-2 flex items-center gap-1" style={{ color, fontFamily: 'Georgia, serif' }}>
-            {ABILITY_ICON[ab]} {ABILITY_NAMES[ab]}
+          {/* Arrow pointing up */}
+          <div style={{ position: 'absolute', top: '-7px', left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderBottom: `7px solid ${color}` }} />
+
+          {/* Header */}
+          <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom: `1px solid ${color}44` }}>
+            <span style={{ fontSize: '1.1rem' }}>{ABILITY_ICON[ab]}</span>
+            <div>
+              <div className="font-bold text-sm" style={{ color, fontFamily: 'Georgia, serif' }}>{ABILITY_NAMES[ab]}</div>
+              <div style={{ color: 'var(--text-faint)', fontSize: '0.6rem' }}>{ab.toUpperCase()}</div>
+            </div>
+            <div className="ml-auto text-center">
+              <div className="font-bold" style={{ fontSize: '1.6rem', color, fontFamily: 'Georgia, serif', lineHeight: 1 }}>{formatMod(mod)}</div>
+              <div style={{ fontSize: '0.6rem', color: 'var(--text-faint)' }}>modifier</div>
+            </div>
           </div>
-          <div className="space-y-1 mb-2">
-            <div className="flex justify-between">
-              <span>Base score</span><span style={{ color: 'var(--text)' }}>{base}</span>
+
+          {/* Score breakdown */}
+          <div className="space-y-1.5 mb-3">
+            <div className="flex justify-between items-center">
+              <span style={{ color: 'var(--text-faint)' }}>Base score</span>
+              <span className="font-bold" style={{ color: 'var(--text)' }}>{base}</span>
             </div>
             {hasBuff && (
-              <div className="flex justify-between">
-                <span>Buff / item</span><span style={{ color: buffColor }}>{buff > 0 ? `+${buff}` : buff}</span>
+              <div className="flex justify-between items-center">
+                <span style={{ color: 'var(--text-faint)' }}>Buff / item</span>
+                <span className="font-bold" style={{ color: buffColor }}>{buff > 0 ? `+${buff}` : buff}</span>
               </div>
             )}
-            <div className="flex justify-between font-bold pt-1" style={{ borderTop: '1px solid var(--bg-border)' }}>
-              <span style={{ color: 'var(--text)' }}>Total</span><span style={{ color: 'var(--text)' }}>{score}</span>
-            </div>
-            <div className="flex justify-between font-bold">
-              <span style={{ color: 'var(--text)' }}>Modifier</span><span style={{ color }}>{formatMod(mod)}</span>
+            <div className="flex justify-between items-center pt-1.5 font-bold" style={{ borderTop: `1px solid ${color}33` }}>
+              <span style={{ color: 'var(--text)' }}>Total score</span>
+              <span style={{ color }}>{score}</span>
             </div>
           </div>
-          <div style={{ color: 'var(--text-faint)', fontSize: '0.65rem', lineHeight: 1.4, borderTop: '1px solid var(--bg-border)', paddingTop: '6px' }}>
-            {ABILITY_DESC[ab]}
+
+          {/* Description */}
+          <div className="rounded-lg px-2 py-1.5" style={{ backgroundColor: `${color}0d`, border: `1px solid ${color}22` }}>
+            <div style={{ color: 'var(--text-faint)', fontSize: '0.65rem', lineHeight: 1.5 }}>
+              {ABILITY_DESC[ab]}
+            </div>
           </div>
         </div>
       )}
