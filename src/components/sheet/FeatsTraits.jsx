@@ -333,8 +333,8 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
             style={{ color: 'var(--accent)', border: '1px solid var(--accent)', backgroundColor: 'var(--accent-dim)' }}>
             📖 Library
           </button>
-          <button onClick={() => setAdding(true)} className="text-xs px-2 py-1 rounded-lg font-bold"
-            style={{ color, border: `1px solid ${color}55`, backgroundColor: `${color}0d` }}>
+          <button onClick={() => setAdding(true)} className="text-xs px-2 py-0.5 rounded font-bold"
+            style={{ color, border: `1px solid ${color}`, backgroundColor: `${color}0d` }}>
             {pendingFeat ? <span className="level-up-pulse" style={{ color: '#22c55e' }}>+ Add</span> : '+ Add'}
           </button>
         </div>
