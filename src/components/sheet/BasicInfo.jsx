@@ -208,10 +208,10 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
       )}
       <div className="flex gap-4">
         {/* Portrait */}
-        <div className="relative flex-shrink-0 self-stretch" style={{ width: '120px' }}>
+        <div className="relative flex-shrink-0 self-stretch hidden sm:block" style={{ width: '120px' }}>
           <div
             onClick={() => portraitRef.current.click()}
-            className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-colors group"
+            className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
             style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-darker)', minHeight: '100%' }}
             onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
             onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--bg-border)'}
@@ -228,7 +228,7 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
         </div>
 
         {/* Fields */}
-        <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="flex-1 grid grid-cols-2 gap-3">
           {field('Character Name', 'name')}
           {field('Player Name', 'playerName')}
           {field('Race', 'race', 'text', RACES)}
@@ -238,14 +238,14 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           {field('Experience', 'experience', 'number')}
           {field('Age', 'age', 'number')}
           {field('Gender', 'gender')}
-{field('Height', 'height')}
+          {field('Height', 'height')}
           {field('Weight', 'weight')}
           {field('Background', 'background')}
-          <div className="col-span-2 md:col-span-3 flex flex-col gap-1">
+          <div className="col-span-2 flex flex-col gap-1">
             <label className="text-gray-400 text-xs uppercase tracking-wide">Languages</label>
             <input type="text" value={character.languages||''} onChange={e => onChange('languages', e.target.value)} placeholder="e.g. Common, Elvish, Draconic..." className="input-field text-sm" />
           </div>
-          <div className="col-span-2 md:col-span-3 flex flex-col gap-1">
+          <div className="col-span-2 flex flex-col gap-1">
             <label className="text-gray-400 text-xs uppercase tracking-wide">Description</label>
             <textarea
               value={character.description || ''}
