@@ -440,6 +440,28 @@ export const THEMES = {
     }
   },
 
+  maroonOrange: {
+    id: 'maroonOrange',
+    name: 'Maroon & Orange',
+    preview: ['#7A0025', '#EF6719'],
+    vars: {
+      '--bg-darker':    '#1a0008',
+      '--bg-dark':      '#7A0025',
+      '--bg-surface':   '#990926',
+      '--bg-border':    '#CA033E',
+      '--accent':       '#EF6719',
+      '--accent-dim':   '#DC3C18',
+      '--accent-hover': '#ff7a2a',
+      '--text':         '#fff0e8',
+      '--text-dim':     '#f0b090',
+      '--text-faint':   '#8a3020',
+      '--danger':       '#7A0025',
+      '--danger-hover': '#990926',
+      '--positive':     '#22c55e',
+      '--warning':      '#fbbf24',
+    }
+  },
+
   mephisto: {
     id: 'mephisto',
     name: 'Mephisto',
