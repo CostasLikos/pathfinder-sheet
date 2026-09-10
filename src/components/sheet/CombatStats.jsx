@@ -382,10 +382,10 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
                   { label: 'Ability', el: <span style={{ color: 'var(--text-dim)', fontWeight: 'bold' }}>{formatMod(mod)}</span> },
                   { label: 'Base', el: computedSaveBases
                       ? <span style={{ color, fontWeight: 'bold' }}>+{computedSaveBases[key]} <span style={{ color: 'var(--text-faint)', fontWeight: 'normal' }}>(auto)</span></span>
-                      : <SpinnerInput value={saves[key]?.base ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], base: v } })} width="w-9" />
+                      : <SpinnerInput value={saves[key]?.base ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], base: v } })} width="w-8" small />
                   },
-                  { label: 'Enh', el: <SpinnerInput value={saves[key]?.enhance ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], enhance: v } })} width="w-9" /> },
-                  { label: 'Misc', el: <SpinnerInput value={saves[key]?.misc    ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], misc:    v } })} width="w-9" /> },
+                  { label: 'E', el: <SpinnerInput value={saves[key]?.enhance ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], enhance: v } })} width="w-8" small /> },
+                  { label: 'M', el: <SpinnerInput value={saves[key]?.misc    ?? 0} onChange={v => onChange('saves', { ...saves, [key]: { ...saves[key], misc:    v } })} width="w-8" small /> },
                 ].map(({ label: lbl, el }) => (
                   <div key={lbl} className="flex items-center justify-between gap-1">
                     <span style={{ color: 'var(--text-faint)', flexShrink: 0 }}>{lbl}</span>
