@@ -1,5 +1,6 @@
 import { ALIGNMENTS, RACES, CLASSES, CLASS_DATA, computeClassTotals } from '../../data/pf1eData'
 import { useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import PinButton from '../PinButton'
 
 const emptyClassEntry = (isFavored = false) => ({
@@ -126,6 +127,7 @@ function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored 
 export default function BasicInfo({ character, onChange, pinned, onTogglePin }) {
   const portraitRef = useRef()
   const [classesOpen, setClassesOpen] = useState(true)
+  const [portraitOpen, setPortraitOpen] = useState(false)
 
   const handlePortrait = (e) => {
     const file = e.target.files[0]
@@ -203,7 +205,7 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
       <div className="flex items-center gap-3 mb-3 md:hidden">
         <div className="relative flex-shrink-0" style={{ width: '80px', height: '80px' }}>
           <div
-            onClick={() => portraitRef.current.click()}
+            onClick={() => setPortraitOpen(true)}
             className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
             style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}
             onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
@@ -214,10 +216,10 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
               : <span className="text-3xl">🧙</span>
             }
             <div className="absolute bottom-0 left-0 right-0 text-center py-0.5" style={{ backgroundColor:'rgba(0,0,0,0.55)', fontSize:'0.55rem', color:'var(--text-dim)' }}>
-              {character.portrait ? 'change' : 'add photo'}
+              {character.portrait ? 'view' : 'add photo'}
             </div>
           </div>
-          <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={handlePortrait} />
+          <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={e => { handlePortrait(e); setPortraitOpen(false) }} />
         </div>
         <div className="flex-1 flex flex-col justify-center gap-2">
           {field('Name', 'name')}
@@ -251,7 +253,7 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
       <div className="hidden md:flex gap-4">
         <div className="relative flex-shrink-0 self-stretch" style={{ width: '120px' }}>
           <div
-            onClick={() => portraitRef.current.click()}
+            onClick={() => setPortraitOpen(true)}
             className="w-full h-full rounded border-2 border-dashed cursor-pointer overflow-hidden flex items-center justify-center transition-colors"
             style={{ borderColor: 'var(--bg-border)', backgroundColor: 'var(--bg-darker)', minHeight: '100%' }}
             onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
@@ -262,10 +264,10 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
               : <span className="text-4xl">🧙</span>
             }
             <div className="absolute bottom-0 left-0 right-0 text-center py-0.5" style={{ backgroundColor:'rgba(0,0,0,0.55)', fontSize:'0.6rem', color:'var(--text-dim)', letterSpacing:'0.05em' }}>
-              {character.portrait ? 'change' : 'add photo'}
+              {character.portrait ? 'view' : 'add photo'}
             </div>
           </div>
-          <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={handlePortrait} />
+          <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={e => { handlePortrait(e); setPortraitOpen(false) }} />
         </div>
         <div className="flex-1 grid grid-cols-3 gap-3">
           {field('Name', 'name')}
@@ -408,6 +410,48 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           </div>
         )}
       </div>
+
+      {/* Portrait popup */}
+      {portraitOpen && createPortal(
+        <div className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setPortraitOpen(false)}>
+          <div className="flex flex-col items-center gap-4 rounded-2xl p-5"
+            style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)44', maxWidth: '360px', width: '100%' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="w-48 h-48 rounded-xl overflow-hidden flex items-center justify-center"
+              style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
+              {character.portrait
+                ? <img src={character.portrait} alt="" className="w-full h-full object-cover" />
+                : <span style={{ fontSize: '5rem' }}>🧙</span>
+              }
+            </div>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => portraitRef.current.click()}
+                className="flex-1 py-2 rounded-lg font-bold text-sm"
+                style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>
+                {character.portrait ? '🖼 Change Photo' : '📷 Add Photo'}
+              </button>
+              {character.portrait && (
+                <button
+                  onClick={() => { onChange('portrait', ''); setPortraitOpen(false) }}
+                  className="py-2 px-3 rounded-lg text-sm font-bold"
+                  style={{ color: '#ef4444', border: '1px solid #ef444444', backgroundColor: '#ef444411' }}>
+                  Remove
+                </button>
+              )}
+              <button
+                onClick={() => setPortraitOpen(false)}
+                className="py-2 px-3 rounded-lg text-sm"
+                style={{ color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }
