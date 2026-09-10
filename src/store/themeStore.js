@@ -286,6 +286,28 @@ export const THEMES = {
     }
   },
 
+  umbra: {
+    id: 'umbra',
+    name: 'Umbra',
+    preview: ['#40042B', '#735C3F'],
+    vars: {
+      '--bg-darker':    '#0e0009',
+      '--bg-dark':      '#1c0115',
+      '--bg-surface':   '#40042B',
+      '--bg-border':    '#024059',
+      '--accent':       '#735C3F',
+      '--accent-dim':   '#590E45',
+      '--accent-hover': '#9e7d56',
+      '--text':         '#e8d5c4',
+      '--text-dim':     '#023859',
+      '--text-faint':   '#590E45',
+      '--danger':       '#8B0000',
+      '--danger-hover': '#a50000',
+      '--positive':     '#2a7d5e',
+      '--warning':      '#9e7d56',
+    }
+  },
+
   phoenix: {
     id: 'phoenix',
     name: 'Phoenix',
