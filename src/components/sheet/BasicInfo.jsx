@@ -419,13 +419,13 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           style={{ zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)' }}
           onClick={() => setPortraitOpen(false)}>
           <div className="flex flex-col items-center gap-4 rounded-2xl p-5"
-            style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)44', maxWidth: '360px', width: '100%' }}
+            style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)44', maxWidth: '480px', width: '100%' }}
             onClick={e => e.stopPropagation()}>
-            <div className="w-48 h-48 rounded-xl overflow-hidden flex items-center justify-center"
-              style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
+            <div className="rounded-xl overflow-hidden flex items-center justify-center"
+              style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', width: '100%', maxHeight: '60vh' }}>
               {character.portrait
-                ? <img src={character.portrait} alt="" className="w-full h-full object-cover" />
-                : <span style={{ fontSize: '5rem' }}>🧙</span>
+                ? <img src={character.portrait} alt="" style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain' }} />
+                : <span style={{ fontSize: '5rem', padding: '2rem 0' }}>🧙</span>
               }
             </div>
             <div className="flex gap-3 w-full">
