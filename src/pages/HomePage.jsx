@@ -317,11 +317,13 @@ export default function HomePage() {
             fontSize: 'clamp(2.4rem, 9vw, 4.5rem)',
             fontWeight: 900, fontFamily: 'Georgia, serif', lineHeight: 1.05,
             marginBottom: '1.5rem',
-            background: `linear-gradient(180deg, ${textColor} 0%, ${accentHex} 45%, ${accentDim} 100%)`,
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            filter: `drop-shadow(0 2px 16px ${glowColor})`,
           }}>
-            Chronicle<br />of Heroes
+            <span style={{
+              background: `linear-gradient(180deg, ${textColor} 0%, ${accentHex} 45%, ${accentDim} 100%)`,
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+              display: 'inline-block',
+              textShadow: 'none',
+            }}>Chronicle<br />of Heroes</span>
           </h1>
 
           {/* quote */}
