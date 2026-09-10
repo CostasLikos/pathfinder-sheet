@@ -605,7 +605,7 @@ function SpellCardPopup({ spellName, onClose }) {
     <div className="fixed inset-0 z-[9999] bg-black/75" onClick={onClose}>
       <div
         className="flex flex-col rounded-xl shadow-2xl overflow-hidden"
-        style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100% - 32px)', maxWidth: 520, maxHeight: '85vh', backgroundColor: 'var(--bg-surface)', border: `2px solid ${color}` }}
+        style={{ position: 'fixed', bottom: '20%', left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 32px)', maxWidth: 520, maxHeight: '70vh', backgroundColor: 'var(--bg-surface)', border: `2px solid ${color}` }}
         onClick={e => e.stopPropagation()}
       >
         <div className="px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${color}33`, background: `linear-gradient(135deg, var(--bg-darker) 0%, ${color}18 100%)` }}>
