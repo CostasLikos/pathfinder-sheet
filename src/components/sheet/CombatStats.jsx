@@ -92,7 +92,7 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
         borderLeft: `1px solid ${hpColor}55`,
         borderRight: `1px solid ${hpColor}22`,
         borderBottom: `1px solid ${hpColor}22`,
-        boxShadow: `0 4px 24px rgba(0,0,0,0.5), 0 0 20px ${hpColor}22, inset 0 1px 0 ${hpColor}33, inset 0 -1px 0 rgba(0,0,0,0.3)`,
+        boxShadow: `0 4px 24px rgba(0,0,0,0.5), 0 0 20px ${hpColor}66, inset 0 1px 0 ${hpColor}33, inset 0 -1px 0 rgba(0,0,0,0.3)`,
       }}>
 
         {/* Header */}
