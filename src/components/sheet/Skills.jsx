@@ -9,7 +9,8 @@ function BadgeCluster({ badges }) {
   const rows = badges.length === 1 ? [[badges[0]]]
     : badges.length === 2 ? [[badges[0], badges[1]]]
     : badges.length === 3 ? [[badges[0], badges[1]], [badges[2]]]
-    : [[badges[0], badges[1]], [badges[2], badges[3]]]
+    : badges.length === 4 ? [[badges[0], badges[1]], [badges[2], badges[3]]]
+    : [[badges[0], badges[1]], [badges[2]], [badges[3], badges[4]]]
   return (
     <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', verticalAlign: 'super', marginLeft: '2px', gap: '1px' }}>
       {rows.map((row, ri) => (
