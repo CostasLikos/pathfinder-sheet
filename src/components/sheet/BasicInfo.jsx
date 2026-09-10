@@ -196,6 +196,11 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           <PinButton pinned={pinned} onToggle={onTogglePin} />
         </div>
       )}
+      {/* Section title */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--accent)' }}>Character</span>
+      </div>
+
       {/* Mobile: portrait + name row, then fields below */}
       {/* Desktop: portrait tall sidebar beside all fields */}
 
@@ -220,7 +225,7 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={handlePortrait} />
         </div>
         <div className="flex-1 flex flex-col justify-center gap-2">
-          {field('Character Name', 'name')}
+          {field('Name', 'name')}
           {field('Player Name', 'playerName')}
         </div>
       </div>
@@ -268,7 +273,7 @@ export default function BasicInfo({ character, onChange, pinned, onTogglePin }) 
           <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={handlePortrait} />
         </div>
         <div className="flex-1 grid grid-cols-3 gap-3">
-          {field('Character Name', 'name')}
+          {field('Name', 'name')}
           {field('Player Name', 'playerName')}
           {field('Race', 'race', 'text', RACES)}
           {field('Alignment', 'alignment', 'text', ALIGNMENTS)}
