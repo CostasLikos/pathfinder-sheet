@@ -2,6 +2,28 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export const THEMES = {
+  default: {
+    id: 'default',
+    name: 'Default',
+    preview: ['#1e2430', '#6b9fb8'],
+    vars: {
+      '--bg-darker':    '#161c27',
+      '--bg-dark':      '#1e2430',
+      '--bg-surface':   '#252d3d',
+      '--bg-border':    '#37445a',
+      '--accent':       '#6b9fb8',
+      '--accent-dim':   '#3d6a82',
+      '--accent-hover': '#8bbdd6',
+      '--text':         '#d8e4ef',
+      '--text-dim':     '#8fa3ba',
+      '--text-faint':   '#45566e',
+      '--danger':       '#7a2535',
+      '--danger-hover': '#9a3045',
+      '--positive':     '#4ade80',
+      '--warning':      '#fbbf24',
+    }
+  },
+
   darkGold: {
     id: 'darkGold',
     name: 'The Gilded Tome',
@@ -488,7 +510,7 @@ export const THEMES = {
 export const useThemeStore = create(
   persist(
     (set) => ({
-      activeTheme: 'darkGold',
+      activeTheme: 'default',
       setTheme: (id) => set({ activeTheme: id }),
     }),
     { name: 'pf-theme' }
