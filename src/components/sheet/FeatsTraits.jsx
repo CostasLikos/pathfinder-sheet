@@ -520,14 +520,6 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
               placeholder="Trait name (e.g. Reactionary)"
             />
           </div>
-          <div style={{ borderTop: '1px solid #ef444433', paddingTop: '1.5rem' }}>
-            <DrawbackEditor
-              drawbacks={drawbacks}
-              onAdd={addDrawback}
-              onUpdate={updateDrawback}
-              onRemove={removeDrawback}
-            />
-          </div>
           <div style={{ borderTop: '1px solid #22c55e33', paddingTop: '1.5rem' }}>
             <ListEditor
               title="Features"
@@ -538,6 +530,14 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
               onUpdate={updateFeature}
               onRemove={removeFeature}
               placeholder="Feature name (e.g. Bardic Performance)"
+            />
+          </div>
+          <div style={{ borderTop: '1px solid #ef444433', paddingTop: '1.5rem' }}>
+            <DrawbackEditor
+              drawbacks={drawbacks}
+              onAdd={addDrawback}
+              onUpdate={updateDrawback}
+              onRemove={removeDrawback}
             />
           </div>
         </div>
