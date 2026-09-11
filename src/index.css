@@ -289,6 +289,6 @@ body {
   }
   /* HP inputs keep their large size on mobile */
   input.hp-input {
-    font-size: 6.8rem !important;
+    font-size: 4rem !important;
   }
 }
