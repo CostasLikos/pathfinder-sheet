@@ -5,7 +5,7 @@ export const THEMES = {
   default: {
     id: 'default',
     name: 'Default',
-    preview: ['#1e2e3a', '#c89090'],
+    preview: ['#1e2e3a', '#d4906a'],
     vars: {
       '--bg-darker':    '#141e28',
       '--bg-dark':      '#1e2e3a',
@@ -459,6 +459,28 @@ export const THEMES = {
       '--danger-hover': '#FF5733',
       '--positive':     '#FFCC00',
       '--warning':      '#FF5733',
+    }
+  },
+
+  mountainSunset: {
+    id: 'mountainSunset',
+    name: 'Mountain Sunset',
+    preview: ['#201c1a', '#d4926a'],
+    vars: {
+      '--bg-darker':    '#120f0e',
+      '--bg-dark':      '#201c1a',
+      '--bg-surface':   '#2c2624',
+      '--bg-border':    '#484040',
+      '--accent':       '#d4926a',
+      '--accent-dim':   '#8a5a3a',
+      '--accent-hover': '#e8aa80',
+      '--text':         '#f0d8b8',
+      '--text-dim':     '#9a8890',
+      '--text-faint':   '#484040',
+      '--danger':       '#7a2535',
+      '--danger-hover': '#9a3545',
+      '--positive':     '#6aaa78',
+      '--warning':      '#c8a040',
     }
   },
 
