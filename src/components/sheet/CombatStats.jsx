@@ -213,7 +213,7 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
 
         {/* Quick adjust buttons */}
         <div className="flex gap-1.5 justify-center mb-4">
-          {[-10, -5, -1].map(n => (
+          {[-10, -5].map(n => (
             <button key={n}
               onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) + n })}
               className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors"
@@ -224,7 +224,7 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
             </button>
           ))}
           <div className="w-px mx-0.5" style={{ backgroundColor: 'var(--bg-border)' }} />
-          {[1, 5, 10].map(n => (
+          {[5, 10].map(n => (
             <button key={n}
               onClick={() => onChange('hp', { ...hp, current: (hp.current ?? 0) + n })}
               className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors"
