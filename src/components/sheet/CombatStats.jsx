@@ -174,7 +174,6 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
             </div>
           </div>
 
-
           {/* Max HP */}
           <div className={`flex flex-col items-center gap-1 rounded-xl px-4 py-3 ${pendingHP ? 'level-up-pulse' : ''}`}
             style={{ background: 'var(--bg-darker)', border: pendingHP ? '2px solid #22c55e88' : '2px solid var(--bg-border)' }}>
