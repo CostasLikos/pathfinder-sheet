@@ -287,4 +287,8 @@ body {
   textarea {
     font-size: max(16px, 0.875rem) !important;
   }
+  /* HP inputs keep their large size on mobile */
+  input.hp-input {
+    font-size: 6.8rem !important;
+  }
 }
