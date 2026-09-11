@@ -175,9 +175,18 @@ function CombatWidget({ character }) {
   )
 }
 
-function AttacksWidget({ character }) {
+function AttacksWidget({ character, computedBAB = null, buffTotals = {} }) {
   const weapons = character.weapons ?? []
   const [hovered, setHovered] = useState(null)
+  const bab = computedBAB ?? (character.bab ?? 0)
+  const abilities = character.abilities ?? {}
+
+  const getAttackTotal = (w) => {
+    const abilityScore = abilities[w.ability ?? 'str'] ?? 10
+    const abilityBonus = Math.floor((abilityScore - 10) / 2)
+    return bab + abilityBonus + (w.attackMisc ?? 0) + (w.tempAttack ?? 0) + (buffTotals.attackRoll ?? 0)
+  }
+
   if (!weapons.length) return <p className="text-xs text-center py-2" style={{ color: 'var(--text-faint)' }}>No weapons added.</p>
   return (
     <div className="space-y-2">
@@ -187,10 +196,10 @@ function AttacksWidget({ character }) {
           onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
           <div className="flex items-center justify-between">
             <span className="font-semibold text-sm" style={{ color: 'var(--text)' }}>{w.name || 'Unnamed Weapon'}</span>
-            <span className="text-sm font-bold" style={{ color: 'var(--accent)' }}>{formatMod(w.attackBonus ?? 0)}</span>
+            <span className="text-sm font-bold" style={{ color: 'var(--accent)' }}>{formatMod(getAttackTotal(w))}</span>
           </div>
           <div className="text-xs mt-0.5" style={{ color: 'var(--text-dim)' }}>
-            {w.damage && <span>{w.damage}</span>}
+            {w.dmgDice && <span>{w.dmgDice}</span>}
             {w.critical && <span className="ml-2" style={{ color: 'var(--text-faint)' }}>× {w.critical}</span>}
           </div>
           {hovered === i && (w.type || w.range || w.notes || w.special) && (
@@ -616,7 +625,7 @@ function SizeWidget({ character, onChange }) {
 
 // ─── Widget Renderer ──────────────────────────────────────────────────────────
 
-function renderWidget(id, character, onChange) {
+function renderWidget(id, character, onChange, computedBAB, buffTotals) {
   switch (id) {
     case 'basicInfo':    return <BasicInfoWidget character={character} />
     case 'hp':           return <HPWidget character={character} onChange={onChange} />
@@ -624,7 +633,7 @@ function renderWidget(id, character, onChange) {
     case 'ac':           return <ACWidget character={character} />
     case 'saves':        return <SavesWidget character={character} />
     case 'combat':       return <CombatWidget character={character} />
-    case 'attacks':      return <AttacksWidget character={character} />
+    case 'attacks':      return <AttacksWidget character={character} computedBAB={computedBAB} buffTotals={buffTotals} />
     case 'spellcasting': return <SpellcastingWidget character={character} />
     case 'spells':       return <SpellsWidget character={character} />
     case 'statBuffs':    return <StatBuffsWidget character={character} onChange={onChange} />
@@ -642,7 +651,7 @@ function renderWidget(id, character, onChange) {
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
-export default function Dashboard({ character, onChange }) {
+export default function Dashboard({ character, onChange, computedBAB = null, buffTotals = {} }) {
   const pins = character.pins ?? { sections: [], skills: [] }
   const pinnedSections = pins.sections ?? []
   const hasPinnedSkills = (pins.skills ?? []).length > 0
@@ -737,7 +746,7 @@ export default function Dashboard({ character, onChange }) {
             isDragging={dragging === id}
             {...makeDragHandlers(id)}
           >
-            {renderWidget(id, character, onChange)}
+            {renderWidget(id, character, onChange, computedBAB, buffTotals)}
           </WidgetCard>
         )
       })}

@@ -270,7 +270,7 @@ export default function CharacterPage() {
       <div key={activeTab} className="tab-content max-w-6xl mx-auto p-4 space-y-4">
 
         {activeTab === '📌 Dashboard' && (
-          <Dashboard character={character} onChange={update} />
+          <Dashboard character={character} onChange={update} computedBAB={computedBAB} buffTotals={buffTotals} />
         )}
 
         {activeTab === 'Overview' && (
