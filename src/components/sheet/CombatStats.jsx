@@ -143,7 +143,7 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
         )}
 
         {/* Current / Max inputs */}
-        <div className="flex items-center justify-center gap-6 mb-4">
+        <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
 
           {/* Current HP */}
           <div className="flex flex-col items-center gap-1 rounded-xl px-4 py-3"
