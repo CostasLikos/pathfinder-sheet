@@ -290,6 +290,6 @@ body {
   /* HP inputs keep their large size on mobile */
   input.hp-input {
     font-size: 4rem !important;
-    width: 120px !important;
+    width: 150px !important;
   }
 }

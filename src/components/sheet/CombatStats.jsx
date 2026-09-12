@@ -154,7 +154,7 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
               value={hp.current ?? 0}
               onChange={e => onChange('hp', { ...hp, current: Number(e.target.value) })}
               className="hp-input text-center font-bold focus:outline-none bg-transparent"
-              style={{ width: '120px', fontSize: '4rem', fontFamily: 'Georgia, serif', color: hpColor, border: 'none', outline: 'none' }}
+              style={{ width: '150px', fontSize: '4rem', fontFamily: 'Georgia, serif', color: hpColor, border: 'none', outline: 'none' }}
             />
             <div className="flex gap-2 mt-1">
               <button
@@ -186,7 +186,7 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
               value={hp.max ?? 0}
               onChange={e => onChange('hp', { ...hp, max: Math.max(0, Number(e.target.value)) })}
               className="hp-input text-center font-bold focus:outline-none bg-transparent"
-              style={{ width: '120px', fontSize: '4rem', fontFamily: 'Georgia, serif', color: 'var(--text-dim)', border: 'none', outline: 'none' }}
+              style={{ width: '150px', fontSize: '4rem', fontFamily: 'Georgia, serif', color: 'var(--text-dim)', border: 'none', outline: 'none' }}
             />
             <div className="flex gap-2 mt-1">
               <button
