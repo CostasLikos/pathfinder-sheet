@@ -386,14 +386,16 @@ function DCBonusManager({ dcBonuses, onUpdate }) {
           </div>
           <p className="text-xs" style={{ color: 'var(--text-faint)' }}>Spell Focus, school specialization, etc. School-specific bonuses only apply to matching spells.</p>
           {dcBonuses.map(b => (
-            <div key={b.id} className="flex items-center gap-2 p-2 rounded-lg" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}>
-              <input type="text" value={b.name} onChange={e => update(b.id, 'name', e.target.value)} placeholder="e.g. Spell Focus" className="flex-1 text-xs focus:outline-none px-2 py-1 rounded" style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text)', border: '1px solid var(--bg-border)' }} />
-              <select value={b.school} onChange={e => update(b.id, 'school', e.target.value)} className="text-xs px-1 py-1 rounded focus:outline-none" style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
-                <option value="All Schools">All Schools</option>
-                {SPELL_SCHOOLS.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <SpinnerInput value={b.bonus ?? 1} onChange={v => update(b.id, 'bonus', v)} width="w-10" />
-              <button onClick={() => remove(b.id)} className="text-xs px-1.5 py-0.5 rounded" style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
+            <div key={b.id} className="flex flex-col gap-1.5 p-2 rounded-lg" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}>
+              <input type="text" value={b.name} onChange={e => update(b.id, 'name', e.target.value)} placeholder="e.g. Spell Focus" className="w-full text-xs focus:outline-none px-2 py-1 rounded" style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text)', border: '1px solid var(--bg-border)' }} />
+              <div className="flex items-center gap-2">
+                <select value={b.school} onChange={e => update(b.id, 'school', e.target.value)} className="flex-1 text-xs px-1 py-1 rounded focus:outline-none" style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
+                  <option value="All Schools">All Schools</option>
+                  {SPELL_SCHOOLS.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <SpinnerInput value={b.bonus ?? 1} onChange={v => update(b.id, 'bonus', v)} width="w-10" />
+                <button onClick={() => remove(b.id)} className="text-xs px-1.5 py-0.5 rounded" style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
+              </div>
             </div>
           ))}
           {dcBonuses.length === 0 && <p className="text-xs text-center py-2" style={{ color: 'var(--text-faint)' }}>No DC bonuses.</p>}
