@@ -452,7 +452,7 @@ function ListEditor({ title, icon, items, onAdd, onUpdate, onRemove, onReorder, 
 
       <div className="space-y-1.5">
         {items.map((item, i) => (
-          <ItemRow key={item.name + i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder} color={color} />
+          <ItemRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder} color={color} />
         ))}
         {items.length === 0 && <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>None added yet</div>}
       </div>
@@ -592,7 +592,7 @@ function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove, onReorder }) {
 
       <div className="space-y-1.5">
         {drawbacks.map((item, i) => (
-          <ItemRow key={item.name + i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder} color={color} />
+          <ItemRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder} color={color} />
         ))}
         {drawbacks.length === 0 && <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>No drawbacks</div>}
       </div>
