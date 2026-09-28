@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { abilityMod, formatMod } from '../../data/pf1eData'
 
 const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -40,9 +40,17 @@ function NumInput({ value, onChange, width = 'w-12', className = '', style = {} 
 
 function CompanionCard({ companion, onChange, onRemove }) {
   const [expanded, setExpanded] = useState(true)
-  const [editMode, setEditMode] = useState(false)
+  const portraitRef = useRef()
 
   const set = (key, val) => onChange({ ...companion, [key]: val })
+
+  const handlePortrait = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => set('portrait', ev.target.result)
+    reader.readAsDataURL(file)
+  }
   const setAbility = (ab, val) => onChange({ ...companion, abilities: { ...companion.abilities, [ab]: val } })
   const setHp = (key, val) => onChange({ ...companion, hp: { ...companion.hp, [key]: val } })
   const setAttack = (i, key, val) => {
@@ -62,31 +70,52 @@ function CompanionCard({ companion, onChange, onRemove }) {
     <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--accent)44', backgroundColor: 'var(--bg-card)' }}>
 
       {/* ── Header bar ── */}
-      <div className="flex items-center gap-2 px-3 py-2 cursor-pointer select-none"
-        style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, var(--bg-darker))' }}
-        onClick={() => setExpanded(x => !x)}>
-        <span className="text-base">🐾</span>
-        <div className="flex-1 min-w-0">
-          <span className="font-bold text-sm" style={{ color: 'var(--accent)' }}>
-            {companion.name || 'Unnamed Companion'}
-          </span>
-          {companion.raceTemplate && (
-            <span className="text-xs ml-2" style={{ color: 'var(--text-faint)' }}>{companion.raceTemplate}</span>
-          )}
-          {companion.levelHD && (
-            <span className="text-xs ml-2 px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text-dim)' }}>
-              HD {companion.levelHD}
-            </span>
-          )}
+      <div className="flex items-center gap-2 px-2 py-2 select-none"
+        style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, var(--bg-darker))' }}>
+
+        {/* Portrait */}
+        <div className="relative group flex-shrink-0 cursor-pointer rounded-lg overflow-hidden"
+          style={{ width: '44px', height: '44px', border: '2px solid var(--accent)44', backgroundColor: 'var(--bg-darker)' }}
+          onClick={e => { e.stopPropagation(); portraitRef.current?.click() }}
+          title="Click to upload portrait">
+          {companion.portrait
+            ? <img src={companion.portrait} alt="" className="w-full h-full object-cover group-hover:brightness-75 transition-all" />
+            : <div className="w-full h-full flex items-center justify-center text-xl">🐾</div>
+          }
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
+            style={{ color: 'var(--accent)' }}>
+            {companion.portrait ? '✎' : '+'}
+          </div>
         </div>
+        <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={handlePortrait} />
+
+        {/* Name + info — clicking this area toggles expand */}
+        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpanded(x => !x)}>
+          <div className="font-bold text-sm" style={{ color: 'var(--accent)' }}>
+            {companion.name || 'Unnamed Companion'}
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+            {companion.raceTemplate && (
+              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{companion.raceTemplate}</span>
+            )}
+            {companion.levelHD && (
+              <span className="text-xs px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text-dim)' }}>
+                HD {companion.levelHD}
+              </span>
+            )}
+          </div>
+        </div>
+
         {/* HP quick view */}
-        <div className="flex items-center gap-1 text-xs font-bold" style={{ color: hpColor }}>
+        <div className="flex items-center gap-1 text-xs font-bold cursor-pointer" style={{ color: hpColor }}
+          onClick={() => setExpanded(x => !x)}>
           <span>{companion.hp.current}</span>
           <span style={{ color: 'var(--text-faint)' }}>/</span>
           <span>{companion.hp.max}</span>
           <span className="ml-1" style={{ color: 'var(--text-faint)' }}>HP</span>
         </div>
-        <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{expanded ? '▲' : '▼'}</span>
+        <span className="text-xs cursor-pointer" style={{ color: 'var(--text-faint)' }}
+          onClick={() => setExpanded(x => !x)}>{expanded ? '▲' : '▼'}</span>
       </div>
 
       {expanded && (
