@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import PinButton from '../PinButton'
 import equipmentData from '../../data/equipment.json'
 import magicItemsData from '../../data/magicItems.json'
@@ -18,6 +19,209 @@ function getEncumbrance(str, w) {
   if (w <= l[1]) return { label: 'Medium Load', color: 'var(--warning)',  max: l[1] }
   if (w <= l[2]) return { label: 'Heavy Load',  color: '#f97316',         max: l[2] }
   return           { label: 'Overloaded',    color: '#ef4444',         max: l[2] }
+}
+
+// ── Worn Equipment slots ──────────────────────────────────────────────────────
+const WORN_SLOTS = [
+  { key: 'head',      label: 'Head',      icon: '🪖' },
+  { key: 'face',      label: 'Face',      icon: '👁️' },
+  { key: 'throat',    label: 'Throat',    icon: '📿' },
+  { key: 'shoulders', label: 'Shoulders', icon: '🧥' },
+  { key: 'body',      label: 'Body',      icon: '🛡️' },
+  { key: 'torso',     label: 'Torso',     icon: '👕' },
+  { key: 'arms',      label: 'Arms',      icon: '💪' },
+  { key: 'hands',     label: 'Hands',     icon: '🧤' },
+  { key: 'ring1',     label: 'Ring',      icon: '💍' },
+  { key: 'ring2',     label: 'Ring',      icon: '💍' },
+  { key: 'waist',     label: 'Waist',     icon: '🎗️' },
+  { key: 'feet',      label: 'Feet',      icon: '👢' },
+]
+
+function SlotPicker({ slotLabel, slotIcon, currentValue, gear, onSelect, onClose }) {
+  const [query, setQuery] = useState(currentValue ?? '')
+  const wrapRef = useRef()
+
+  useEffect(() => {
+    const handle = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) onClose()
+    }
+    // Use setTimeout so the click that opened us doesn't immediately close us
+    const t = setTimeout(() => {
+      document.addEventListener('mousedown', handle)
+      document.addEventListener('touchstart', handle)
+    }, 50)
+    return () => {
+      clearTimeout(t)
+      document.removeEventListener('mousedown', handle)
+      document.removeEventListener('touchstart', handle)
+    }
+  }, [onClose])
+
+  const magicInInventory = (gear ?? []).filter(g =>
+    g.category === 'Magic Item' && g.name &&
+    (!query.trim() || g.name.toLowerCase().includes(query.toLowerCase()))
+  )
+  const dbSuggestions = query.trim().length > 1
+    ? BROWSE_ITEMS
+        .filter(i => i._src === 'magic' && i.name.toLowerCase().includes(query.toLowerCase()))
+        .slice(0, 8)
+    : []
+
+  return createPortal(
+    <div
+      ref={wrapRef}
+      className="fixed rounded-xl shadow-2xl overflow-hidden flex flex-col"
+      style={{
+        top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+        width: 300, maxHeight: 380, zIndex: 9999,
+        backgroundColor: 'var(--bg-surface)',
+        border: '2px solid var(--accent)',
+        boxShadow: '0 0 60px rgba(0,0,0,0.9), 0 0 30px rgba(201,168,76,0.15)',
+      }}
+    >
+      <div className="flex items-center gap-2 px-3 py-2 flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)', backgroundColor: 'var(--bg-darker)' }}>
+        <span>{slotIcon}</span>
+        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>{slotLabel} Slot</span>
+        <button onMouseDown={e => { e.stopPropagation(); onClose() }} className="ml-auto text-xs" style={{ color: 'var(--text-faint)' }}>✕</button>
+      </div>
+      <div className="p-2 flex-shrink-0" style={{ borderBottom: '1px solid var(--bg-border)' }}>
+        <input
+          autoFocus
+          type="text" value={query} onChange={e => setQuery(e.target.value)}
+          placeholder="Type item name…"
+          className="input-field text-sm w-full"
+          onKeyDown={e => {
+            if (e.key === 'Enter') { onSelect(query.trim() || null); onClose() }
+            if (e.key === 'Escape') onClose()
+          }}
+        />
+      </div>
+      <div className="overflow-y-auto flex-1">
+        {currentValue && (
+          <button
+            onMouseDown={e => { e.stopPropagation(); onSelect(null); onClose() }}
+            className="w-full text-left px-3 py-2 text-xs"
+            style={{ color: '#ef4444', borderBottom: '1px solid var(--bg-border)' }}
+          >✕ Clear slot</button>
+        )}
+        {magicInInventory.length > 0 && (
+          <>
+            <div className="px-3 pt-2 pb-1 text-xs uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>From Inventory</div>
+            {magicInInventory.map(g => (
+              <button key={g.id}
+                onMouseDown={e => { e.stopPropagation(); onSelect(g.name); onClose() }}
+                className="w-full text-left px-3 py-1.5 text-sm"
+                style={{ color: 'var(--text)', borderBottom: '1px solid var(--bg-border)' }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--accent-dim)'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}
+              >✨ {g.name}</button>
+            ))}
+          </>
+        )}
+        {dbSuggestions.length > 0 && (
+          <>
+            <div className="px-3 pt-2 pb-1 text-xs uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>Item Database</div>
+            {dbSuggestions.map((item, i) => (
+              <button key={i}
+                onMouseDown={e => { e.stopPropagation(); onSelect(item.name); onClose() }}
+                className="w-full text-left px-3 py-1.5 text-sm"
+                style={{ color: 'var(--text-dim)', borderBottom: '1px solid var(--bg-border)' }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--accent-dim)'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}
+              >{item.name}</button>
+            ))}
+          </>
+        )}
+        {query.trim() && magicInInventory.length === 0 && dbSuggestions.length === 0 && (
+          <button
+            onMouseDown={e => { e.stopPropagation(); onSelect(query.trim()); onClose() }}
+            className="w-full text-left px-3 py-2 text-sm"
+            style={{ color: 'var(--accent)' }}
+          >+ Use "{query.trim()}"</button>
+        )}
+      </div>
+    </div>,
+    document.body
+  )
+}
+
+function WornEquipmentPanel({ wornEquipment = {}, gear = [], onChange }) {
+  const [activeSlot, setActiveSlot] = useState(null) // { key, label, icon, el }
+
+  const set = (key, val) => {
+    const next = { ...wornEquipment }
+    if (val === null) delete next[key]
+    else next[key] = val
+    onChange('wornEquipment', next)
+  }
+  const clearAll = () => onChange('wornEquipment', {})
+  const filledCount = WORN_SLOTS.filter(s => wornEquipment[s.key]).length
+
+  return (
+    <div className="card" style={{ position: 'relative' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <h2 className="section-title mb-0">⚔️ Worn Equipment</h2>
+          {filledCount > 0 && (
+            <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>
+              {filledCount}/{WORN_SLOTS.length}
+            </span>
+          )}
+        </div>
+        {filledCount > 0 && (
+          <button
+            onClick={clearAll}
+            className="text-xs px-3 py-1 rounded font-bold uppercase tracking-wide"
+            style={{ backgroundColor: 'rgba(139,0,0,0.2)', color: '#ef4444', border: '1px solid #ef444444', letterSpacing: '0.08em' }}
+          >✕ Clear</button>
+        )}
+      </div>
+
+      {/* Slot grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        {WORN_SLOTS.map(slot => {
+          const item = wornEquipment[slot.key]
+          const filled = !!item
+          return (
+            <button
+              key={slot.key}
+              onClick={() => setActiveSlot(slot)}
+              className="flex items-center gap-2 rounded-lg px-2 py-2 text-left transition-all"
+              style={{
+                backgroundColor: filled ? 'rgba(201,168,76,0.07)' : 'var(--bg-darker)',
+                border: `1px solid ${filled ? 'var(--accent)' : 'var(--bg-border)'}`,
+                boxShadow: filled ? '0 0 10px rgba(201,168,76,0.12)' : 'none',
+                minHeight: 52,
+              }}
+            >
+              <span className="text-xl flex-shrink-0 w-7 text-center" style={{ opacity: filled ? 1 : 0.45 }}>{slot.icon}</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-bold uppercase tracking-widest" style={{ color: filled ? 'var(--accent)' : 'var(--text-faint)', fontSize: '0.55rem', letterSpacing: '0.12em' }}>{slot.label}</div>
+                <div className="text-xs font-semibold truncate mt-0.5" style={{ color: filled ? 'var(--text)' : 'var(--text-faint)', fontStyle: filled ? 'normal' : 'italic' }}>
+                  {item ?? '— empty —'}
+                </div>
+              </div>
+              {filled && <span className="text-xs flex-shrink-0" style={{ color: 'var(--accent)', opacity: 0.6 }}>✎</span>}
+            </button>
+          )
+        })}
+      </div>
+
+      <p className="text-xs mt-3" style={{ color: 'var(--text-faint)' }}>Click any slot to equip or change a magic item.</p>
+
+      {activeSlot && (
+        <SlotPicker
+          slotLabel={activeSlot.label}
+          slotIcon={activeSlot.icon}
+          currentValue={wornEquipment[activeSlot.key] ?? null}
+          gear={gear}
+          onSelect={val => set(activeSlot.key, val)}
+          onClose={() => setActiveSlot(null)}
+        />
+      )}
+    </div>
+  )
 }
 
 // ── Item categories ───────────────────────────────────────────────────────────
@@ -583,6 +787,7 @@ export default function Equipment({ character, onChange, pins = {}, onTogglePin 
 
   return (
     <div className="space-y-4">
+      <WornEquipmentPanel wornEquipment={character.wornEquipment??{}} gear={gear} onChange={onChange} />
       <ArmorPropertiesPanel armorProps={character.armorProps??{}} onChange={onChange} />
 
       {/* Encumbrance + Currency */}
