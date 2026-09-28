@@ -41,9 +41,10 @@ function ACTooltip({ ac, dexMod, bt }) {
     { label: 'Buff',     value: sign(bt.ac      ?? 0), dim: !(bt.ac      ?? 0) },
   ]
   return (
-    <div className="rounded-lg p-3 text-xs shadow-xl" style={{
-      backgroundColor: 'var(--bg-card)', border: '1px solid var(--accent)44',
+    <div className="rounded-lg p-3 text-xs" style={{
+      backgroundColor: 'var(--bg-darker)', border: '1px solid var(--accent)88',
       minWidth: '160px', pointerEvents: 'none',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.6)', opacity: 1,
     }}>
       <div className="font-bold text-center mb-2" style={{ color: 'var(--accent)', borderBottom: '1px solid var(--bg-border)', paddingBottom: '4px' }}>
         AC Breakdown
