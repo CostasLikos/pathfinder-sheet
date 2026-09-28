@@ -62,7 +62,16 @@ export function computeClassTotals(classes = []) {
   let totalFavoredHP = 0, totalFavoredSkill = 0, totalHD = 0, totalSkillsPerLevel = 0
   for (const c of classes) {
     const lvl  = c.level ?? 0
-    const data = CLASS_DATA[c.className] ?? CLASS_DATA.Other
+    // Use custom fields if present (for classes not in CLASS_DATA), else look up
+    const known = CLASS_DATA[c.className]
+    const data = {
+      bab:           c.customBab   ?? known?.bab           ?? 'mid',
+      fort:          c.customFort  ?? known?.fort          ?? 'poor',
+      ref:           c.customRef   ?? known?.ref           ?? 'poor',
+      will:          c.customWill  ?? known?.will          ?? 'poor',
+      hd:            c.customHd    ?? known?.hd            ?? 8,
+      skillsPerLevel:c.customSkills?? known?.skillsPerLevel?? 4,
+    }
     totalLevel       += lvl
     totalBAB         += babValue(data.bab, lvl)
     totalFort        += saveVal(data.fort, lvl)
