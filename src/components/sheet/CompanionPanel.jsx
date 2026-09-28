@@ -116,6 +116,11 @@ function CompanionCard({ companion, onChange, onRemove }) {
         </div>
         <span className="text-xs cursor-pointer" style={{ color: 'var(--text-faint)' }}
           onClick={() => setExpanded(x => !x)}>{expanded ? '▲' : '▼'}</span>
+        <button
+          onClick={e => { e.stopPropagation(); if (confirm(`Remove "${companion.name || 'this companion'}"?`)) onRemove() }}
+          className="text-xs w-6 h-6 flex items-center justify-center rounded flex-shrink-0 ml-1"
+          style={{ color: '#ef4444', border: '1px solid #ef444444', backgroundColor: 'rgba(239,68,68,0.08)' }}
+          title="Remove companion">✕</button>
       </div>
 
       {expanded && (
@@ -251,26 +256,41 @@ function CompanionCard({ companion, onChange, onRemove }) {
               <NumInput value={companion.bab} onChange={v => set('bab', v)} width="w-12" />
             </div>
 
-            <div className="space-y-1.5">
-              {/* Header */}
-              <div className="grid gap-2 text-xs font-bold" style={{ color: 'var(--text-faint)', gridTemplateColumns: '2fr 1fr 2fr 1fr 2fr auto' }}>
-                <span>Attack</span><span className="text-center">Bonus</span><span className="text-center">Damage</span><span className="text-center">+Dmg</span><span>Crit</span><span></span>
-              </div>
+            <div className="space-y-2">
               {companion.attacks.map((atk, i) => (
-                <div key={i} className="grid gap-2 items-center" style={{ gridTemplateColumns: '2fr 1fr 2fr 1fr 2fr auto' }}>
-                  <input type="text" value={atk.label} onChange={e => setAttack(i, 'label', e.target.value)}
-                    className="text-xs px-1.5 py-1 rounded focus:outline-none"
-                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)', color: 'var(--text-dim)' }} />
-                  <NumInput value={atk.bonus} onChange={v => setAttack(i, 'bonus', v)} width="w-full" />
-                  <input type="text" value={atk.dmgDice} onChange={e => setAttack(i, 'dmgDice', e.target.value)}
-                    className="text-xs px-1.5 py-1 rounded focus:outline-none text-center font-bold"
-                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)', color: '#fbbf24' }} />
-                  <NumInput value={atk.dmgBonus} onChange={v => setAttack(i, 'dmgBonus', v)} width="w-full" />
-                  <input type="text" value={atk.crit} onChange={e => setAttack(i, 'crit', e.target.value)}
-                    className="text-xs px-1.5 py-1 rounded focus:outline-none text-center"
-                    style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)', color: '#f87171' }} />
-                  <button onClick={() => removeAttack(i)} className="text-xs w-6 h-6 flex items-center justify-center rounded"
-                    style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
+                <div key={i} className="rounded p-2 space-y-1.5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}>
+                  {/* Row 1: label + remove */}
+                  <div className="flex items-center gap-2">
+                    <input type="text" value={atk.label} onChange={e => setAttack(i, 'label', e.target.value)}
+                      placeholder="Attack name…"
+                      className="flex-1 text-xs px-1.5 py-1 rounded focus:outline-none font-semibold"
+                      style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: 'var(--text)' }} />
+                    <button onClick={() => removeAttack(i)} className="text-xs w-6 h-6 flex items-center justify-center rounded flex-shrink-0"
+                      style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
+                  </div>
+                  {/* Row 2: Bonus | Damage Dice | +Dmg | Crit */}
+                  <div className="grid grid-cols-4 gap-1.5">
+                    <div className="flex flex-col gap-0.5 items-center">
+                      <span className="text-xs" style={{ color: 'var(--text-faint)' }}>Bonus</span>
+                      <NumInput value={atk.bonus} onChange={v => setAttack(i, 'bonus', v)} width="w-full" />
+                    </div>
+                    <div className="flex flex-col gap-0.5 items-center">
+                      <span className="text-xs" style={{ color: 'var(--text-faint)' }}>Dice</span>
+                      <input type="text" value={atk.dmgDice} onChange={e => setAttack(i, 'dmgDice', e.target.value)}
+                        className="w-full text-xs px-1 py-1 rounded focus:outline-none text-center font-bold"
+                        style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: '#fbbf24' }} />
+                    </div>
+                    <div className="flex flex-col gap-0.5 items-center">
+                      <span className="text-xs" style={{ color: 'var(--text-faint)' }}>+Dmg</span>
+                      <NumInput value={atk.dmgBonus} onChange={v => setAttack(i, 'dmgBonus', v)} width="w-full" />
+                    </div>
+                    <div className="flex flex-col gap-0.5 items-center">
+                      <span className="text-xs" style={{ color: 'var(--text-faint)' }}>Crit</span>
+                      <input type="text" value={atk.crit} onChange={e => setAttack(i, 'crit', e.target.value)}
+                        className="w-full text-xs px-1 py-1 rounded focus:outline-none text-center"
+                        style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: '#f87171' }} />
+                    </div>
+                  </div>
                 </div>
               ))}
               <button onClick={addAttack} className="text-xs px-2 py-1 rounded mt-1"
@@ -290,13 +310,6 @@ function CompanionCard({ companion, onChange, onRemove }) {
             style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', color: 'var(--text-dim)' }}
           />
 
-          {/* ── Remove button ── */}
-          <div className="flex justify-end">
-            <button onClick={onRemove} className="text-xs px-3 py-1 rounded"
-              style={{ color: '#ef4444', border: '1px solid #ef444444', backgroundColor: 'rgba(239,68,68,0.08)' }}>
-              Remove Companion
-            </button>
-          </div>
         </div>
       )}
     </div>
