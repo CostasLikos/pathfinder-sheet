@@ -347,19 +347,6 @@ function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
           <span className="flex-1 text-sm font-semibold truncate" style={{ color: item.name ? 'var(--text)' : 'var(--text-faint)' }}>
             {item.name || 'Unnamed…'}
           </span>
-          {item.desc && (
-            <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
-              style={{ color, backgroundColor: `${color}18`, border: `1px solid ${color}33` }}>i</span>
-          )}
-          {/* Edit pencil — visible on hover (desktop), hidden on touch */}
-          <button
-            onClick={e => { e.stopPropagation(); cancelPress(); setShowInfo(false); setEditing(true) }}
-            className="feat-edit-btn text-xs w-6 h-6 items-center justify-center rounded-full flex-shrink-0"
-            style={{ color: `${color}88`, border: `1px solid ${color}33` }}
-            onMouseEnter={e => { e.currentTarget.style.color = color; e.currentTarget.style.backgroundColor = `${color}18` }}
-            onMouseLeave={e => { e.currentTarget.style.color = `${color}88`; e.currentTarget.style.backgroundColor = 'transparent' }}>
-            ✎
-          </button>
           <button
             onClick={e => { e.stopPropagation(); cancelPress(); onRemove(index) }}
             className="text-xs w-6 h-6 flex items-center justify-center rounded-full flex-shrink-0"

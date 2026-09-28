@@ -294,6 +294,3 @@ body {
   }
 }
 
-/* Feat edit pencil: hidden on touch, shown on pointer-capable devices */
-.feat-edit-btn { display: none; }
-@media (hover: hover) { .feat-edit-btn { display: flex; } }
