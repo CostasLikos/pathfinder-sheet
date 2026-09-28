@@ -15,6 +15,7 @@ import BuffTracker from '../components/sheet/BuffTracker'
 import Equipment from '../components/sheet/Equipment'
 import Dashboard from '../components/sheet/Dashboard'
 import Campaign from '../components/sheet/Campaign'
+import CompanionPanel from '../components/sheet/CompanionPanel'
 import SettingsPanel from '../components/SettingsPanel'
 
 const TABS = ['Overview', 'Attacks', 'Spells', 'Skills', 'Feats & Traits', 'Equipment', 'Helper', 'Notes', '📌 Dashboard']
@@ -296,6 +297,10 @@ export default function CharacterPage() {
               computedSaveBases={computedSaveBases}
               favoredHP={favoredHP}
               pendingHP={lusHP}
+            />
+            <CompanionPanel
+              companions={character.companions ?? []}
+              onChange={v => update('companions', v)}
             />
             <Campaign
               campaign={character.campaign ?? {}}
