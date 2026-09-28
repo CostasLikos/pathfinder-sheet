@@ -1,4 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist'
+import ALL_SPELLS from '../data/spells.json'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.mjs',
@@ -364,10 +365,45 @@ export function mapFieldsToCharacter(f) {
   ].filter(Boolean).join(' · ')
 
   // ── Spells ────────────────────────────────────────────────────────────────
+  // Build a lookup: normalized name → spell data
+  const spellLookup = new Map()
+  for (const s of ALL_SPELLS) {
+    spellLookup.set(s.name.toLowerCase().trim(), s)
+  }
+  const findSpell = (name) => {
+    const key = name.toLowerCase().trim()
+    if (spellLookup.has(key)) return spellLookup.get(key)
+    // fuzzy: check if any spell name starts with what we have (handles truncation like "Protection from")
+    for (const [k, v] of spellLookup) {
+      if (k.startsWith(key) || key.startsWith(k.slice(0, Math.max(8, k.length - 3)))) return v
+    }
+    return null
+  }
+
+  const importedSpells = []
   const sessionSpells = []
-  for (let n = 100; n <= 175; n++) {
-    const v = str(f[`SP - Name Desc - ${n}`])
-    if (v) sessionSpells.push(v)
+  // SP fields: SP - Name Desc - XYZ where X = spell level (0-9), YZ = slot
+  for (let n = 100; n <= 999; n++) {
+    const raw = str(f[`SP - Name Desc - ${n}`])
+    if (!raw) continue
+    sessionSpells.push(raw)
+    const level = Math.floor(n / 100) // first digit = level
+    const match = findSpell(raw)
+    const prepared = 1
+    importedSpells.push({
+      id: crypto.randomUUID(),
+      name: match ? match.name : raw,
+      level,
+      school:       match?.school        ?? 'Evocation',
+      castingTime:  match?.casting_time  ?? '1 standard action',
+      range:        match?.range         ?? '',
+      duration:     match?.duration      ?? '',
+      savingThrow:  match?.saving_throw  ?? '',
+      components:   match?.components    ?? '',
+      description:  match?.description   ?? '',
+      prepared,
+      used: 0,
+    })
   }
 
   // ── Casting class (only if it's actually a spellcasting class) ───────────
@@ -399,7 +435,7 @@ export function mapFieldsToCharacter(f) {
     notes,
     currency,
     sessionSpells,
-    spellcasting: { class: castingClass, ability: 'int', concentration: 0, slots: {}, spells: [] },
+    spellcasting: { class: castingClass, ability: 'int', concentration: 0, slots: {}, spells: importedSpells },
     feats: [],
     traits: [],
     buffs: [],
