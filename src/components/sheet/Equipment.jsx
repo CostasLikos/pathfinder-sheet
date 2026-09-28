@@ -27,7 +27,7 @@ const WORN_SLOTS = [
   { key: 'face',      label: 'Face',      icon: '👁️' },
   { key: 'throat',    label: 'Throat',    icon: '📿' },
   { key: 'shoulders', label: 'Shoulders', icon: '🧥' },
-  { key: 'body',      label: 'Body',      icon: '🛡️' },
+  { key: 'body',      label: 'Body',      icon: '🧍' },
   { key: 'torso',     label: 'Torso',     icon: '👕' },
   { key: 'arms',      label: 'Arms',      icon: '💪' },
   { key: 'hands',     label: 'Hands',     icon: '🧤' },
