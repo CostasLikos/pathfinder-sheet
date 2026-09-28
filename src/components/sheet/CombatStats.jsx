@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { abilityMod, formatMod } from '../../data/pf1eData'
 import PinButton from '../PinButton'
 import SpinnerInput from '../SpinnerInput'
@@ -16,6 +16,108 @@ function useFlash(value) {
     elRef.current.classList.add(cls)
   }, [value])
   return elRef
+}
+
+function BuffBadge({ val }) {
+  if (!val) return null
+  return (
+    <span className="text-xs ml-1 px-1 rounded" style={{ backgroundColor: val > 0 ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)', color: val > 0 ? 'var(--positive)' : '#ef4444', border: `1px solid ${val > 0 ? 'var(--positive)' : '#ef4444'}` }}>
+      {val > 0 ? `+${val}` : val}
+    </span>
+  )
+}
+
+function ACTooltip({ ac, dexMod, bt }) {
+  const sign = n => n >= 0 ? `+${n}` : `${n}`
+  const rows = [
+    { label: 'Base',     value: '+10',          always: true },
+    { label: 'Armor',    value: sign(ac.armor   ?? 0), dim: !(ac.armor   ?? 0) },
+    { label: 'Shield',   value: sign(ac.shield  ?? 0), dim: !(ac.shield  ?? 0) },
+    { label: 'DEX mod',  value: sign(dexMod),          dim: !dexMod },
+    { label: 'Dodge',    value: sign(ac.dodge   ?? 0), dim: !(ac.dodge   ?? 0) },
+    { label: 'Natural',  value: sign(ac.natural ?? 0), dim: !(ac.natural ?? 0) },
+    { label: 'Deflect',  value: sign(ac.deflect ?? 0), dim: !(ac.deflect ?? 0) },
+    { label: 'Misc',     value: sign(ac.misc    ?? 0), dim: !(ac.misc    ?? 0) },
+    { label: 'Buff',     value: sign(bt.ac      ?? 0), dim: !(bt.ac      ?? 0) },
+  ]
+  return (
+    <div className="rounded-lg p-3 text-xs shadow-xl" style={{
+      backgroundColor: 'var(--bg-card)', border: '1px solid var(--accent)44',
+      minWidth: '160px', pointerEvents: 'none',
+    }}>
+      <div className="font-bold text-center mb-2" style={{ color: 'var(--accent)', borderBottom: '1px solid var(--bg-border)', paddingBottom: '4px' }}>
+        AC Breakdown
+      </div>
+      {rows.map(({ label, value }) => (
+        <div key={label} className="flex justify-between gap-4 py-0.5">
+          <span style={{ color: 'var(--text-dim)' }}>{label}</span>
+          <span className="font-bold tabular-nums" style={{ color: 'var(--text)' }}>{value}</span>
+        </div>
+      ))}
+      <div className="mt-2 pt-1 flex justify-between font-bold" style={{ borderTop: '1px solid var(--bg-border)', color: 'var(--accent)' }}>
+        <span>Touch excludes</span><span>Armor, Shield, Natural</span>
+      </div>
+      <div className="flex justify-between" style={{ color: 'var(--text-dim)' }}>
+        <span>Flat-foot excludes</span><span>DEX, Dodge</span>
+      </div>
+    </div>
+  )
+}
+
+function useACTooltip() {
+  const [visible, setVisible] = useState(false)
+  const timerRef = useRef(null)
+
+  const show = () => { clearTimeout(timerRef.current); setVisible(true) }
+  const hide = () => { timerRef.current = setTimeout(() => setVisible(false), 80) }
+
+  // long-press for mobile
+  const onTouchStart = () => { timerRef.current = setTimeout(() => setVisible(true), 400) }
+  const onTouchEnd   = () => { clearTimeout(timerRef.current); setTimeout(() => setVisible(false), 1200) }
+
+  return { visible, handlers: { onMouseEnter: show, onMouseLeave: hide, onTouchStart, onTouchEnd } }
+}
+
+function ACDisplay({ totalAC, touchAC, flatFooted, ac, dexMod, bt, acFlashRef }) {
+  const tooltip = useACTooltip()
+  return (
+    <div className="mb-4">
+      {/* Hero row */}
+      <div className="flex items-stretch gap-3 relative">
+        {/* Total AC */}
+        <div ref={acFlashRef} className="flex-1 flex flex-col items-center justify-center py-3 rounded-xl cursor-help relative"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 8%, var(--bg-darker))', border: '2px solid var(--accent)55' }}
+          {...tooltip.handlers}>
+          <div className="text-xs font-bold uppercase tracking-widest mb-1 flex items-center gap-1" style={{ color: 'var(--accent)' }}>
+            🛡 Total AC <BuffBadge val={bt.ac ?? 0} />
+          </div>
+          <div className="font-bold leading-none" style={{ fontSize: '3rem', color: 'var(--accent)', fontFamily: 'Georgia, serif' }}>{totalAC}</div>
+          {tooltip.visible && (
+            <div className="absolute z-50 left-1/2 -translate-x-1/2" style={{ bottom: 'calc(100% + 8px)' }}>
+              <ACTooltip ac={ac} dexMod={dexMod} bt={bt} />
+            </div>
+          )}
+        </div>
+
+        {/* Touch + Flat-Footed */}
+        <div className="flex flex-col gap-2 justify-center" style={{ minWidth: '100px' }}>
+          {[
+            { lbl: 'Touch',      val: touchAC,   col: '#3b82f6',
+              tip: `10 + DEX(${dexMod >= 0 ? '+' : ''}${dexMod}) + Dodge(${ac.dodge ?? 0}) + Deflect(${ac.deflect ?? 0}) + Misc(${ac.misc ?? 0})` },
+            { lbl: 'Flat-Footed', val: flatFooted, col: '#94a3b8',
+              tip: `10 + Armor(${ac.armor ?? 0}) + Shield(${ac.shield ?? 0}) + Natural(${ac.natural ?? 0}) + Deflect(${ac.deflect ?? 0}) + Misc(${ac.misc ?? 0})` },
+          ].map(({ lbl, val, col, tip }) => (
+            <div key={lbl} title={tip}
+              className="flex flex-col items-center justify-center rounded-lg py-2 cursor-help"
+              style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid var(--bg-border)`, borderLeft: `3px solid ${col}` }}>
+              <div className="text-xs mb-0.5 font-semibold" style={{ color: col }}>{lbl}</div>
+              <div className="text-xl font-bold" style={{ color: 'var(--text)', fontFamily: 'Georgia, serif' }}>{val}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default function CombatStats({ character, onChange, pins = {}, onTogglePin, buffTotals = {}, armorProps = {}, computedBAB = null, computedSaveBases = null, favoredHP = 0, pendingHP = false }) {
@@ -41,8 +143,8 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
   const wisMod = abilityMod(effWis)
   const strMod = abilityMod(effStr)
 
-  const totalAC     = 10 + (ac.armor ?? 0) + (ac.shield ?? 0) + dexMod + (ac.natural ?? 0) + (ac.deflect ?? 0) + (ac.misc ?? 0) + (bt.ac ?? 0)
-  const touchAC     = 10 + dexMod + (ac.deflect ?? 0) + (ac.misc ?? 0) + (bt.ac ?? 0)
+  const totalAC     = 10 + (ac.armor ?? 0) + (ac.shield ?? 0) + dexMod + (ac.dodge ?? 0) + (ac.natural ?? 0) + (ac.deflect ?? 0) + (ac.misc ?? 0) + (bt.ac ?? 0)
+  const touchAC     = 10 + dexMod + (ac.dodge ?? 0) + (ac.deflect ?? 0) + (ac.misc ?? 0) + (bt.ac ?? 0)
   const flatFooted  = 10 + (ac.armor ?? 0) + (ac.shield ?? 0) + (ac.natural ?? 0) + (ac.deflect ?? 0) + (ac.misc ?? 0) + (bt.ac ?? 0)
   const totalFort   = effectiveFortBase + conMod + (saves.fort?.enhance ?? 0) + (saves.fort?.misc ?? 0) + (bt.fort ?? 0)
   const totalRef    = effectiveRefBase  + rawDexMod + (saves.ref?.enhance  ?? 0) + (saves.ref?.misc  ?? 0) + (bt.ref  ?? 0)
@@ -77,11 +179,6 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
   const willFlashRef = useFlash(totalWill)
   const hpFlashRef   = useFlash(effectiveMaxHP)
 
-  const BuffBadge = ({ val }) => val !== 0 ? (
-    <span className="text-xs ml-1 px-1 rounded" style={{ backgroundColor: val > 0 ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)', color: val > 0 ? 'var(--positive)' : '#ef4444', border: `1px solid ${val > 0 ? 'var(--positive)' : '#ef4444'}` }}>
-      {val > 0 ? `+${val}` : val}
-    </span>
-  ) : null
 
   return (
     <div className="space-y-3">
@@ -265,34 +362,23 @@ export default function CombatStats({ character, onChange, pins = {}, onTogglePi
         )}
 
         {/* AC display — hero Total + secondary Touch/FF */}
-        <div className="flex items-stretch gap-3 mb-4">
-          {/* Total AC — hero */}
-          <div ref={acFlashRef} className="flex-1 flex flex-col items-center justify-center py-3 rounded-xl"
-            style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 8%, var(--bg-darker))', border: '2px solid var(--accent)55' }}>
-            <div className="text-xs font-bold uppercase tracking-widest mb-1 flex items-center gap-1" style={{ color: 'var(--accent)' }}>
-              🛡 Total AC <BuffBadge val={bt.ac ?? 0} />
-            </div>
-            <div className="font-bold leading-none" style={{ fontSize: '3rem', color: 'var(--accent)', fontFamily: 'Georgia, serif' }}>{totalAC}</div>
-          </div>
-          {/* Touch + Flat-Footed — secondary */}
-          <div className="flex flex-col gap-2 justify-center" style={{ minWidth: '90px' }}>
-            {[['Touch', touchAC, '#3b82f6'], ['Flat-Footed', flatFooted, 'var(--text-dim)']].map(([lbl, val, col]) => (
-              <div key={lbl} className="stat-box text-center py-2" style={{ borderLeft: `3px solid ${col}55` }}>
-                <div className="text-xs mb-0.5" style={{ color: 'var(--text-faint)' }}>{lbl}</div>
-                <div className="text-xl font-bold" style={{ color: col }}>{val}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <ACDisplay
+          totalAC={totalAC} touchAC={touchAC} flatFooted={flatFooted}
+          ac={ac} dexMod={dexMod} bt={bt} acFlashRef={acFlashRef}
+        />
 
         {/* AC components */}
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
           {[
-            ['Armor', 'armor', '#94a3b8'], ['Shield', 'shield', '#c084fc'], ['Natural', 'natural', '#4ade80'],
-            ['Deflect', 'deflect', '#60a5fa'], ['Misc', 'misc', 'var(--text-dim)'],
+            ['Armor',   'armor',   '#94a3b8'],
+            ['Shield',  'shield',  '#c084fc'],
+            ['Dodge',   'dodge',   '#fb923c'],
+            ['Natural', 'natural', '#4ade80'],
+            ['Deflect', 'deflect', '#60a5fa'],
+            ['Misc',    'misc',    '#a8a29e'],
           ].map(([label, key, col]) => (
             <div key={key} className="flex flex-col items-center gap-1 rounded-lg py-2"
-              style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid var(--bg-border)`, borderTop: `2px solid ${col}66` }}>
+              style={{ backgroundColor: 'var(--bg-darker)', border: `1px solid var(--bg-border)`, borderTop: `2px solid ${col}99` }}>
               <span className="text-xs font-bold" style={{ color: col }}>{label}</span>
               <SpinnerInput value={ac[key] ?? 0} onChange={v => onChange('ac', { ...ac, [key]: v })} width="w-10" />
             </div>
