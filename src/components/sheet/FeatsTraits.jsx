@@ -281,25 +281,15 @@ function InfoCard({ name, desc, color, anchorRef, onClose, onEdit }) {
 
 // ─── Item Row ─────────────────────────────────────────────────────────────────
 
-function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
+function ItemRow({ item, index, onUpdate, onRemove, onReorder, color = 'var(--accent)' }) {
   const [showInfo, setShowInfo] = useState(false)
   const [editing, setEditing]   = useState(false)
+  const [dragOver, setDragOver] = useState(false)
   const rowRef   = useRef()
-  const pressRef = useRef(null)  // long-press timer
+  const pressRef = useRef(null)
 
-  const startPress = () => {
-    pressRef.current = setTimeout(() => { pressRef.current = null; setEditing(true) }, 500)
-  }
   const cancelPress = () => { if (pressRef.current) { clearTimeout(pressRef.current); pressRef.current = null } }
-  const handleClick = () => {
-    if (!pressRef.current && !editing) {
-      // only open info if the long-press timer already fired (null) but we didn't just enter edit
-      setShowInfo(v => !v)
-    }
-    cancelPress()
-  }
 
-  // Prevent accidental info-open after long-press fires
   const longFired = useRef(false)
   const startPress2 = () => {
     longFired.current = false
@@ -309,7 +299,7 @@ function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
       setEditing(true)
     }, 500)
   }
-  const handleClick2 = (e) => {
+  const handleClick2 = () => {
     cancelPress()
     if (longFired.current) { longFired.current = false; return }
     if (!editing && item.name) setShowInfo(v => !v)
@@ -317,16 +307,22 @@ function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
 
   return (
     <div ref={rowRef}
+      draggable={!editing}
+      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(index)) }}
+      onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOver(true) }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={e => { e.preventDefault(); setDragOver(false); const from = Number(e.dataTransfer.getData('text/plain')); if (from !== index) onReorder?.(from, index) }}
+      onDragEnd={() => setDragOver(false)}
       className="rounded-lg overflow-hidden"
       style={{
-        backgroundColor: 'var(--bg-darker)',
-        borderTop:    `1px solid ${editing ? color : 'var(--bg-border)'}`,
-        borderRight:  `1px solid ${editing ? color : 'var(--bg-border)'}`,
-        borderBottom: `1px solid ${editing ? color : 'var(--bg-border)'}`,
+        backgroundColor: dragOver ? `${color}11` : 'var(--bg-darker)',
+        borderTop:    `1px solid ${editing ? color : dragOver ? color : 'var(--bg-border)'}`,
+        borderRight:  `1px solid ${editing ? color : dragOver ? color : 'var(--bg-border)'}`,
+        borderBottom: `1px solid ${editing ? color : dragOver ? color : 'var(--bg-border)'}`,
         borderLeft: `3px solid ${color}66`,
         borderRadius: '0.5rem',
         overflow: 'hidden',
-        transition: 'border-color 0.15s',
+        transition: 'border-color 0.15s, background-color 0.1s',
       }}>
 
       {showInfo && item.name && (
@@ -340,7 +336,7 @@ function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
 
       {/* ── View row (not editing) ── */}
       {!editing && (
-        <div className="flex items-center gap-2 px-3 py-2 cursor-pointer select-none group"
+        <div className="flex items-center gap-1 px-2 py-2 cursor-pointer select-none"
           onMouseDown={startPress2}
           onMouseUp={cancelPress}
           onMouseLeave={cancelPress}
@@ -348,6 +344,12 @@ function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
           onTouchEnd={handleClick2}
           onClick={handleClick2}
           onDoubleClick={e => { e.stopPropagation(); cancelPress(); setShowInfo(false); setEditing(true) }}>
+          <span
+            className="flex-shrink-0 cursor-grab active:cursor-grabbing text-base leading-none px-1"
+            style={{ color: 'var(--text-faint)', opacity: 0.4, userSelect: 'none' }}
+            onMouseDown={e => e.stopPropagation()}
+            onTouchStart={e => e.stopPropagation()}
+          >⠿</span>
           <span className="flex-1 text-sm font-semibold truncate" style={{ color: item.name ? 'var(--text)' : 'var(--text-faint)' }}>
             {item.name || 'Unnamed…'}
           </span>
@@ -398,7 +400,7 @@ function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
 
 // ─── List Editor ──────────────────────────────────────────────────────────────
 
-function ListEditor({ title, icon, items, onAdd, onUpdate, onRemove, placeholder, showLibrary, color = 'var(--accent)' }) {
+function ListEditor({ title, icon, items, onAdd, onUpdate, onRemove, onReorder, placeholder, showLibrary, color = 'var(--accent)' }) {
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
@@ -450,7 +452,7 @@ function ListEditor({ title, icon, items, onAdd, onUpdate, onRemove, placeholder
 
       <div className="space-y-1.5">
         {items.map((item, i) => (
-          <ItemRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} color={color} />
+          <ItemRow key={item.name + i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder} color={color} />
         ))}
         {items.length === 0 && <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>None added yet</div>}
       </div>
@@ -460,7 +462,7 @@ function ListEditor({ title, icon, items, onAdd, onUpdate, onRemove, placeholder
 
 // ─── Feat List Editor (with search-aware index remapping) ─────────────────────
 
-function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary, pendingFeat = false }) {
+function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, onReorder, showLibrary, pendingFeat = false }) {
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
@@ -526,9 +528,10 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
 
       <div className="space-y-1.5">
         {filtered.map((item, i) => (
-          <ItemRow key={item._realIndex} item={item} index={i}
+          <ItemRow key={item._realIndex} item={item} index={item._realIndex}
             onUpdate={(_, f, v) => onUpdate(item._realIndex, f, v)}
             onRemove={() => onRemove(item._realIndex)}
+            onReorder={!q ? onReorder : undefined}
             color={color} />
         ))}
         {filtered.length === 0 && (
@@ -543,7 +546,7 @@ function FeatListEditor({ feats, search, onAdd, onUpdate, onRemove, showLibrary,
 
 // ─── Drawback Editor (reuses ItemRow with red color) ─────────────────────────
 
-function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
+function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove, onReorder }) {
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
@@ -589,7 +592,7 @@ function DrawbackEditor({ drawbacks, onAdd, onUpdate, onRemove }) {
 
       <div className="space-y-1.5">
         {drawbacks.map((item, i) => (
-          <ItemRow key={i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} color={color} />
+          <ItemRow key={item.name + i} item={item} index={i} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder} color={color} />
         ))}
         {drawbacks.length === 0 && <div className="text-xs italic py-2 px-1" style={{ color: 'var(--text-faint)' }}>No drawbacks</div>}
       </div>
@@ -603,6 +606,10 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
   const [showLibrary, setShowLibrary] = useState(false)
   const [featSearch, setFeatSearch] = useState('')
   const { feats = [], traits = [], drawbacks = [], features = [] } = character
+
+  const reorder = (key, list) => (from, to) => {
+    const arr = [...list]; const [m] = arr.splice(from, 1); arr.splice(to, 0, m); onChange(key, arr)
+  }
 
   const addFeat    = (item) => onChange('feats', [...feats, item])
   const removeFeat = (i)    => onChange('feats', feats.filter((_, idx) => idx !== i))
@@ -648,6 +655,7 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
             onAdd={addFeat}
             onUpdate={updateFeat}
             onRemove={removeFeat}
+            onReorder={reorder('feats', feats)}
             showLibrary={() => setShowLibrary(true)}
             pendingFeat={pendingFeat}
           />
@@ -660,6 +668,7 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
               onAdd={addTrait}
               onUpdate={updateTrait}
               onRemove={removeTrait}
+              onReorder={reorder('traits', traits)}
               placeholder="Trait name (e.g. Reactionary)"
             />
           </div>
@@ -672,6 +681,7 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
               onAdd={addFeature}
               onUpdate={updateFeature}
               onRemove={removeFeature}
+              onReorder={reorder('features', features)}
               placeholder="Feature name (e.g. Bardic Performance)"
             />
           </div>
@@ -681,6 +691,7 @@ export default function FeatsTraits({ character, onChange, pins = {}, onTogglePi
               onAdd={addDrawback}
               onUpdate={updateDrawback}
               onRemove={removeDrawback}
+              onReorder={reorder('drawbacks', drawbacks)}
             />
           </div>
         </div>
