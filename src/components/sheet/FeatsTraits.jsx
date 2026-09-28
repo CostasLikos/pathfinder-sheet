@@ -190,19 +190,80 @@ function FeatLibrary({ onAdd, onClose }) {
   )
 }
 
+// ─── Hover Info Tooltip ───────────────────────────────────────────────────────
+
+function InfoTooltip({ name, desc, color, anchorRef }) {
+  const [pos, setPos] = useState({ top: 0, left: 0, side: 'right' })
+  const tipRef = useRef()
+
+  useEffect(() => {
+    if (!anchorRef.current) return
+    const rect = anchorRef.current.getBoundingClientRect()
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const tipW = 280
+    const tipH = tipRef.current?.offsetHeight ?? 160
+    const spaceRight = vw - rect.right - 12
+    const spaceLeft  = rect.left - 12
+    let top, left
+    if (spaceRight >= tipW) {
+      left = rect.right + 10
+      top  = rect.top + rect.height / 2 - tipH / 2
+    } else if (spaceLeft >= tipW) {
+      left = rect.left - tipW - 10
+      top  = rect.top + rect.height / 2 - tipH / 2
+    } else {
+      // Not enough room on sides — show below
+      left = Math.max(8, Math.min(vw - tipW - 8, rect.left))
+      top  = rect.bottom + 8
+    }
+    top  = Math.max(8, Math.min(vh - tipH - 8, top))
+    left = Math.max(8, Math.min(vw - tipW - 8, left))
+    setPos({ top, left })
+  }, [anchorRef])
+
+  return createPortal(
+    <div ref={tipRef}
+      className="fixed rounded-xl shadow-2xl p-3 space-y-2"
+      style={{
+        top: pos.top, left: pos.left, width: 280, zIndex: 10000,
+        backgroundColor: 'var(--bg-darker)',
+        border: `1px solid ${color}55`,
+        boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 0 1px ${color}22`,
+        pointerEvents: 'none',
+      }}>
+      <div className="font-bold text-sm leading-tight" style={{ color, fontFamily: 'Georgia, serif' }}>{name}</div>
+      {desc && (
+        <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-dim)' }}>{desc}</p>
+      )}
+    </div>,
+    document.body
+  )
+}
+
 // ─── Item Row ─────────────────────────────────────────────────────────────────
 
 function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
   const [expanded, setExpanded] = useState(false)
+  const [hovered, setHovered]   = useState(false)
+  const rowRef = useRef()
   const hasDesc = !!item.desc
 
   return (
-    <div className="rounded-lg overflow-hidden transition-all"
+    <div ref={rowRef}
+      className="rounded-lg overflow-hidden transition-all"
       style={{
         backgroundColor: 'var(--bg-darker)',
         border: `1px solid var(--bg-border)`,
         borderLeft: `3px solid ${color}66`,
-      }}>
+      }}
+      onMouseEnter={() => item.name && setHovered(true)}
+      onMouseLeave={() => setHovered(false)}>
+
+      {hovered && item.name && (
+        <InfoTooltip name={item.name} desc={item.desc} color={color} anchorRef={rowRef} />
+      )}
+
       <div className="flex items-center gap-2 px-3 py-2">
         <input
           type="text"
