@@ -55,12 +55,17 @@ const SKILL_GROUPS = {
 const KEY_TO_GROUP = {}
 Object.entries(SKILL_GROUPS).forEach(([gid, g]) => g.keys.forEach(k => { KEY_TO_GROUP[k] = gid }))
 
-export default function Skills({ character, onChange, pinnedSkills = [], onToggleSkillPin, armorCheckPenalty = 0, buffTotals = {}, pendingRanks = 0 }) {
+export default function Skills({ character, onChange, pinnedSkills = [], onToggleSkillPin, armorCheckPenalty = 0, buffTotals = {}, pendingRanks = 0, favoredSkillRanks = 0 }) {
   const { abilities, skills = {} } = character
   const hasClasses = (character.classes ?? []).length > 0
-  const maxRanks = hasClasses
-    ? computeClassTotals(character.classes).totalLevel
-    : (character.level || 1)
+  const ct = hasClasses ? computeClassTotals(character.classes) : null
+  const intMod = Math.floor(((abilities?.int ?? 10) - 10) / 2)
+  const totalLevel = ct ? ct.totalLevel : (character.level || 1)
+  // total ranks available = (skillsPerLevel + Int) × level + favored skill ranks
+  const ranksAvailable = ct
+    ? ct.totalSkillsPerLevel + Math.max(1, intMod) * totalLevel + favoredSkillRanks
+    : (Math.max(1, intMod + 2) * totalLevel) + favoredSkillRanks
+  const maxRanks = totalLevel
 
   const effAbilities = Object.fromEntries(
     Object.keys(abilities).map(k => [k, (abilities[k] ?? 10) + (buffTotals[k] ?? 0)])
@@ -155,11 +160,13 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
               +{pendingRanks} rank{pendingRanks > 1 ? 's' : ''} to spend
             </span>
           )}
-          <span className="text-xs hidden md:inline" style={{ color: 'var(--text-faint)' }}>
-            {totalRanks} spent · drag ☰ to reorder
+          <span className="text-xs hidden md:inline" style={{ color: totalRanks > ranksAvailable ? '#ef4444' : 'var(--text-faint)' }}>
+            {totalRanks} / {ranksAvailable} ranks · drag ☰ to reorder
+            {favoredSkillRanks > 0 && <span style={{ color: 'var(--positive)' }}> (+{favoredSkillRanks} favored)</span>}
           </span>
-          <span className="text-xs md:hidden" style={{ color: 'var(--text-faint)' }}>
-            {totalRanks} ranks used
+          <span className="text-xs md:hidden" style={{ color: totalRanks > ranksAvailable ? '#ef4444' : 'var(--text-faint)' }}>
+            {totalRanks} / {ranksAvailable} ranks
+            {favoredSkillRanks > 0 && <span style={{ color: 'var(--positive)' }}> (+{favoredSkillRanks})</span>}
           </span>
         </div>
       </div>

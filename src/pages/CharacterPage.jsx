@@ -168,6 +168,7 @@ export default function CharacterPage() {
   const computedBAB       = hasClasses ? classTotals.totalBAB : null
   const computedSaveBases = hasClasses ? { fort: classTotals.totalFort, ref: classTotals.totalRef, will: classTotals.totalWill } : null
   const favoredHP         = classTotals.totalFavoredHP
+  const favoredSkillRanks = classTotals.totalFavoredSkill
 
   // ── Level-up state shorthand ───────────────────────────────────────────────
   const lus = character.levelUpState ?? {}
@@ -332,6 +333,7 @@ export default function CharacterPage() {
             armorCheckPenalty={character.armorProps?.checkPenalty ?? 0}
             buffTotals={buffTotals}
             pendingRanks={lus.pendingRanks ?? 0}
+            favoredSkillRanks={favoredSkillRanks}
           />
         )}
 
