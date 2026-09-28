@@ -929,12 +929,20 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
 
         {/* Stat cards */}
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="rounded-xl p-4 text-center cursor-help"
-            title={`Base: 10 + Mod(${abilityModVal})${allBonus ? ` + Global(+${allBonus})` : ''}\nActual DC = base + spell level`}
+          <div className="rounded-xl p-3 text-center cursor-help"
+            title={`10 + Mod(${abilityModVal})${allBonus ? ` + Bonus(+${allBonus})` : ''} + Spell Level`}
             style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid #a78bfa44', borderTop: '3px solid #a78bfa', background: 'linear-gradient(180deg, #a78bfa0d 0%, transparent 60%)' }}>
-            <div className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: '#a78bfa' }}>🎯 Base Spell DC</div>
-            <div className="font-bold" style={{ fontSize: '2.2rem', color: 'var(--text)', fontFamily: 'Georgia,serif', lineHeight: 1 }}>{baseSpellDC}</div>
-            <div className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>+ spell level per cast</div>
+            <div className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: '#a78bfa' }}>🎯 Spell DC</div>
+            <div className="font-bold" style={{ fontSize: '2rem', color: 'var(--text)', fontFamily: 'Georgia,serif', lineHeight: 1 }}>{baseSpellDC + 1}</div>
+            <div className="text-xs mt-0.5 mb-1.5" style={{ color: 'var(--text-faint)' }}>1st level spells</div>
+            <div className="flex justify-center gap-2">
+              {[1,2,3,4,5,6,7,8,9].map(lvl => (
+                <div key={lvl} className="flex flex-col items-center">
+                  <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>{baseSpellDC + lvl}</span>
+                  <span style={{ fontSize: '0.55rem', color: 'var(--text-faint)' }}>Lv{lvl}</span>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="rounded-xl p-4 text-center cursor-pointer transition-opacity hover:opacity-80"
             onClick={rollConc}
