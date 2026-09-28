@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { abilityMod, formatMod } from '../../data/pf1eData'
 
 const ABILITIES = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -40,6 +41,7 @@ function NumInput({ value, onChange, width = 'w-12', className = '', style = {} 
 
 function CompanionCard({ companion, onChange, onRemove }) {
   const [expanded, setExpanded] = useState(true)
+  const [portraitOpen, setPortraitOpen] = useState(false)
   const portraitRef = useRef()
 
   const set = (key, val) => onChange({ ...companion, [key]: val })
@@ -48,7 +50,7 @@ function CompanionCard({ companion, onChange, onRemove }) {
     const file = e.target.files[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = ev => set('portrait', ev.target.result)
+    reader.onload = ev => { set('portrait', ev.target.result); setPortraitOpen(false) }
     reader.readAsDataURL(file)
   }
   const setAbility = (ab, val) => onChange({ ...companion, abilities: { ...companion.abilities, [ab]: val } })
@@ -76,15 +78,15 @@ function CompanionCard({ companion, onChange, onRemove }) {
         {/* Portrait */}
         <div className="relative group flex-shrink-0 cursor-pointer rounded-lg overflow-hidden"
           style={{ width: '44px', height: '44px', border: '2px solid var(--accent)44', backgroundColor: 'var(--bg-darker)' }}
-          onClick={e => { e.stopPropagation(); portraitRef.current?.click() }}
-          title="Click to upload portrait">
+          onClick={e => { e.stopPropagation(); setPortraitOpen(true) }}
+          title="Click to view portrait">
           {companion.portrait
-            ? <img src={companion.portrait} alt="" className="w-full h-full object-cover group-hover:brightness-75 transition-all" />
+            ? <img src={companion.portrait} alt="" className="w-full h-full object-cover group-hover:brightness-50 transition-all" />
             : <div className="w-full h-full flex items-center justify-center text-xl">🐾</div>
           }
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
-            style={{ color: 'var(--accent)' }}>
-            {companion.portrait ? '✎' : '+'}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ color: 'var(--accent)', fontSize: companion.portrait ? '1.2rem' : '1rem' }}>
+            {companion.portrait ? '👁' : '+'}
           </div>
         </div>
         <input ref={portraitRef} type="file" accept="image/*" className="hidden" onChange={handlePortrait} />
@@ -116,12 +118,56 @@ function CompanionCard({ companion, onChange, onRemove }) {
         </div>
         <span className="text-xs cursor-pointer" style={{ color: 'var(--text-faint)' }}
           onClick={() => setExpanded(x => !x)}>{expanded ? '▲' : '▼'}</span>
-        <button
-          onClick={e => { e.stopPropagation(); if (confirm(`Remove "${companion.name || 'this companion'}"?`)) onRemove() }}
-          className="text-xs w-6 h-6 flex items-center justify-center rounded flex-shrink-0 ml-1"
-          style={{ color: '#ef4444', border: '1px solid #ef444444', backgroundColor: 'rgba(239,68,68,0.08)' }}
-          title="Remove companion">✕</button>
+        {companion.name && (
+          <button
+            onClick={e => { e.stopPropagation(); if (confirm(`Remove "${companion.name}"?`)) onRemove() }}
+            className="text-xs w-6 h-6 flex items-center justify-center rounded flex-shrink-0 ml-1"
+            style={{ color: '#ef4444', border: '1px solid #ef444444', backgroundColor: 'rgba(239,68,68,0.08)' }}
+            title="Remove companion">✕</button>
+        )}
       </div>
+
+      {/* Portrait popup */}
+      {portraitOpen && createPortal(
+        <div className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setPortraitOpen(false)}>
+          <div className="flex flex-col items-center gap-4 rounded-2xl p-5"
+            style={{ backgroundColor: 'var(--bg-surface)', border: '2px solid var(--accent)44', maxWidth: '420px', width: '100%' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="rounded-xl overflow-hidden flex items-center justify-center w-full"
+              style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)', maxHeight: '55vh' }}>
+              {companion.portrait
+                ? <img src={companion.portrait} alt="" style={{ width: '100%', maxHeight: '55vh', objectFit: 'contain' }} />
+                : <span style={{ fontSize: '5rem', padding: '2rem 0' }}>🐾</span>
+              }
+            </div>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => portraitRef.current.click()}
+                className="flex-1 py-2 rounded-lg font-bold text-sm"
+                style={{ backgroundColor: 'var(--accent-dim)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>
+                {companion.portrait ? '🖼 Change Photo' : '📷 Add Photo'}
+              </button>
+              {companion.portrait && (
+                <button
+                  onClick={() => { set('portrait', null); setPortraitOpen(false) }}
+                  className="py-2 px-3 rounded-lg text-sm font-bold"
+                  style={{ color: '#ef4444', border: '1px solid #ef444444', backgroundColor: '#ef444411' }}>
+                  Remove
+                </button>
+              )}
+              <button
+                onClick={() => setPortraitOpen(false)}
+                className="py-2 px-3 rounded-lg text-sm"
+                style={{ color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {expanded && (
         <div className="p-3 space-y-3">
