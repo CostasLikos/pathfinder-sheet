@@ -281,14 +281,12 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
   const babVal = bab ?? 0
   const hasteActive = activePresets.includes('haste')
 
-  // Off-hand: normally 1 attack; +1 at −5 with ITWF; +1 at −10 with GTWF
+  // When a TWF role is assigned, the card shows only a single clean attack —
+  // the full iterative + penalized sequence lives in the Full Attack Bar above.
   const attackBonuses = []
-  if (twfRole === 'off') {
+  if (twfRole) {
     attackBonuses.push(baseAttackBonus)
-    if (twfFeats.itwf || twfFeats.gtwf) attackBonuses.push(baseAttackBonus - 5)
-    if (twfFeats.gtwf) attackBonuses.push(baseAttackBonus - 10)
   } else {
-    // Main hand or no TWF role — normal iterative sequence
     attackBonuses.push(baseAttackBonus)
     if (babVal >= 6)  attackBonuses.push(baseAttackBonus - 5)
     if (babVal >= 11) attackBonuses.push(baseAttackBonus - 10)
