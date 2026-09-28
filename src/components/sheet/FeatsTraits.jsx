@@ -190,22 +190,22 @@ function FeatLibrary({ onAdd, onClose }) {
   )
 }
 
-// ─── Hover Info Tooltip ───────────────────────────────────────────────────────
+// ─── Info Card (click-triggered portal) ──────────────────────────────────────
 
-function InfoTooltip({ name, desc, color, anchorRef }) {
-  const [pos, setPos] = useState({ top: 0, left: 0, side: 'right' })
+function InfoCard({ name, desc, color, anchorRef, onClose, onEdit }) {
   const tipRef = useRef()
+  const [pos, setPos] = useState({ top: 0, left: 0 })
 
   useEffect(() => {
-    if (!anchorRef.current) return
+    if (!anchorRef.current || !tipRef.current) return
     const rect = anchorRef.current.getBoundingClientRect()
-    const vw = window.innerWidth
-    const vh = window.innerHeight
-    const tipW = 280
-    const tipH = tipRef.current?.offsetHeight ?? 160
+    const vw   = window.innerWidth
+    const vh   = window.innerHeight
+    const tipW = 300
+    const tipH = tipRef.current.offsetHeight || 180
     const spaceRight = vw - rect.right - 12
     const spaceLeft  = rect.left - 12
-    let top, left
+    let left, top
     if (spaceRight >= tipW) {
       left = rect.right + 10
       top  = rect.top + rect.height / 2 - tipH / 2
@@ -213,7 +213,6 @@ function InfoTooltip({ name, desc, color, anchorRef }) {
       left = rect.left - tipW - 10
       top  = rect.top + rect.height / 2 - tipH / 2
     } else {
-      // Not enough room on sides — show below
       left = Math.max(8, Math.min(vw - tipW - 8, rect.left))
       top  = rect.bottom + 8
     }
@@ -222,20 +221,59 @@ function InfoTooltip({ name, desc, color, anchorRef }) {
     setPos({ top, left })
   }, [anchorRef])
 
+  // Close on outside click
+  useEffect(() => {
+    const handle = (e) => {
+      if (tipRef.current && !tipRef.current.contains(e.target) &&
+          anchorRef.current && !anchorRef.current.contains(e.target)) {
+        onClose()
+      }
+    }
+    document.addEventListener('mousedown', handle)
+    document.addEventListener('touchstart', handle)
+    return () => { document.removeEventListener('mousedown', handle); document.removeEventListener('touchstart', handle) }
+  }, [onClose, anchorRef])
+
+  // Close on Escape
+  useEffect(() => {
+    const handle = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handle)
+    return () => document.removeEventListener('keydown', handle)
+  }, [onClose])
+
   return createPortal(
     <div ref={tipRef}
-      className="fixed rounded-xl shadow-2xl p-3 space-y-2"
+      className="fixed rounded-xl shadow-2xl"
       style={{
-        top: pos.top, left: pos.left, width: 280, zIndex: 10000,
+        top: pos.top, left: pos.left, width: 300, zIndex: 10000,
         backgroundColor: 'var(--bg-darker)',
         border: `1px solid ${color}55`,
-        boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 0 1px ${color}22`,
-        pointerEvents: 'none',
+        boxShadow: `0 8px 32px rgba(0,0,0,0.75), 0 0 0 1px ${color}22`,
       }}>
-      <div className="font-bold text-sm leading-tight" style={{ color, fontFamily: 'Georgia, serif' }}>{name}</div>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2 px-3 pt-3 pb-2"
+        style={{ borderBottom: desc ? `1px solid ${color}22` : 'none' }}>
+        <div className="font-bold text-sm leading-snug" style={{ color, fontFamily: 'Georgia, serif' }}>{name}</div>
+        <button onClick={onClose} className="text-xs w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 mt-0.5"
+          style={{ color: 'var(--text-faint)', border: '1px solid var(--bg-border)' }}>✕</button>
+      </div>
+      {/* Body */}
       {desc && (
-        <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-dim)' }}>{desc}</p>
+        <div className="px-3 py-2 max-h-48 overflow-y-auto">
+          <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-dim)' }}>{desc}</p>
+        </div>
       )}
+      {!desc && (
+        <p className="px-3 pb-2 text-xs italic" style={{ color: 'var(--text-faint)' }}>No description yet.</p>
+      )}
+      {/* Footer */}
+      <div className="px-3 pb-3 pt-1 flex justify-end">
+        <button onClick={() => { onClose(); onEdit() }}
+          className="text-xs px-2.5 py-1 rounded font-semibold"
+          style={{ color, border: `1px solid ${color}55`, backgroundColor: `${color}11` }}>
+          ✎ Edit
+        </button>
+      </div>
     </div>,
     document.body
   )
@@ -244,70 +282,119 @@ function InfoTooltip({ name, desc, color, anchorRef }) {
 // ─── Item Row ─────────────────────────────────────────────────────────────────
 
 function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
-  const [expanded, setExpanded] = useState(false)
-  const [hovered, setHovered]   = useState(false)
-  const rowRef = useRef()
-  const hasDesc = !!item.desc
+  const [showInfo, setShowInfo] = useState(false)
+  const [editing, setEditing]   = useState(false)
+  const rowRef   = useRef()
+  const pressRef = useRef(null)  // long-press timer
+
+  const startPress = () => {
+    pressRef.current = setTimeout(() => { pressRef.current = null; setEditing(true) }, 500)
+  }
+  const cancelPress = () => { if (pressRef.current) { clearTimeout(pressRef.current); pressRef.current = null } }
+  const handleClick = () => {
+    if (!pressRef.current && !editing) {
+      // only open info if the long-press timer already fired (null) but we didn't just enter edit
+      setShowInfo(v => !v)
+    }
+    cancelPress()
+  }
+
+  // Prevent accidental info-open after long-press fires
+  const longFired = useRef(false)
+  const startPress2 = () => {
+    longFired.current = false
+    pressRef.current = setTimeout(() => {
+      pressRef.current = null
+      longFired.current = true
+      setEditing(true)
+    }, 500)
+  }
+  const handleClick2 = (e) => {
+    cancelPress()
+    if (longFired.current) { longFired.current = false; return }
+    if (!editing && item.name) setShowInfo(v => !v)
+  }
 
   return (
     <div ref={rowRef}
-      className="rounded-lg overflow-hidden transition-all"
+      className="rounded-lg overflow-hidden"
       style={{
         backgroundColor: 'var(--bg-darker)',
-        border: `1px solid var(--bg-border)`,
+        border: `1px solid ${editing ? color : 'var(--bg-border)'}`,
         borderLeft: `3px solid ${color}66`,
-      }}
-      onMouseEnter={() => item.name && setHovered(true)}
-      onMouseLeave={() => setHovered(false)}>
+        transition: 'border-color 0.15s',
+      }}>
 
-      {hovered && item.name && (
-        <InfoTooltip name={item.name} desc={item.desc} color={color} anchorRef={rowRef} />
+      {showInfo && item.name && (
+        <InfoCard
+          name={item.name} desc={item.desc} color={color}
+          anchorRef={rowRef}
+          onClose={() => setShowInfo(false)}
+          onEdit={() => setEditing(true)}
+        />
       )}
 
-      <div className="flex items-center gap-2 px-3 py-2">
-        <input
-          type="text"
-          value={item.name}
-          onChange={e => onUpdate(index, 'name', e.target.value)}
-          placeholder="Name..."
-          className="flex-1 bg-transparent font-semibold text-sm focus:outline-none min-w-0"
-          style={{ color: 'var(--text)' }}
-        />
-        <button onClick={() => setExpanded(x => !x)}
-          className="text-xs px-2 py-0.5 rounded-full flex-shrink-0 transition-all"
-          style={{
-            color: hasDesc ? color : 'var(--text-faint)',
-            backgroundColor: hasDesc ? `${color}18` : 'transparent',
-            border: `1px solid ${hasDesc ? color + '55' : 'var(--bg-border)'}`,
-          }}>
-          {expanded ? '▲' : hasDesc ? '▾ desc' : '+ desc'}
-        </button>
-        <button onClick={() => onRemove(index)}
-          className="text-xs w-6 h-6 flex items-center justify-center rounded-full flex-shrink-0"
-          style={{ color: '#ef444488', border: '1px solid #ef444433' }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.backgroundColor = '#ef444422' }}
-          onMouseLeave={e => { e.currentTarget.style.color = '#ef444488'; e.currentTarget.style.backgroundColor = 'transparent' }}>
-          ✕
-        </button>
-      </div>
-
-      {/* Description preview (collapsed) */}
-      {!expanded && hasDesc && (
-        <div className="px-3 pb-2 cursor-pointer" onClick={() => setExpanded(true)}>
-          <p className="text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--text-faint)' }}>{item.desc}</p>
+      {/* ── View row (not editing) ── */}
+      {!editing && (
+        <div className="flex items-center gap-2 px-3 py-2 cursor-pointer select-none group"
+          onMouseDown={startPress2}
+          onMouseUp={cancelPress}
+          onMouseLeave={cancelPress}
+          onTouchStart={startPress2}
+          onTouchEnd={handleClick2}
+          onClick={handleClick2}
+          onDoubleClick={e => { e.stopPropagation(); cancelPress(); setShowInfo(false); setEditing(true) }}>
+          <span className="flex-1 text-sm font-semibold truncate" style={{ color: item.name ? 'var(--text)' : 'var(--text-faint)' }}>
+            {item.name || 'Unnamed…'}
+          </span>
+          {item.desc && (
+            <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
+              style={{ color, backgroundColor: `${color}18`, border: `1px solid ${color}33` }}>i</span>
+          )}
+          {/* Edit pencil — visible on hover (desktop), hidden on touch */}
+          <button
+            onClick={e => { e.stopPropagation(); cancelPress(); setShowInfo(false); setEditing(true) }}
+            className="feat-edit-btn text-xs w-6 h-6 items-center justify-center rounded-full flex-shrink-0"
+            style={{ color: `${color}88`, border: `1px solid ${color}33` }}
+            onMouseEnter={e => { e.currentTarget.style.color = color; e.currentTarget.style.backgroundColor = `${color}18` }}
+            onMouseLeave={e => { e.currentTarget.style.color = `${color}88`; e.currentTarget.style.backgroundColor = 'transparent' }}>
+            ✎
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); cancelPress(); onRemove(index) }}
+            className="text-xs w-6 h-6 flex items-center justify-center rounded-full flex-shrink-0"
+            style={{ color: '#ef444488', border: '1px solid #ef444433' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.backgroundColor = '#ef444422' }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#ef444488'; e.currentTarget.style.backgroundColor = 'transparent' }}>
+            ✕
+          </button>
         </div>
       )}
 
-      {/* Description editor (expanded) */}
-      {expanded && (
-        <div className="px-3 pb-3" style={{ borderTop: `1px solid ${color}22` }}>
+      {/* ── Edit row ── */}
+      {editing && (
+        <div className="p-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <input autoFocus
+              type="text"
+              value={item.name}
+              onChange={e => onUpdate(index, 'name', e.target.value)}
+              placeholder="Name..."
+              className="flex-1 bg-transparent font-semibold text-sm focus:outline-none min-w-0 px-1"
+              style={{ color: 'var(--text)', borderBottom: `1px solid ${color}55` }}
+            />
+            <button onClick={() => setEditing(false)}
+              className="text-xs px-2 py-0.5 rounded font-bold flex-shrink-0"
+              style={{ color, border: `1px solid ${color}55`, backgroundColor: `${color}11` }}>
+              Done
+            </button>
+          </div>
           <textarea
-            autoFocus
             value={item.desc}
             onChange={e => onUpdate(index, 'desc', e.target.value)}
             placeholder="Description, effect, prerequisites..."
             rows={4}
-            className="w-full text-xs resize-none focus:outline-none mt-2 p-2 rounded"
+            className="w-full text-xs resize-none focus:outline-none p-2 rounded"
             style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-dim)', border: `1px solid ${color}33` }}
             onFocus={e => e.target.style.borderColor = color}
             onBlur={e => e.target.style.borderColor = `${color}33`}
