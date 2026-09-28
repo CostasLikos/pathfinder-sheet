@@ -15,6 +15,7 @@ const emptyWeapon = () => ({
   ability: 'str',
   dmgAbility: 'str',
   attackMisc: 0,
+  enhancement: 0,
   dmgDice: '1d6',
   dmgMisc: 0,
   critRange: '20',
@@ -132,16 +133,18 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
   const { mainPenalty, offPenalty } = twfPenalties(twfFeats, effectiveLightOffhand)
   const twfPenalty = twfRole === 'main' ? mainPenalty : twfRole === 'off' ? offPenalty : 0
 
-  // Build attack bonus (BAB + ability + misc + temp + buff + presets + TWF penalty)
-  const baseAttackBonus = (bab ?? 0) + abilityModForAttack + (weapon.attackMisc ?? 0) + (weapon.tempAttack ?? 0) + (buffTotals.attackRoll ?? 0) + presetAtkBonus + twfPenalty
+  const enh = weapon.enhancement ?? 0
+
+  // Build attack bonus (BAB + ability + enhancement + misc + temp + buff + presets + TWF penalty)
+  const baseAttackBonus = (bab ?? 0) + abilityModForAttack + enh + (weapon.attackMisc ?? 0) + (weapon.tempAttack ?? 0) + (buffTotals.attackRoll ?? 0) + presetAtkBonus + twfPenalty
 
   // Off-hand damage uses ½ Str (round down), unless ITWF/GTWF feat (still ½ Str — RAW)
   const strMod = abilityModForDmg  // already the correct ability mod
   const offHandDmgMod = twfRole === 'off'
     ? Math.floor(Math.max(0, strMod) / 2)  // ½ Str (positive only), negatives still apply full
     : strMod
-  const effectiveDmgMod = twfRole === 'off' ? offHandDmgMod + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
-                                             : abilityModForDmg + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
+  const effectiveDmgMod = twfRole === 'off' ? offHandDmgMod + enh + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
+                                             : abilityModForDmg + enh + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
   const totalDmgBonus = effectiveDmgMod
 
   // Generate iterative attacks from BAB
@@ -242,6 +245,12 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
             <span className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: `${accentColor}20`, color: accentColor, border: `1px solid ${accentColor}44` }}>{weapon.attackType}</span>
             <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{weapon.dmgDice} {weapon.damageType}</span>
             <span className="text-xs" style={{ color: 'var(--text-faint)' }}>Crit {weapon.critRange}/{weapon.critMult}</span>
+            {/* Enhancement bonus */}
+            <span className="flex items-center gap-0.5 text-xs" style={{ color: enh !== 0 ? '#a78bfa' : 'var(--text-faint)' }}>
+              <button onClick={() => onUpdate('enhancement', enh - 1)} className="w-4 h-4 flex items-center justify-center rounded text-xs leading-none" style={{ backgroundColor: 'var(--bg-border)' }}>−</button>
+              <span className="font-bold tabular-nums" style={{ minWidth: '28px', textAlign: 'center' }}>{enh >= 0 ? `+${enh}` : enh}</span>
+              <button onClick={() => onUpdate('enhancement', enh + 1)} className="w-4 h-4 flex items-center justify-center rounded text-xs leading-none" style={{ backgroundColor: 'var(--bg-border)' }}>+</button>
+            </span>
           </div>
         </div>
 
@@ -327,6 +336,7 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
         <span style={{ color: accentColor, fontWeight: 'bold' }}>ATK</span>
         <span style={{ color: 'var(--text-dim)' }}>BAB <span style={{ color: accentColor }}>{formatMod(bab ?? 0)}</span></span>
         <span style={{ color: 'var(--text-dim)' }}>+ {weapon.ability.toUpperCase()} <span style={{ color: accentColor }}>{formatMod(abilityModForAttack)}</span></span>
+        {enh !== 0 && <span style={{ color: '#a78bfa' }}>+ Enh <span style={{ fontWeight: 'bold' }}>{formatMod(enh)}</span></span>}
         <span className="flex items-center gap-1" style={{ color: 'var(--text-dim)' }}>
           + Misc
           <input type="number" value={weapon.attackMisc ?? 0} onChange={e => onUpdate('attackMisc', Number(e.target.value))}
