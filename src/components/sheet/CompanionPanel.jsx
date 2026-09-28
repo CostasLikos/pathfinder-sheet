@@ -381,6 +381,7 @@ export default function CompanionPanel({ companions = [], onChange }) {
   const updateCompanion = (i, data) => onChange(companions.map((c, idx) => idx === i ? data : c))
   const removeCompanion = (i) => onChange(companions.filter((_, idx) => idx !== i))
 
+  const filledCompanions = companions.filter(c => c.name || c.raceTemplate || c.classType || c.levelHD || c.notes || c.hp.max > 0)
   const hasAny = companions.length > 0
 
   return (
@@ -390,7 +391,7 @@ export default function CompanionPanel({ companions = [], onChange }) {
         onClick={() => setCollapsed(x => !x)}>
         <h2 className="section-title mb-0 flex items-center gap-2">
           🐾 Companions & Familiars
-          {hasAny && <span className="text-xs px-1.5 py-0.5 rounded font-normal" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text-dim)' }}>{companions.length}</span>}
+          {filledCompanions.length > 0 && <span className="text-xs px-1.5 py-0.5 rounded font-normal" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text-dim)' }}>{filledCompanions.length}</span>}
         </h2>
         <div className="flex items-center gap-2">
           {!collapsed && (
