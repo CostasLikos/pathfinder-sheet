@@ -13,8 +13,8 @@ const emptyClassEntry = (isFavored = false) => ({
 })
 
 function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored }) {
+  const isOther   = entry.className === 'Other'
   const knownData = CLASS_DATA[entry.className]
-  const isCustom  = !knownData
   const data = {
     bab:            entry.customBab    ?? knownData?.bab            ?? 'mid',
     fort:           entry.customFort   ?? knownData?.fort           ?? 'poor',
@@ -45,18 +45,15 @@ function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored 
           style={{ color: entry.isFavored ? 'var(--accent)' : 'var(--text-faint)' }}
         >★</button>
 
-        {/* Class name — free text with autocomplete from known classes */}
-        <input
-          list={`classes-list-${entry.id}`}
+        {/* Class selector dropdown */}
+        <select
           value={entry.className}
           onChange={e => set('className', e.target.value)}
-          placeholder="Class name…"
           className="flex-1 text-sm px-2 py-1 rounded focus:outline-none font-bold"
-          style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text)', border: `1px solid ${isCustom ? 'var(--accent-dim)' : 'var(--bg-border)'}`, minWidth: '120px' }}
-        />
-        <datalist id={`classes-list-${entry.id}`}>
-          {CLASSES.map(c => <option key={c} value={c} />)}
-        </datalist>
+          style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text)', border: '1px solid var(--bg-border)', minWidth: '120px' }}
+        >
+          {CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
 
         {/* Level */}
         <div className="flex items-center gap-1 flex-shrink-0">
@@ -70,30 +67,40 @@ function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored 
           <button onClick={() => set('level', Math.min(20, lvl+1))} className="w-6 h-6 flex items-center justify-center rounded text-sm" style={{ backgroundColor: 'var(--bg-border)', color: 'var(--text)' }}>+</button>
         </div>
 
-        {/* Class stats badges */}
-        <div className="flex gap-1 flex-wrap">
-          <span className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
-            d{data.hd}
-          </span>
-          <span className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
-            {data.bab === 'full' ? 'Full BAB' : data.bab === 'mid' ? '¾ BAB' : '½ BAB'}
-          </span>
-          <span className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
-            {data.skillsPerLevel}+Int skills
-          </span>
-        </div>
+        {/* Class stats badges (known classes only) */}
+        {!isOther && (
+          <div className="flex gap-1 flex-wrap">
+            <span className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>d{data.hd}</span>
+            <span className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
+              {data.bab === 'full' ? 'Full BAB' : data.bab === 'mid' ? '¾ BAB' : '½ BAB'}
+            </span>
+            <span className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
+              {data.skillsPerLevel}+Int skills
+            </span>
+          </div>
+        )}
 
         {onRemove && (
           <button onClick={onRemove} className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: '#ef4444', border: '1px solid var(--bg-border)' }}>✕</button>
         )}
       </div>
 
-      {/* Custom class stats — shown when class name isn't in the known list */}
-      {isCustom && (
+      {/* "Other" — custom name + full stats editor */}
+      {isOther && (
         <div className="pt-2 space-y-2" style={{ borderTop: '1px solid var(--bg-border)' }}>
-          <div className="text-xs font-semibold mb-1" style={{ color: 'var(--accent-dim)' }}>Custom Class Stats</div>
+          {/* Custom class name */}
+          <input
+            type="text"
+            value={entry.customName ?? ''}
+            onChange={e => set('customName', e.target.value)}
+            placeholder="Class name (e.g. Shadowdancer, Vigilante…)"
+            className="w-full text-sm px-2 py-1.5 rounded focus:outline-none font-bold"
+            style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--accent)', border: '1px solid var(--accent-dim)' }}
+            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+            onBlur={e => e.target.style.borderColor = 'var(--accent-dim)'}
+          />
+          {/* Stats grid */}
           <div className="grid grid-cols-2 gap-2">
-            {/* Hit Die */}
             <div className="flex flex-col gap-0.5">
               <span className="text-xs" style={{ color: 'var(--text-dim)' }}>Hit Die</span>
               <select value={data.hd} onChange={e => set('customHd', Number(e.target.value))}
@@ -102,27 +109,24 @@ function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored 
                 {[4,6,8,10,12].map(d => <option key={d} value={d}>d{d}</option>)}
               </select>
             </div>
-            {/* BAB */}
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs" style={{ color: 'var(--text-dim)' }}>BAB</span>
+              <span className="text-xs" style={{ color: 'var(--text-dim)' }}>BAB Progression</span>
               <select value={data.bab} onChange={e => set('customBab', e.target.value)}
                 className="text-xs px-1.5 py-1 rounded focus:outline-none"
                 style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text)', border: '1px solid var(--bg-border)' }}>
-                <option value="full">Full (+1/lvl)</option>
-                <option value="mid">¾ (+3/4 lvl)</option>
-                <option value="half">½ (+1/2 lvl)</option>
+                <option value="full">Full (+1 / level)</option>
+                <option value="mid">¾ (+3/4 level)</option>
+                <option value="half">½ (+1/2 level)</option>
               </select>
             </div>
-            {/* Skills/level */}
             <div className="flex flex-col gap-0.5">
               <span className="text-xs" style={{ color: 'var(--text-dim)' }}>Skills / Level</span>
               <input type="number" min={1} max={12} value={data.skillsPerLevel}
                 onChange={e => set('customSkills', Math.max(1, Number(e.target.value)))}
-                className="text-xs px-1.5 py-1 rounded focus:outline-none text-center"
+                className="text-xs px-2 py-1 rounded focus:outline-none"
                 style={{ backgroundColor: 'var(--bg-darker)', color: 'var(--text)', border: '1px solid var(--bg-border)' }} />
             </div>
           </div>
-          {/* Save progressions */}
           <div className="grid grid-cols-3 gap-2">
             {[
               { label: 'Fortitude', key: 'customFort', val: data.fort },
@@ -132,7 +136,7 @@ function ClassEntry({ entry, index, total, onChange, onRemove, canRemoveFavored 
               <div key={key} className="flex flex-col gap-0.5">
                 <span className="text-xs" style={{ color: 'var(--text-dim)' }}>{label}</span>
                 <select value={val} onChange={e => set(key, e.target.value)}
-                  className="text-xs px-1.5 py-1 rounded focus:outline-none"
+                  className="text-xs px-1.5 py-1 rounded focus:outline-none font-semibold"
                   style={{ backgroundColor: 'var(--bg-darker)', color: val === 'good' ? 'var(--positive)' : 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>
                   <option value="good">Good</option>
                   <option value="poor">Poor</option>
