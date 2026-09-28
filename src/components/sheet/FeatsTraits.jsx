@@ -320,8 +320,12 @@ function ItemRow({ item, index, onUpdate, onRemove, color = 'var(--accent)' }) {
       className="rounded-lg overflow-hidden"
       style={{
         backgroundColor: 'var(--bg-darker)',
-        border: `1px solid ${editing ? color : 'var(--bg-border)'}`,
+        borderTop:    `1px solid ${editing ? color : 'var(--bg-border)'}`,
+        borderRight:  `1px solid ${editing ? color : 'var(--bg-border)'}`,
+        borderBottom: `1px solid ${editing ? color : 'var(--bg-border)'}`,
         borderLeft: `3px solid ${color}66`,
+        borderRadius: '0.5rem',
+        overflow: 'hidden',
         transition: 'border-color 0.15s',
       }}>
 
