@@ -16,11 +16,9 @@ export async function extractPdfFields(file) {
     const page = await pdf.getPage(pageNum)
     const annotations = await page.getAnnotations()
     for (const ann of annotations) {
-      if (ann.fieldName && ann.fieldValue !== undefined && ann.fieldValue !== '') {
-        // Don't overwrite a value we already have (some fields repeat across pages)
-        if (!(ann.fieldName in fields)) {
-          fields[ann.fieldName] = ann.fieldValue
-        }
+      if (ann.fieldName && !(ann.fieldName in fields)) {
+        const v = ann.fieldValue ?? ''
+        fields[ann.fieldName] = v
       }
     }
   }
@@ -29,133 +27,211 @@ export async function extractPdfFields(file) {
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
+const str = (v, fallback = '') => (v && String(v).trim() !== '-' ? String(v).trim() : fallback)
+
 const num = (v, fallback = 0) => {
-  if (v === undefined || v === null) return fallback
-  const n = parseInt(String(v).replace(/[^0-9\-]/g, '').trim(), 10)
+  if (v === undefined || v === null || String(v).trim() === '-') return fallback
+  const n = parseInt(String(v).replace(/[^\d\-]/g, '').trim(), 10)
   return isNaN(n) ? fallback : n
 }
 
-// Parse "1d6+3" or "1d4 + 7" → { dice: '1d6', bonus: 3 }
-const parseDmg = (str = '') => {
-  const m = String(str).match(/(\d+d\d+)\s*([+-]\s*\d+)?/)
-  if (!m) return { dice: str.trim() || '1d6', bonus: 0 }
-  const dice = m[1]
+// Parse "1d4 + 7" → { dice: '1d4', bonus: 7 }
+const parseDmg = (s = '') => {
+  const m = String(s).match(/(\d+d\d+)\s*([+\-]\s*\d+)?/)
+  if (!m) return { dice: String(s).trim() || '1d6', bonus: 0 }
   const bonus = m[2] ? parseInt(m[2].replace(/\s/g, ''), 10) : 0
-  return { dice, bonus: isNaN(bonus) ? 0 : bonus }
+  return { dice: m[1], bonus: isNaN(bonus) ? 0 : bonus }
 }
 
-// Parse first number from an attack modifier string like "+14, +9"
-const parseFirstMod = (str = '') => {
-  const m = String(str).match(/([+-]?\d+)/)
-  return m ? parseInt(m[1], 10) : 0
+// Parse crit range "19-20" or "x2" mult
+const parseCritRange = (s = '') => {
+  if (!s) return '20'
+  const m = String(s).match(/(\d+)-20/)
+  return m ? `${m[1]}-20` : '20'
+}
+const parseCritMult = (s = '') => {
+  if (!s) return '×2'
+  const m = String(s).match(/x(\d)/)
+  return m ? `×${m[1]}` : '×2'
 }
 
-// Parse "ClassName 3" → { className, level }
-const parseClassLevel = (str = '') => {
-  const m = String(str).trim().match(/^(.+?)\s+(\d+)$/)
-  if (!m) return { className: str.trim(), level: 1 }
-  return { className: m[1].trim(), level: parseInt(m[2], 10) }
+// "ClassName 5" → { className, level }
+const parseClassLevel = (s = '') => {
+  const m = String(s).trim().match(/^(.+?)\s+(\d+)$/)
+  return m ? { className: m[1].trim(), level: parseInt(m[2]) } : { className: s.trim(), level: 1 }
+}
+
+// Known spellcasting classes — used to avoid triggering SpellAttacksPanel scan
+const CASTER_CLASSES = new Set([
+  'wizard','sorcerer','witch','magus','bard','skald','cleric','oracle',
+  'druid','paladin','ranger','inquisitor','alchemist','summoner','shaman',
+  'warpriest','bloodrager','hunter','arcanist','occultist','spiritualist',
+  'medium','mesmerist','psychic',
+])
+
+// Map skill PDF keys to app skill IDs
+const SKILL_MAP = {
+  'SK - Acro': 'acrobatics',
+  'SK - Apra': 'appraise',
+  'SK - Bluf': 'bluff',
+  'SK - Clim': 'climb',
+  'SK - Cra1': 'craftAlchemy',
+  'SK - Dipl': 'diplomacy',
+  'SK - Disa': 'disableDevice',
+  'SK - Disg': 'disguise',
+  'SK - Esca': 'escapeArtist',
+  'SK - Fly':  'fly',
+  'SK - Hand': 'handleAnimal',
+  'SK - Heal': 'heal',
+  'SK - Inti': 'intimidate',
+  'SK - Kno1': 'knowledgePlanes',
+  'SK - Kno2': 'knowledgeLocal',
+  'SK - Kno3': 'knowledgeNobility',
+  'SK - Kno4': 'knowledgeReligion',
+  'SK - Ling': 'linguistics',
+  'SK - Perc': 'perception',
+  'SK - Perf': 'perform',
+  'SK - Prof': 'profession',
+  'SK - Ride': 'ride',
+  'SK - Sens': 'senseMotive',
+  'SK - Slei': 'sleightOfHand',
+  'SK - Spel': 'spellcraft',
+  'SK - Stea': 'stealth',
+  'SK - Surv': 'survival',
+  'SK - Swim': 'swim',
+  'SK - Usem': 'useMagicDevice',
 }
 
 /**
  * Map extracted PDF fields to our character schema.
- * This mapping targets the "Dyslexic Studeos" / standard PF1e fillable PDF layout.
+ * Targets the JamesTheBard / Dyslexic Studeos PF1e fillable PDF.
  */
 export function mapFieldsToCharacter(f) {
-  // ── Abilities ────────────────────────────────────────────────────────────
-  // Only Charisma Total is a named field in this template.
-  // The FC- fields are Familiar/Companion stats, not the character's own.
+  // ── Personal info ─────────────────────────────────────────────────────────
+  const name      = str(f['PI - Character'])
+  const race      = str(f['PI - Race'])
+  const alignment = str(f['PI - Alignment'])
+  const deity     = str(f['PI - Deity'])
+  const gender    = str(f['PI - Gender'])
+  const height    = str(f['PI - Height'])
+  const weight    = str(f['PI - Weight'])
+  const age       = str(f['PI - Age'])
+
+  // ── Abilities ─────────────────────────────────────────────────────────────
   const abilities = {
-    str: 10,
-    dex: 10,
-    con: 10,
-    int: 10,
-    wis: 10,
-    cha: num(f['Charisma - Total'], 10),
+    str: num(f['Strength - Total'],     num(f['Strength - Base'],  10)),
+    dex: num(f['Dexterity - Total'],    num(f['Dexterity - Base'], 10)),
+    con: num(f['Constitution - Total'], num(f['Constitution - Base'], 10)),
+    int: num(f['Intelligence - Total'], num(f['Intelligence - Base'], 10)),
+    wis: num(f['Wisdom - Total'],       num(f['Wisdom - Base'], 10)),
+    cha: num(f['Charisma - Total'],     num(f['Charisma - Base'], 10)),
   }
 
   // ── HP ───────────────────────────────────────────────────────────────────
   const maxHp = num(f['Total HP'], 0)
   const hp = { max: maxHp, current: maxHp, nonlethal: 0 }
 
-  // ── Saves ────────────────────────────────────────────────────────────────
-  // Use class base + misc separately so formula still works once ability scores are set
+  // ── Saves ─────────────────────────────────────────────────────────────────
+  // Use class base + misc. The total = base + ability + misc; ability is derived
+  // from abilities above, so just store base + misc and let the formula run.
   const saves = {
-    fort: { base: num(f['Class Fortitude Save'] ?? f['Total Fort Save']), misc: num(f['Fortitude Misc Mod']) },
-    ref:  { base: num(f['Class Reflex Save']    ?? f['Total Reflex Save']), misc: num(f['Reflex Misc Mod']) },
-    will: { base: num(f['Class Willpower Save']  ?? f['Total Will Save']),  misc: num(f['Willpower Misc Mod']) },
+    fort: { base: num(f['Class Fortitude Save']), misc: num(f['Fortitude Misc Mod']) },
+    ref:  { base: num(f['Class Reflex Save']),    misc: num(f['Reflex Misc Mod']) },
+    will: { base: num(f['Class Willpower Save']),  misc: num(f['Willpower Misc Mod']) },
   }
 
   // ── AC ───────────────────────────────────────────────────────────────────
-  // Store total AC in misc so the display is correct; user can re-break it down later
-  const totalAC = num(f['Total AC'], 10)
-  const naturalBonus = num(f['AC - Natural Bonus'], 0)
   const ac = {
-    armor:   0,
-    shield:  0,
-    natural: naturalBonus,
+    armor:   num(f['AC - Armor Bonus']),
+    shield:  num(f['AC - Shield Bonus']),
+    natural: num(f['AC - Natural Bonus']),
     deflect: 0,
-    misc:    Math.max(0, totalAC - 10 - naturalBonus),
+    misc:    num(f['AC - Dodge Bonus']),
   }
 
-  // ── BAB / Initiative / Speed ──────────────────────────────────────────────
-  const bab = num(f['Total BAB'] ?? f['ATK - Melee - BAB'])
-  const speed = num(f['FC - Speed'], 30) // FC - Speed = 40 in Noah's sheet
+  // ── BAB / initiative / speed ─────────────────────────────────────────────
+  const bab   = num(f['Total BAB'])
+  const speed = num(f['EX - Run Speed'], 30)
+  const initMisc = num(f['EX - Initiative'], 0) - Math.floor((abilities.dex - 10) / 2)
 
   // ── Classes ──────────────────────────────────────────────────────────────
   const classes = []
-  for (let i = 2; i <= 4; i++) {
+  for (let i = 1; i <= 4; i++) {
     const raw = f[`CR - Class ${i} Class`]
-    if (raw && raw.trim()) {
-      const { className, level } = parseClassLevel(raw)
-      classes.push({
-        id: crypto.randomUUID(),
-        className,
-        level,
-        isFavored: false,
-        favoredHP: 0,
-        favoredSkill: 0,
-      })
-    }
-  }
-  // Also try Class 1 (often not filled in on this template, but try anyway)
-  const cls1 = f['CR - Class 1 Class']
-  if (cls1 && cls1.trim()) {
-    const { className, level } = parseClassLevel(cls1)
-    classes.unshift({ id: crypto.randomUUID(), className, level, isFavored: false, favoredHP: 0, favoredSkill: 0 })
+    if (!raw || !str(raw)) continue
+    const { className, level: clsLevel } = parseClassLevel(str(raw))
+    const explicitLevel = num(f[`CR - Class ${i} Levels`], 0)
+    classes.push({
+      id: crypto.randomUUID(),
+      className,
+      level: explicitLevel || clsLevel,
+      isFavored: str(f['Favored Class']).toLowerCase() === className.toLowerCase(),
+      favoredHP: 0,
+      favoredSkill: 0,
+    })
   }
 
-  const totalLevel = num(f['Total Levels'], classes.reduce((s, c) => s + c.level, 0) || 1)
+  const totalLevel  = num(f['Total Levels'], Math.max(1, classes.reduce((s, c) => s + c.level, 0)))
   const primaryClass = classes[0]?.className ?? ''
 
-  // ── Weapons ──────────────────────────────────────────────────────────────
-  const weapons = []
+  // ── Armor ─────────────────────────────────────────────────────────────────
+  const armor = []
   for (let i = 1; i <= 3; i++) {
-    const name = f[`WA - Weapon ${i} - Name`]
-    // Weapons 2+ may not have a name field in this template; skip if no data
-    const atkStr = f[`WA - Weapon ${i} - Attack Modifiers`] ?? ''
-    const dmgStr = f[`WA - Weapon ${i} - Damage`] ?? ''
-    if (!name?.trim() && !atkStr?.trim() && !dmgStr?.trim()) continue
+    const armorName = str(f[`AS - Armor ${i} - Name`])
+    if (!armorName) continue
+    armor.push({
+      id: crypto.randomUUID(),
+      name: armorName,
+      acBonus: num(f[`AS - Armor ${i} - AC Bonus`]),
+      maxDex: num(f[`AS - Armor ${i} - Max Dex`], null) || null,
+      checkPenalty: num(f[`AS - Armor ${i} - Armor Penalty`]),
+      spellFailure: parseInt(str(f[`AS - Armor ${i} - Spell Failure`])) || 0,
+      equipped: true,
+    })
+  }
+
+  const armorProps = {
+    checkPenalty: num(f['Armor Penalty']),
+    maxDex: num(f['Max Dexterity Bonus'], null) || null,
+    spellFailure: 0,
+  }
+
+  // ── Weapons ───────────────────────────────────────────────────────────────
+  const weapons = []
+  for (let i = 1; i <= 5; i++) {
+    const wName   = str(f[`WA - Weapon ${i} - Name`])
+    const atkStr  = str(f[`WA - Weapon ${i} - Attack Modifiers`])
+    const dmgStr  = str(f[`WA - Weapon ${i} - Damage`])
+    if (!wName && !atkStr && !dmgStr) continue
 
     const { dice: dmgDice, bonus: dmgMisc } = parseDmg(dmgStr)
-    // attackMisc: use first modifier minus BAB as misc bonus
-    // (PDF stores total attack like +14, we subtract BAB to get rough misc)
-    const totalAtk = parseFirstMod(atkStr)
-    const attackMisc = atkStr ? Math.max(0, totalAtk - bab) : 0
+    const wType   = str(f[`WA - Weapon ${i} - Type`]) // "P/S"
+    const wRange  = str(f[`WA - Weapon ${i} - Range`])
+    const wCrit   = str(f[`WA - Weapon ${i} - Crit`])  // "x2"
+    const wCritRng = str(f[`WA - Weapon ${i} - Range`]) // note: Range field holds crit range like 19-20
+
+    // Determine if ranged from range note
+    const isRanged = /ft\.|throw|ranged|bow|cross/i.test(str(f[`WA - Weapon ${i} - Ammo`]) + wRange)
+    // Best attack ability: ranged → dex, melee → str
+    const attackAbility = isRanged ? 'dex' : 'str'
+    const abilityMod = Math.floor((abilities[attackAbility] - 10) / 2)
+    // First number in attack string is total; subtract BAB+ability to get misc
+    const firstAtk = (() => { const m = String(atkStr).match(/([+\-]?\d+)/); return m ? parseInt(m[1]) : 0 })()
+    const attackMisc = firstAtk ? Math.max(-5, firstAtk - bab - abilityMod) : 0
 
     weapons.push({
       id: crypto.randomUUID(),
-      name: (name ?? `Weapon ${i}`).trim(),
-      attackType: 'Melee',
-      ability: 'str',
-      dmgAbility: 'str',
+      name: wName || `Weapon ${i}`,
+      attackType: isRanged ? 'Ranged' : 'Melee',
+      ability: attackAbility,
+      dmgAbility: attackAbility,
       attackMisc,
       dmgDice,
       dmgMisc,
-      critRange: '20',
-      critMult: '×2',
-      damageType: 'P',
-      notes: '',
+      critRange: parseCritRange(wCritRng || atkStr),
+      critMult:  parseCritMult(wCrit),
+      damageType: str(wType).split('/')[0] || 'P',
+      notes: str(f[`WA - Weapon ${i} - Ammo`]),
       tempAttack: 0,
       tempDamage: 0,
       activePresets: [],
@@ -163,121 +239,169 @@ export function mapFieldsToCharacter(f) {
     })
   }
 
-  // ── Skills ───────────────────────────────────────────────────────────────
-  const skillKeyMap = {
-    'SK - Apra': 'appraise',
-    'SK - Bluf': 'bluff',
-    'SK - Cra1': 'craftArmor',
-    'SK - Disa': 'disableDevice',
-    'SK - Dipl': 'diplomacy',
-    'SK - Disg': 'disguise',
-    'SK - Hand': 'handleAnimal',
-    'SK - Inti': 'intimidate',
-    'SK - Perc': 'perception',
-    'SK - Perf': 'perform',
-    'SK - Prof': 'profession',
-    'SK - Spel': 'spellcraft',
-    'SK - Stea': 'stealth',
-    'SK - Usem': 'useMagicDevice',
-  }
+  // ── Skills ────────────────────────────────────────────────────────────────
   const skills = {}
-  for (const [pdfKey, skillId] of Object.entries(skillKeyMap)) {
-    const ranks = f[`${pdfKey} - Ranks`]
-    if (ranks !== undefined) {
-      skills[skillId] = { ranks: num(ranks), misc: 0, classSkill: false }
+  for (const [pdfKey, skillId] of Object.entries(SKILL_MAP)) {
+    const total  = f[`${pdfKey} - Total`]
+    const ranks  = f[`${pdfKey} - Ranks`]
+    if (total === undefined && ranks === undefined) continue
+    const isClass = f[`${pdfKey} - IsClass`]
+    skills[skillId] = {
+      ranks: num(ranks),
+      misc:  0,
+      classSkill: isClass === '1' || isClass === 'Yes',
     }
+  }
+  // Knowledge skills with names
+  for (let i = 1; i <= 6; i++) {
+    const kName  = str(f[`SK - Kno${i} - Name`])
+    const ranks  = f[`SK - Kno${i} - Ranks`]
+    const isClass = f[`SK - Kno${i} - IsClass`]
+    if (!kName && ranks === undefined) continue
+    const skillId = `knowledge${kName ? kName.charAt(0).toUpperCase() + kName.slice(1) : i}`
+    skills[skillId] = {
+      ranks: num(ranks),
+      misc:  0,
+      classSkill: isClass === '1' || isClass === 'Yes',
+    }
+  }
+
+  // ── Currency ─────────────────────────────────────────────────────────────
+  const currency = {
+    pp: num(f['WT - Currency - Platinum']),
+    gp: num(f['WT - Currency - Gold']),
+    sp: num(f['WT - Currency - Silver']),
+    cp: num(f['WT - Currency - Copper']),
   }
 
   // ── Gear ─────────────────────────────────────────────────────────────────
   const gear = []
-  for (let i = 1; i <= 35; i++) {
+  for (let i = 1; i <= 40; i++) {
     const pad = String(i).padStart(2, '0')
-    const itemName = f[`EQ - Line ${pad} - Item Name`]
-    if (itemName?.trim()) {
-      const wt = num(f[`EQ - Line ${pad} - Total Weight`], 0)
-      gear.push({ id: crypto.randomUUID(), name: itemName.trim(), qty: 1, weight: wt, notes: '' })
-    }
+    const itemName = str(f[`EQ - Line ${pad} - Item Name`])
+    if (!itemName) continue
+    gear.push({
+      id: crypto.randomUUID(),
+      name: itemName,
+      qty:    num(f[`EQ - Line ${pad} - Quantity`], 1),
+      weight: num(f[`EQ - Line ${pad} - Total Weight`], 0),
+      notes: '',
+    })
   }
-  // Wondrous items from WE- fields
-  for (const [slot, key] of Object.entries({
-    Shoulders: 'WE - Shoulders', Throat: 'WE - Throat',
-  })) {
-    const val = f[key]
-    if (val?.trim()) gear.push({ id: crypto.randomUUID(), name: `[${slot}] ${val.trim()}`, qty: 1, weight: 0, notes: '' })
+  // Magic/misc items
+  for (let i = 1; i <= 15; i++) {
+    const pad = String(i).padStart(2, '0')
+    const itemName = str(f[`MI - Item Name - Line ${pad}`])
+    if (!itemName) continue
+    const charges = str(f[`MI - Uses and Charges - Line ${pad}`])
+    gear.push({
+      id: crypto.randomUUID(),
+      name: itemName + (charges ? ` (×${charges})` : ''),
+      qty: 1, weight: 0, notes: 'magic item',
+    })
+  }
+  // Wondrous items from WE- slots
+  for (const slot of ['Head','Headband','Eyes','Neck','Shoulders','Chest','Torso','Body','Arms','Wrists','Ring - Left','Ring - Right','Belt','Feet','Throat']) {
+    const val = str(f[`WE - ${slot}`])
+    if (val) gear.push({ id: crypto.randomUUID(), name: `[${slot}] ${val}`, qty: 1, weight: 0, notes: 'worn item' })
   }
 
   // ── Notes ─────────────────────────────────────────────────────────────────
-  const sqLines = Array.from({ length: 15 }, (_, i) => {
-    const pad = String(i + 1).padStart(2, '0')
-    return f[`FC - Special Qualities ${pad}`]
-  }).filter(Boolean)
-
-  const saLines = Array.from({ length: 5 }, (_, i) => {
-    const pad = String(i + 1).padStart(2, '0')
-    return f[`SA - Name - Line ${pad}`]
-  }).filter(Boolean)
-
-  const ffLines = [205, 211, 212, 213, 214, 107].map(n => f[`FF - Line ${n}`]).filter(Boolean)
-  const noLines = Array.from({ length: 10 }, (_, i) => {
-    const pad = String(i + 1).padStart(2, '0')
-    return f[`NO - Line ${pad}`]
-  }).filter(Boolean)
-
-  const notesSections = []
-  if (sqLines.length)  notesSections.push('Special Qualities:\n' + sqLines.join('\n'))
-  if (saLines.length)  notesSections.push('Special Abilities:\n' + saLines.join('\n'))
-  if (ffLines.length)  notesSections.push('Class Features:\n' + ffLines.join('\n'))
-  if (noLines.length)  notesSections.push('Notes:\n' + noLines.join('\n'))
-  const notes = notesSections.join('\n\n')
-
-  // ── Spells ────────────────────────────────────────────────────────────────
-  const spellNames = []
-  for (let n = 100; n <= 120; n++) {
-    const name = f[`SP - Name Desc - ${n}`]
-    if (name?.trim()) spellNames.push(name.trim())
+  const gather = (prefix, count, suffix = '') => {
+    const lines = []
+    for (let i = 1; i <= count; i++) {
+      const pad = String(i).padStart(2, '0')
+      const v = str(f[`${prefix}${pad}${suffix}`])
+      if (v) lines.push(v)
+    }
+    return lines
   }
 
-  // Only set a casting class if it's a known spellcasting class — otherwise
-  // SpellAttacksPanel will scan 2800+ spells on every render and freeze the tab.
-  const KNOWN_CASTING_CLASSES = new Set([
-    'wizard','sorcerer','witch','magus','bard','skald','cleric','oracle',
-    'druid','paladin','ranger','inquisitor','alchemist','summoner','shaman',
-    'warpriest','bloodrager','hunter','arcanist','occultist','spiritualist',
-    'medium','mesmerist','psychic',
-  ])
-  const castingClass = KNOWN_CASTING_CLASSES.has(primaryClass.toLowerCase()) ? primaryClass : ''
+  const ffLines = [...gather('FF - Line ', 9, ''), ...gather('FF - Line 2', 14, '').map(s => s)]
+  // Actually rebuild FF lines properly
+  const ffAll = []
+  for (let n = 101; n <= 115; n++) { const v = str(f[`FF - Line ${n}`]); if (v) ffAll.push(v) }
+  for (let n = 201; n <= 215; n++) { const v = str(f[`FF - Line ${n}`]); if (v) ffAll.push(v) }
+
+  const adNotes = []
+  for (let i = 1; i <= 15; i++) { const v = str(f[`AD - Notes ${i}`]); if (v) adNotes.push(v) }
+
+  const saLines = []
+  for (let i = 1; i <= 10; i++) {
+    const pad = String(i).padStart(2, '0')
+    const v = str(f[`SA - Name - Line ${pad}`])
+    if (v) saLines.push(v)
+  }
+
+  const noLines = []
+  for (let i = 1; i <= 10; i++) {
+    const pad = String(i).padStart(2, '0')
+    const v = str(f[`NO - Line ${pad}`])
+    if (v) noLines.push(v)
+  }
+
+  const fcSQ = []
+  for (let i = 1; i <= 20; i++) {
+    const pad = String(i).padStart(2, '0')
+    const v = str(f[`FC - Special Qualities ${pad}`])
+    if (v) fcSQ.push(v)
+  }
+
+  const noteParts = []
+  if (adNotes.length) noteParts.push('Class Abilities:\n' + adNotes.join('\n'))
+  if (ffAll.length)   noteParts.push('Feats & Features:\n' + ffAll.join('\n'))
+  if (saLines.length) noteParts.push('Special Abilities:\n' + saLines.join('\n'))
+  if (noLines.length) noteParts.push('Notes:\n' + noLines.join('\n'))
+  if (fcSQ.length)    noteParts.push('Familiar:\n' + fcSQ.join('\n'))
+  const notes = noteParts.join('\n\n')
+
+  // extra fields for the Overview / bio section
+  const bio = [
+    gender && `Gender: ${gender}`,
+    age && `Age: ${age}`,
+    height && `Height: ${height}`,
+    weight && `Weight: ${weight}`,
+  ].filter(Boolean).join(' · ')
+
+  // ── Spells ────────────────────────────────────────────────────────────────
+  const sessionSpells = []
+  for (let n = 100; n <= 175; n++) {
+    const v = str(f[`SP - Name Desc - ${n}`])
+    if (v) sessionSpells.push(v)
+  }
+
+  // ── Casting class (only if it's actually a spellcasting class) ───────────
+  const castingClass = CASTER_CLASSES.has(primaryClass.toLowerCase()) ? primaryClass : ''
 
   return {
-    // Basic info — not present as named fields in this PDF template
-    name: '',
+    name,
     playerName: '',
-    race: '',
+    race,
     class: primaryClass,
     level: totalLevel,
     classes,
-    alignment: '',
-    deity: '',
-    homeland: '',
+    alignment,
+    deity,
+    homeland: bio, // store bio details in homeland field as a note
     portrait: null,
-    // Stats
     abilities,
     hp,
     ac,
     bab,
-    initiative: { misc: 0 },
+    initiative: { misc: Math.max(0, initMisc) },
     speed,
     saves,
     weapons,
     skills,
+    armor,
+    armorProps,
     gear,
     notes,
-    sessionSpells: spellNames,
+    currency,
+    sessionSpells,
     spellcasting: { class: castingClass, ability: 'int', concentration: 0, slots: {}, spells: [] },
-    // Defaults
     feats: [],
     traits: [],
-    armor: [],
-    currency: { pp: 0, gp: 0, sp: 0, cp: 0 },
     buffs: [],
     combatRound: 1,
     bardicPerformance: { used: 0, active: false, currentPerf: '', lingeringFeat: false, lingeringRounds: 0 },
@@ -288,7 +412,6 @@ export function mapFieldsToCharacter(f) {
     initiativeCurrent: null,
     pins: { sections: [], skills: [] },
     statBuffs: [],
-    armorProps: { checkPenalty: 0, maxDex: null, spellFailure: 0 },
     skillOrder: null,
   }
 }
