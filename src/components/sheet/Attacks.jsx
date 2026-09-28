@@ -69,7 +69,7 @@ function computeWeaponAttacks({ weapon, bab, abilities, buffTotals = {}, twfFeat
     Object.entries(abilities ?? {}).map(([k, v]) => [k, v + (buffTotals[k] ?? 0)])
   )
   const atkMod = abilityMod(effAbilities[weapon.ability] ?? 10)
-  const dmgMod = abilityMod(effAbilities[weapon.dmgAbility] ?? 10)
+  const dmgMod = weapon.dmgAbility === 'none' ? 0 : abilityMod(effAbilities[weapon.dmgAbility] ?? 10)
   const enh = weapon.enhancement ?? 0
   const activePresets = weapon.activePresets ?? []
   const presetAtk = activePresets.reduce((s, k) => s + (PRESETS[k]?.(bab ?? 0)?.atkBonus ?? 0), 0)
@@ -94,8 +94,10 @@ function computeWeaponAttacks({ weapon, bab, abilities, buffTotals = {}, twfFeat
     if (babVal >= 16) bonuses.push(base - 15)
   }
   if (hasteActive) bonuses.push(bonuses[0])
-  const strMod = dmgMod
-  const offDmgMod = twfRole === 'off' ? Math.floor(Math.max(0, strMod) / 2) : strMod
+  // Off-hand: positive Str is halved (round down), negative Str applies in full
+  const offDmgMod = twfRole === 'off'
+    ? (dmgMod > 0 ? Math.floor(dmgMod / 2) : dmgMod)
+    : dmgMod
   const totalDmg = (twfRole === 'off' ? offDmgMod : dmgMod) + enh + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmg
   return { bonuses, totalDmg, dmgDice: weapon.dmgDice || '1d6', name: weapon.name || 'Weapon' }
 }
@@ -234,7 +236,7 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
     Object.entries(abilities).map(([k, v]) => [k, v + (buffTotals[k] ?? 0)])
   )
   const abilityModForAttack = abilityMod(effAbilities[weapon.ability] ?? 10)
-  const abilityModForDmg   = abilityMod(effAbilities[weapon.dmgAbility] ?? 10)
+  const abilityModForDmg   = weapon.dmgAbility === 'none' ? 0 : abilityMod(effAbilities[weapon.dmgAbility] ?? 10)
 
   // Compute active preset bonuses
   const activePresets = weapon.activePresets ?? []
