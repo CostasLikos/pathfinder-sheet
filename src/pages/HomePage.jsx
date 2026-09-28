@@ -5,13 +5,16 @@ import SettingsPanel from '../components/SettingsPanel'
 import { THEMES, useThemeStore } from '../store/themeStore'
 import SigilBackground from '../components/SigilBackground'
 import { computeClassTotals } from '../data/pf1eData'
+import { extractPdfFields, mapFieldsToCharacter } from '../utils/pdfImport'
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const { characters, addCharacter, deleteCharacter, exportCharacter, importCharacter } = useCharacterStore()
+  const { characters, addCharacter, updateCharacter, deleteCharacter, exportCharacter, importCharacter } = useCharacterStore()
   const importRef = useRef()
+  const pdfImportRef = useRef()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(null) // char id pending delete
+  const [pdfImporting, setPdfImporting] = useState(false)
 
   // Typewriter quote animation
   const QUOTE = `"Hell hath no limits, nor is circumscribed\nIn one self place, for where we are is hell,\nAnd where hell is there must we ever be."`
@@ -58,6 +61,24 @@ export default function HomePage() {
     }
     reader.readAsText(file)
     e.target.value = ''
+  }
+
+  const handlePdfImport = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    e.target.value = ''
+    setPdfImporting(true)
+    try {
+      const fields = await extractPdfFields(file)
+      const charData = mapFieldsToCharacter(fields)
+      const id = addCharacter()
+      updateCharacter(id, charData)
+      navigate(`/character/${id}`)
+    } catch (err) {
+      alert(`PDF import failed: ${err.message}`)
+    } finally {
+      setPdfImporting(false)
+    }
   }
 
   const formatLastSeen = (ts) => {
@@ -131,6 +152,7 @@ export default function HomePage() {
       />
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <input ref={importRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+      <input ref={pdfImportRef} type="file" accept=".pdf" className="hidden" onChange={handlePdfImport} />
 
       {/* ── HERO ── */}
       <div style={{
@@ -371,16 +393,28 @@ export default function HomePage() {
                 onMouseEnter={e => e.currentTarget.style.boxShadow = `0 0 40px ${glowStrong}`}
                 onMouseLeave={e => e.currentTarget.style.boxShadow = `0 0 24px ${glowColor}`}
               >Begin Your Journey</button>
-              <button onClick={() => importRef.current.click()} style={{
-                background: 'transparent',
-                border: `1px solid ${hex2rgba(accentHex, 0.2)}`,
-                color: hex2rgba(accentHex, 0.45),
-                padding: '0.45rem 1.5rem', borderRadius: '3px',
-                fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = hex2rgba(accentHex, 0.5); e.currentTarget.style.color = hex2rgba(accentHex, 0.8) }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = hex2rgba(accentHex, 0.2); e.currentTarget.style.color = hex2rgba(accentHex, 0.45) }}
-              >Import Character</button>
+              <div className="flex gap-2">
+                <button onClick={() => importRef.current.click()} style={{
+                  background: 'transparent',
+                  border: `1px solid ${hex2rgba(accentHex, 0.2)}`,
+                  color: hex2rgba(accentHex, 0.45),
+                  padding: '0.45rem 1.2rem', borderRadius: '3px',
+                  fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = hex2rgba(accentHex, 0.5); e.currentTarget.style.color = hex2rgba(accentHex, 0.8) }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = hex2rgba(accentHex, 0.2); e.currentTarget.style.color = hex2rgba(accentHex, 0.45) }}
+                >Import JSON</button>
+                <button onClick={() => pdfImportRef.current.click()} disabled={pdfImporting} style={{
+                  background: 'transparent',
+                  border: `1px solid ${hex2rgba(accentHex, 0.25)}`,
+                  color: hex2rgba(accentHex, 0.5),
+                  padding: '0.45rem 1.2rem', borderRadius: '3px',
+                  fontSize: '0.8rem', cursor: pdfImporting ? 'wait' : 'pointer', transition: 'all 0.2s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = hex2rgba(accentHex, 0.5); e.currentTarget.style.color = hex2rgba(accentHex, 0.8) }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = hex2rgba(accentHex, 0.25); e.currentTarget.style.color = hex2rgba(accentHex, 0.5) }}
+                >{pdfImporting ? 'Importing…' : 'Import PDF'}</button>
+              </div>
             </div>
           ) : (
             <div className="flex gap-3 justify-center flex-wrap">
@@ -391,7 +425,10 @@ export default function HomePage() {
                 fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer',
                 boxShadow: `0 0 12px ${glowFaint}`,
               }}>+ New Character</button>
-              <button onClick={() => importRef.current.click()} className="btn-secondary text-sm">Import</button>
+              <button onClick={() => importRef.current.click()} className="btn-secondary text-sm">Import JSON</button>
+              <button onClick={() => pdfImportRef.current.click()} disabled={pdfImporting} className="btn-secondary text-sm">
+                {pdfImporting ? 'Importing…' : 'Import PDF'}
+              </button>
               <button onClick={() => setSettingsOpen(true)} className="btn-secondary text-sm px-3" title="Settings">⚙️</button>
             </div>
           )}
