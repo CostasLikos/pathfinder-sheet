@@ -42,6 +42,7 @@ function NumInput({ value, onChange, width = 'w-12', className = '', style = {} 
 function CompanionCard({ companion, onChange, onRemove }) {
   const [expanded, setExpanded] = useState(true)
   const [portraitOpen, setPortraitOpen] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const portraitRef = useRef()
 
   const set = (key, val) => onChange({ ...companion, [key]: val })
@@ -118,12 +119,23 @@ function CompanionCard({ companion, onChange, onRemove }) {
         </div>
         <span className="text-xs cursor-pointer" style={{ color: 'var(--text-faint)' }}
           onClick={() => setExpanded(x => !x)}>{expanded ? '▲' : '▼'}</span>
-        {companion.name && (
+        {companion.name && !confirmDelete && (
           <button
-            onClick={e => { e.stopPropagation(); if (confirm(`Remove "${companion.name}"?`)) onRemove() }}
+            onClick={e => { e.stopPropagation(); setConfirmDelete(true) }}
             className="text-xs w-6 h-6 flex items-center justify-center rounded flex-shrink-0 ml-1"
             style={{ color: '#ef4444', border: '1px solid #ef444444', backgroundColor: 'rgba(239,68,68,0.08)' }}
             title="Remove companion">✕</button>
+        )}
+        {confirmDelete && (
+          <div className="flex items-center gap-1 ml-1" onClick={e => e.stopPropagation()}>
+            <span className="text-xs" style={{ color: '#ef4444' }}>Remove?</span>
+            <button onClick={() => onRemove()}
+              className="text-xs px-1.5 py-0.5 rounded font-bold"
+              style={{ color: '#ef4444', border: '1px solid #ef4444', backgroundColor: 'rgba(239,68,68,0.15)' }}>Yes</button>
+            <button onClick={() => setConfirmDelete(false)}
+              className="text-xs px-1.5 py-0.5 rounded"
+              style={{ color: 'var(--text-dim)', border: '1px solid var(--bg-border)' }}>No</button>
+          </div>
         )}
       </div>
 
