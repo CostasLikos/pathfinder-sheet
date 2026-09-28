@@ -237,6 +237,16 @@ export function mapFieldsToCharacter(f) {
     if (name?.trim()) spellNames.push(name.trim())
   }
 
+  // Only set a casting class if it's a known spellcasting class — otherwise
+  // SpellAttacksPanel will scan 2800+ spells on every render and freeze the tab.
+  const KNOWN_CASTING_CLASSES = new Set([
+    'wizard','sorcerer','witch','magus','bard','skald','cleric','oracle',
+    'druid','paladin','ranger','inquisitor','alchemist','summoner','shaman',
+    'warpriest','bloodrager','hunter','arcanist','occultist','spiritualist',
+    'medium','mesmerist','psychic',
+  ])
+  const castingClass = KNOWN_CASTING_CLASSES.has(primaryClass.toLowerCase()) ? primaryClass : ''
+
   return {
     // Basic info — not present as named fields in this PDF template
     name: '',
@@ -261,9 +271,8 @@ export function mapFieldsToCharacter(f) {
     skills,
     gear,
     notes,
-    // Spells (store as session spells list for quick reference)
     sessionSpells: spellNames,
-    spellcasting: { class: primaryClass, ability: 'int', concentration: 0, slots: {}, spells: [] },
+    spellcasting: { class: castingClass, ability: 'int', concentration: 0, slots: {}, spells: [] },
     // Defaults
     feats: [],
     traits: [],
