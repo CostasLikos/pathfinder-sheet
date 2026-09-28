@@ -198,22 +198,42 @@ function CompanionCard({ companion, onChange, onRemove }) {
             {/* Defenses */}
             <div className="rounded-lg p-2" style={{ backgroundColor: 'var(--bg-darker)', border: '1px solid var(--bg-border)' }}>
               <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--accent)' }}>Defenses</div>
+              {/* AC full-width */}
+              {[{ label: 'AC', key: 'ac', color: 'var(--accent)' }].map(({ label, key, color }) => (
+                <div key={key} className="flex items-center justify-between gap-1 rounded px-1.5 py-1 mb-1.5"
+                  style={{ backgroundColor: 'var(--bg-surface)', border: `2px solid ${color}55` }}>
+                  <span className="text-xs font-bold" style={{ color }}>{label}</span>
+                  <NumInput value={companion[key] ?? 0} onChange={v => set(key, v)} width="w-10" />
+                </div>
+              ))}
+              {/* Fort/Ref/Will | Speed/CMB/CMD */}
               <div className="grid grid-cols-2 gap-1.5">
-                {[
-                  { label: 'AC', key: 'ac', color: 'var(--accent)' },
-                  { label: 'Speed', key: 'speed', color: '#60a5fa' },
-                  { label: 'Fort', key: 'fort', color: '#4ade80' },
-                  { label: 'Ref', key: 'ref', color: '#f59e0b' },
-                  { label: 'Will', key: 'will', color: '#c084fc' },
-                  { label: 'CMB', key: 'cmb', color: '#94a3b8' },
-                  { label: 'CMD', key: 'cmd', color: '#94a3b8' },
-                ].map(({ label, key, color }) => (
-                  <div key={key} className="flex items-center justify-between gap-1 rounded px-1.5 py-1"
-                    style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${color}33` }}>
-                    <span className="text-xs font-bold" style={{ color }}>{label}</span>
-                    <NumInput value={companion[key] ?? 0} onChange={v => set(key, v)} width="w-10" />
-                  </div>
-                ))}
+                <div className="flex flex-col gap-1.5">
+                  {[
+                    { label: 'Fort', key: 'fort', color: '#4ade80' },
+                    { label: 'Ref',  key: 'ref',  color: '#f59e0b' },
+                    { label: 'Will', key: 'will', color: '#c084fc' },
+                  ].map(({ label, key, color }) => (
+                    <div key={key} className="flex items-center justify-between gap-1 rounded px-1.5 py-1"
+                      style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${color}33` }}>
+                      <span className="text-xs font-bold" style={{ color }}>{label}</span>
+                      <NumInput value={companion[key] ?? 0} onChange={v => set(key, v)} width="w-10" />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {[
+                    { label: 'Speed', key: 'speed', color: '#60a5fa' },
+                    { label: 'CMB',   key: 'cmb',   color: '#94a3b8' },
+                    { label: 'CMD',   key: 'cmd',   color: '#94a3b8' },
+                  ].map(({ label, key, color }) => (
+                    <div key={key} className="flex items-center justify-between gap-1 rounded px-1.5 py-1"
+                      style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${color}33` }}>
+                      <span className="text-xs font-bold" style={{ color }}>{label}</span>
+                      <NumInput value={companion[key] ?? 0} onChange={v => set(key, v)} width="w-10" />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
