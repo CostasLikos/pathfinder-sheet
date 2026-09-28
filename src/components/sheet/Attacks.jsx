@@ -264,16 +264,17 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
 
   const enh = weapon.enhancement ?? 0
 
-  // Build attack bonus (BAB + ability + enhancement + misc + temp + buff + presets + TWF penalty)
-  const baseAttackBonus = (bab ?? 0) + abilityModForAttack + enh + (weapon.attackMisc ?? 0) + (weapon.tempAttack ?? 0) + (buffTotals.attackRoll ?? 0) + presetAtkBonus + twfPenalty
+  // Build attack bonus (BAB + ability + enhancement + misc + temp + buff + presets)
+  // TWF penalties are shown only in the Full Attack Bar, not here
+  const baseAttackBonus = (bab ?? 0) + abilityModForAttack + enh + (weapon.attackMisc ?? 0) + (weapon.tempAttack ?? 0) + (buffTotals.attackRoll ?? 0) + presetAtkBonus
 
   // Off-hand damage uses ½ Str (round down), unless ITWF/GTWF feat (still ½ Str — RAW)
   const strMod = abilityModForDmg  // already the correct ability mod
   const offHandDmgMod = twfRole === 'off'
     ? Math.floor(Math.max(0, strMod) / 2)  // ½ Str (positive only), negatives still apply full
     : strMod
-  const effectiveDmgMod = twfRole === 'off' ? offHandDmgMod + enh + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
-                                             : abilityModForDmg + enh + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
+  // WeaponCard always shows full Str damage — half-Str for off-hand is only in the Full Attack Bar
+  const effectiveDmgMod = abilityModForDmg + enh + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
   const totalDmgBonus = effectiveDmgMod
 
   // Generate iterative attacks from BAB
