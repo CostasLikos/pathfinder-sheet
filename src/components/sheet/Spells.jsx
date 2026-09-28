@@ -878,7 +878,7 @@ export default function Spells({ character, onChange, pins = {}, onTogglePin }) 
       {castResult && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setCastResult(null)}>
           <div className="rounded-xl p-8 text-center shadow-2xl max-w-sm w-full mx-4"
-            style={{ backgroundColor: 'var(--bg-surface)', border: `2px solid ${castResult.color}`, background: `linear-gradient(135deg, var(--bg-surface) 0%, ${castResult.color}12 100%)` }}
+            style={{ backgroundColor: 'var(--bg-darker)', border: `2px solid ${castResult.color}`, boxShadow: `0 0 60px rgba(0,0,0,0.8), 0 0 30px ${castResult.color}22` }}
             onClick={e => e.stopPropagation()}>
             <div className="text-4xl mb-3">{castResult.school ? (SCHOOL_ICONS[castResult.school] ?? '✨') : '✨'}</div>
             <div className="font-bold text-xl mb-1" style={{ color: castResult.color, fontFamily: 'Georgia,serif' }}>{castResult.name}</div>
