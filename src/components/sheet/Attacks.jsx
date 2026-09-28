@@ -42,11 +42,22 @@ const PRESETS = {
     const n = Math.floor(bab / 4) + 1
     return { atkBonus: -n, dmgBonus: n * 2, label: 'Deadly Aim', desc: `−${n} atk / +${n * 2} dmg (ranged)` }
   },
-  twfPrimary: () => ({ atkBonus: -2, dmgBonus: 0, label: 'TWF Primary', desc: '−2 atk (TWF feat + light off-hand)' }),
-  twfOffhand:  () => ({ atkBonus: -2, dmgBonus: 0, label: 'TWF Off-hand', desc: '−2 atk (TWF feat + light off-hand)' }),
   flanking:    () => ({ atkBonus: +2, dmgBonus: 0, label: 'Flanking', desc: '+2 atk (flanking)' }),
   charge:      () => ({ atkBonus: +2, dmgBonus: 0, label: 'Charge', desc: '+2 atk / −2 AC (charge)' }),
   haste:       () => ({ atkBonus: +1, dmgBonus: 0, label: '⚡ Haste', desc: '+1 atk + extra attack at highest BAB', extraAttack: true }),
+}
+
+// TWF penalty tables
+// returns { mainPenalty, offPenalty } based on feats and whether off-hand is light
+function twfPenalties(feats = {}, lightOffhand = false) {
+  const { twf, itwf, gtwf } = feats
+  if (twf || itwf || gtwf) {
+    // With TWF feat: -4/-4 normally, -2/-2 with light off-hand
+    const base = lightOffhand ? -2 : -4
+    return { mainPenalty: base, offPenalty: base }
+  }
+  // No feat: -6/-10, or -4/-8 with light off-hand
+  return lightOffhand ? { mainPenalty: -4, offPenalty: -8 } : { mainPenalty: -6, offPenalty: -10 }
 }
 
 const EXTRA_DIE_TYPES = ['d3','d4','d6','d8','d10','d12']
@@ -77,7 +88,7 @@ function rollDice(expr) {
   return { rolls, total: rolls.reduce((a, b) => a + b, 0) }
 }
 
-function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {} }) {
+function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {}, twfFeats = {}, allWeapons = [] }) {
   const [expanded, setExpanded] = useState(false)
   const [rollResult, setRollResult] = useState(null)
   const [showPresets, setShowPresets] = useState(false)
@@ -108,19 +119,50 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
   const updateExtraDie = (id, field, val) => onUpdate('extraDice', extraDice.map(d => d.id === id ? { ...d, [field]: val } : d))
   const removeExtraDie = (id) => onUpdate('extraDice', extraDice.filter(d => d.id !== id))
 
-  // Build attack bonus (BAB + ability + misc + temp + buff + presets)
-  const baseAttackBonus = (bab ?? 0) + abilityModForAttack + (weapon.attackMisc ?? 0) + (weapon.tempAttack ?? 0) + (buffTotals.attackRoll ?? 0) + presetAtkBonus
-  const totalDmgBonus   = abilityModForDmg + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
+  // TWF setup
+  const twfRole = weapon.twfRole ?? null  // null | 'main' | 'off'
+  const lightOffhand = weapon.lightOffhand ?? false
+  // find the paired off-hand weapon for light-offhand penalty lookup
+  const offHandWeapon = twfRole === 'main'
+    ? allWeapons.find(w => w.twfRole === 'off')
+    : null
+  const effectiveLightOffhand = twfRole === 'main'
+    ? (offHandWeapon?.lightOffhand ?? false)
+    : lightOffhand
+  const { mainPenalty, offPenalty } = twfPenalties(twfFeats, effectiveLightOffhand)
+  const twfPenalty = twfRole === 'main' ? mainPenalty : twfRole === 'off' ? offPenalty : 0
+
+  // Build attack bonus (BAB + ability + misc + temp + buff + presets + TWF penalty)
+  const baseAttackBonus = (bab ?? 0) + abilityModForAttack + (weapon.attackMisc ?? 0) + (weapon.tempAttack ?? 0) + (buffTotals.attackRoll ?? 0) + presetAtkBonus + twfPenalty
+
+  // Off-hand damage uses ½ Str (round down), unless ITWF/GTWF feat (still ½ Str — RAW)
+  const strMod = abilityModForDmg  // already the correct ability mod
+  const offHandDmgMod = twfRole === 'off'
+    ? Math.floor(Math.max(0, strMod) / 2)  // ½ Str (positive only), negatives still apply full
+    : strMod
+  const effectiveDmgMod = twfRole === 'off' ? offHandDmgMod + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
+                                             : abilityModForDmg + (weapon.dmgMisc ?? 0) + (weapon.tempDamage ?? 0) + (buffTotals.damage ?? 0) + presetDmgBonus
+  const totalDmgBonus = effectiveDmgMod
 
   // Generate iterative attacks from BAB
   const babVal = bab ?? 0
   const hasteActive = activePresets.includes('haste')
-  const attackBonuses = [baseAttackBonus]
-  if (babVal >= 6)  attackBonuses.push(baseAttackBonus - 5)
-  if (babVal >= 11) attackBonuses.push(baseAttackBonus - 10)
-  if (babVal >= 16) attackBonuses.push(baseAttackBonus - 15)
+
+  // Off-hand: normally 1 attack; +1 at −5 with ITWF; +1 at −10 with GTWF
+  const attackBonuses = []
+  if (twfRole === 'off') {
+    attackBonuses.push(baseAttackBonus)
+    if (twfFeats.itwf || twfFeats.gtwf) attackBonuses.push(baseAttackBonus - 5)
+    if (twfFeats.gtwf) attackBonuses.push(baseAttackBonus - 10)
+  } else {
+    // Main hand or no TWF role — normal iterative sequence
+    attackBonuses.push(baseAttackBonus)
+    if (babVal >= 6)  attackBonuses.push(baseAttackBonus - 5)
+    if (babVal >= 11) attackBonuses.push(baseAttackBonus - 10)
+    if (babVal >= 16) attackBonuses.push(baseAttackBonus - 15)
+  }
   // Haste: extra attack at highest BAB, appended last
-  if (hasteActive) attackBonuses.push(baseAttackBonus)
+  if (hasteActive) attackBonuses.push(attackBonuses[0])
 
   const rollAttack = (bonus) => {
     const d20 = Math.floor(Math.random() * 20) + 1
@@ -225,15 +267,18 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
             <div className="flex gap-2 flex-wrap justify-center">
               {attackBonuses.map((bonus, i) => {
                 const isHasteAttack = hasteActive && i === attackBonuses.length - 1
+                const isOffExtra = twfRole === 'off' && i > 0
                 return (
                   <button key={i} onClick={() => rollAttack(bonus)}
                     className="font-bold rounded-lg px-4 py-2 text-sm transition-all hover:scale-105 active:scale-95"
                     style={isHasteAttack
                       ? { backgroundColor: '#0c2a4a', border: '2px solid #38bdf8', color: '#38bdf8', boxShadow: '0 0 10px #38bdf844' }
+                      : twfRole
+                      ? { backgroundColor: twfRole === 'off' ? '#431407' : '#1c0a00', border: `2px solid #f9731688`, color: '#fb923c', boxShadow: '0 2px 6px rgba(0,0,0,0.4)' }
                       : { backgroundColor: 'var(--danger)', border: `2px solid ${accentColor}66`, color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.4)' }}
-                    title={isHasteAttack ? '⚡ Haste extra attack' : `Attack ${i + 1} — click to roll`}
+                    title={isHasteAttack ? '⚡ Haste extra attack' : twfRole ? `TWF ${twfRole} attack ${i + 1}` : `Attack ${i + 1} — click to roll`}
                   >
-                    {isHasteAttack ? <>🔵⚡ {formatMod(bonus)}</> : formatMod(bonus)}
+                    {isHasteAttack ? <>🔵⚡ {formatMod(bonus)}</> : twfRole ? <>{twfRole === 'main' ? '🗡' : isOffExtra ? '🗡₂' : '🗡'} {formatMod(bonus)}</> : formatMod(bonus)}
                   </button>
                 )
               })}
@@ -311,13 +356,40 @@ function WeaponCard({ weapon, bab, abilities, onUpdate, onRemove, buffTotals = {
         <button
           onClick={() => setShowPresets(x => !x)}
           className="w-full flex items-center justify-between px-3 py-1.5 text-xs"
-          style={{ color: activePresets.length > 0 ? 'var(--accent)' : 'var(--text-faint)', backgroundColor: 'transparent' }}
+          style={{ color: (activePresets.length > 0 || twfRole) ? 'var(--accent)' : 'var(--text-faint)', backgroundColor: 'transparent' }}
         >
-          <span>⚔ Combat Presets {activePresets.length > 0 && `(${activePresets.length} active)`}</span>
+          <span>⚔ Combat Presets {activePresets.length > 0 && `(${activePresets.length} active)`}{twfRole && ` · TWF ${twfRole === 'main' ? '🗡 Main' : '🗡 Off-hand'}`}</span>
           <span>{showPresets ? '▲' : '▼'}</span>
         </button>
         {showPresets && (
           <div className="px-3 pb-3">
+            {/* TWF Role */}
+            <div className="mb-3 pb-2" style={{ borderBottom: '1px solid var(--bg-border)' }}>
+              <div className="text-xs font-semibold mb-1.5" style={{ color: '#f97316' }}>⚔⚔ Two-Weapon Fighting</div>
+              <div className="flex flex-wrap gap-2 items-center">
+                {[['main', '🗡 Main Hand'], ['off', '🗡 Off-hand']].map(([role, label]) => {
+                  const active = twfRole === role
+                  return (
+                    <button key={role} onClick={() => onUpdate('twfRole', active ? null : role)}
+                      className="text-xs px-2 py-1 rounded font-semibold transition-all"
+                      style={{ backgroundColor: active ? '#f97316' : 'var(--bg-surface)', color: active ? '#fff' : 'var(--text-dim)', border: `1px solid ${active ? '#f97316' : 'var(--bg-border)'}` }}>
+                      {label}
+                    </button>
+                  )
+                })}
+                {(twfRole === 'off') && (
+                  <label className="flex items-center gap-1 text-xs cursor-pointer" style={{ color: lightOffhand ? '#f97316' : 'var(--text-faint)' }}>
+                    <input type="checkbox" checked={lightOffhand} onChange={e => onUpdate('lightOffhand', e.target.checked)} className="accent-orange-500" />
+                    Light weapon
+                  </label>
+                )}
+                {twfRole && (
+                  <span className="text-xs ml-1" style={{ color: 'var(--text-faint)' }}>
+                    ({twfRole === 'main' ? `${mainPenalty > 0 ? '+' : ''}${mainPenalty} main` : `${offPenalty > 0 ? '+' : ''}${offPenalty} off`})
+                  </span>
+                )}
+              </div>
+            </div>
             <div className="flex flex-wrap gap-2 mb-2">
               {Object.entries(PRESETS).map(([key, fn]) => {
                 const p = fn(babVal)
@@ -738,6 +810,9 @@ function SpellRow({ spell, dmgInfo, kind, dc, isOpen, spellAtk, casterLevel, onR
 export default function Attacks({ character, onChange, pinned, onTogglePin, buffTotals = {}, computedBAB = null }) {
   const { weapons = [], bab: manualBAB, abilities } = character
   const bab = computedBAB ?? manualBAB
+  const twfFeats = character.twfFeats ?? {}
+
+  const setTwfFeat = (key, val) => onChange('twfFeats', { ...twfFeats, [key]: val })
 
   const addWeapon = () => onChange('weapons', [...weapons, emptyWeapon()])
 
@@ -770,6 +845,29 @@ export default function Attacks({ character, onChange, pinned, onTogglePin, buff
         </div>
       </div>
 
+      {/* TWF Feats row — only shown when any weapon has a TWF role */}
+      {weapons.some(w => w.twfRole) && (
+        <div className="flex flex-wrap gap-2 items-center mb-3 px-1 py-2 rounded-lg" style={{ backgroundColor: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.25)' }}>
+          <span className="text-xs font-bold" style={{ color: '#f97316' }}>⚔⚔ TWF Feats:</span>
+          {[['twf','TWF'],['itwf','Improved TWF'],['gtwf','Greater TWF']].map(([key, label]) => {
+            const active = twfFeats[key]
+            return (
+              <button key={key} onClick={() => setTwfFeat(key, !active)}
+                className="text-xs px-2 py-0.5 rounded font-semibold transition-all"
+                style={{ backgroundColor: active ? '#f97316' : 'var(--bg-surface)', color: active ? '#fff' : 'var(--text-dim)', border: `1px solid ${active ? '#f97316' : 'var(--bg-border)'}` }}>
+                {label}
+              </button>
+            )
+          })}
+          <span className="text-xs ml-1" style={{ color: 'var(--text-faint)' }}>
+            {twfFeats.gtwf ? '−2/−2 (light) or −4/−4 · off-hand: 3 attacks'
+              : twfFeats.itwf ? '−2/−2 (light) or −4/−4 · off-hand: 2 attacks'
+              : twfFeats.twf  ? '−2/−2 (light) or −4/−4'
+              : '−4/−8 (light) or −6/−10'}
+          </span>
+        </div>
+      )}
+
       {weapons.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <div className="text-4xl mb-2">⚔️</div>
@@ -788,6 +886,8 @@ export default function Attacks({ character, onChange, pinned, onTogglePin, buff
             onUpdate={(key, value) => updateWeapon(i, key, value)}
             onRemove={() => removeWeapon(i)}
             buffTotals={buffTotals}
+            twfFeats={twfFeats}
+            allWeapons={weapons}
           />
         ))}
       </div>
