@@ -23,7 +23,7 @@ function getEncumbrance(str, w) {
 
 // ── Worn Equipment slots ──────────────────────────────────────────────────────
 const WORN_SLOTS = [
-  { key: 'head',      label: 'Head',      icon: '🪖' },
+  { key: 'head',      label: 'Head',      icon: '⛑️' },
   { key: 'face',      label: 'Face',      icon: '👁️' },
   { key: 'throat',    label: 'Throat',    icon: '📿' },
   { key: 'shoulders', label: 'Shoulders', icon: '🧥' },
