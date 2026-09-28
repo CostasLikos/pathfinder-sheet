@@ -197,7 +197,7 @@ function WornEquipmentPanel({ wornEquipment = {}, gear = [], onChange }) {
             >
               <span className="text-xl flex-shrink-0 w-7 text-center" style={{ opacity: filled ? 1 : 0.45 }}>{slot.icon}</span>
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold uppercase tracking-widest" style={{ color: filled ? 'var(--accent)' : 'var(--text-faint)', fontSize: '0.55rem', letterSpacing: '0.12em' }}>{slot.label}</div>
+                <div className="text-xs font-bold uppercase tracking-widest" style={{ color: filled ? 'var(--accent)' : 'var(--accent-dim)', fontSize: '0.55rem', letterSpacing: '0.12em' }}>{slot.label}</div>
                 <div className="text-xs font-semibold truncate mt-0.5" style={{ color: filled ? 'var(--text)' : 'var(--text-faint)', fontStyle: filled ? 'normal' : 'italic' }}>
                   {item ?? '— empty —'}
                 </div>
