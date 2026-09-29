@@ -290,9 +290,10 @@ function ItemRow({ item, index, onUpdate, onRemove, onReorder, color = 'var(--ac
 
   const cancelPress = () => { if (pressRef.current) { clearTimeout(pressRef.current); pressRef.current = null } }
 
-  const longFired  = useRef(false)
-  const didScroll  = useRef(false)
-  const touchStart = useRef({ x: 0, y: 0 })
+  const longFired   = useRef(false)
+  const didScroll   = useRef(false)
+  const touchStart  = useRef({ x: 0, y: 0 })
+  const justDragged = useRef(false)
 
   const startPress2 = (e) => {
     longFired.current = false
@@ -311,11 +312,12 @@ function ItemRow({ item, index, onUpdate, onRemove, onReorder, color = 'var(--ac
     const dy = e.touches[0].clientY - touchStart.current.y
     if (Math.abs(dx) > 8 || Math.abs(dy) > 8) { didScroll.current = true; cancelPress() }
   }
-  const handleClick2 = (e) => {
-    // ignore synthetic click fired after a touch sequence
-    if (e?.type === 'click' && didScroll.current) return
+  // Only use onClick (not onTouchEnd) — avoids the ghost-click double-fire on mobile
+  const handleClick = () => {
+    if (justDragged.current) { justDragged.current = false; return }
     cancelPress()
     if (longFired.current) { longFired.current = false; return }
+    if (didScroll.current) return
     if (!editing && item.name) setShowInfo(v => !v)
   }
 
@@ -353,13 +355,12 @@ function ItemRow({ item, index, onUpdate, onRemove, onReorder, color = 'var(--ac
           onMouseLeave={cancelPress}
           onTouchStart={startPress2}
           onTouchMove={onTouchMove}
-          onTouchEnd={handleClick2}
-          onClick={handleClick2}
+          onClick={handleClick}
           onDoubleClick={e => { e.stopPropagation(); cancelPress(); setShowInfo(false); setEditing(true) }}>
           <span
             draggable={!!onReorder}
             onDragStart={e => { e.stopPropagation(); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(index)) }}
-            onDragEnd={() => setDragOver(false)}
+            onDragEnd={() => { setDragOver(false); justDragged.current = true; setTimeout(() => { justDragged.current = false }, 200) }}
             className="flex-shrink-0 cursor-grab active:cursor-grabbing text-base leading-none px-1"
             style={{ color: 'var(--text-faint)', opacity: 0.4, userSelect: 'none' }}
             onMouseDown={e => e.stopPropagation()}
