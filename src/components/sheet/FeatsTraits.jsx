@@ -296,6 +296,7 @@ function ItemRow({ item, index, onUpdate, onRemove, onReorder, color = 'var(--ac
   const justDragged = useRef(false)
 
   const startPress2 = (e) => {
+    cancelPress()
     longFired.current = false
     didScroll.current = false
     if (e?.touches?.[0]) { touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY } }
