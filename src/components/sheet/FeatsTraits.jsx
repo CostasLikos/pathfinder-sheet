@@ -307,12 +307,9 @@ function ItemRow({ item, index, onUpdate, onRemove, onReorder, color = 'var(--ac
 
   return (
     <div ref={rowRef}
-      draggable={!editing}
-      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(index)) }}
       onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOver(true) }}
       onDragLeave={() => setDragOver(false)}
       onDrop={e => { e.preventDefault(); setDragOver(false); const from = Number(e.dataTransfer.getData('text/plain')); if (from !== index) onReorder?.(from, index) }}
-      onDragEnd={() => setDragOver(false)}
       className="rounded-lg overflow-hidden"
       style={{
         backgroundColor: dragOver ? `${color}11` : 'var(--bg-darker)',
@@ -345,6 +342,9 @@ function ItemRow({ item, index, onUpdate, onRemove, onReorder, color = 'var(--ac
           onClick={handleClick2}
           onDoubleClick={e => { e.stopPropagation(); cancelPress(); setShowInfo(false); setEditing(true) }}>
           <span
+            draggable={!!onReorder}
+            onDragStart={e => { e.stopPropagation(); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(index)) }}
+            onDragEnd={() => setDragOver(false)}
             className="flex-shrink-0 cursor-grab active:cursor-grabbing text-base leading-none px-1"
             style={{ color: 'var(--text-faint)', opacity: 0.4, userSelect: 'none' }}
             onMouseDown={e => e.stopPropagation()}
