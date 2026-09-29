@@ -290,16 +290,30 @@ function ItemRow({ item, index, onUpdate, onRemove, onReorder, color = 'var(--ac
 
   const cancelPress = () => { if (pressRef.current) { clearTimeout(pressRef.current); pressRef.current = null } }
 
-  const longFired = useRef(false)
-  const startPress2 = () => {
+  const longFired  = useRef(false)
+  const didScroll  = useRef(false)
+  const touchStart = useRef({ x: 0, y: 0 })
+
+  const startPress2 = (e) => {
     longFired.current = false
+    didScroll.current = false
+    if (e?.touches?.[0]) { touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY } }
     pressRef.current = setTimeout(() => {
       pressRef.current = null
+      if (didScroll.current) return
       longFired.current = true
       setEditing(true)
-    }, 500)
+    }, 750)
   }
-  const handleClick2 = () => {
+  const onTouchMove = (e) => {
+    if (!pressRef.current) return
+    const dx = e.touches[0].clientX - touchStart.current.x
+    const dy = e.touches[0].clientY - touchStart.current.y
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) { didScroll.current = true; cancelPress() }
+  }
+  const handleClick2 = (e) => {
+    // ignore synthetic click fired after a touch sequence
+    if (e?.type === 'click' && didScroll.current) return
     cancelPress()
     if (longFired.current) { longFired.current = false; return }
     if (!editing && item.name) setShowInfo(v => !v)
@@ -338,6 +352,7 @@ function ItemRow({ item, index, onUpdate, onRemove, onReorder, color = 'var(--ac
           onMouseUp={cancelPress}
           onMouseLeave={cancelPress}
           onTouchStart={startPress2}
+          onTouchMove={onTouchMove}
           onTouchEnd={handleClick2}
           onClick={handleClick2}
           onDoubleClick={e => { e.stopPropagation(); cancelPress(); setShowInfo(false); setEditing(true) }}>
