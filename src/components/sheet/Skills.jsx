@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { SKILLS, DEFAULT_SKILL_ORDER, abilityMod, formatMod, computeClassTotals } from '../../data/pf1eData'
 import PinButton from '../PinButton'
 
@@ -144,6 +144,20 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
   const cancelLongPress = () => {
     clearTimeout(longPressTimer.current)
   }
+
+  // close tooltip on outside touch/click
+  useEffect(() => {
+    if (!tooltip) return
+    const handler = (e) => {
+      if (!e.target.closest('.skill-tooltip-anchor')) setTooltip(null)
+    }
+    document.addEventListener('touchstart', handler, true)
+    document.addEventListener('mousedown', handler, true)
+    return () => {
+      document.removeEventListener('touchstart', handler, true)
+      document.removeEventListener('mousedown', handler, true)
+    }
+  }, [tooltip])
 
   const totalRanks = Object.values(skills).reduce((s, v) => s + (v.ranks ?? 0), 0)
   const orderedSkills = skillOrder.map(key => SKILL_MAP[key]).filter(Boolean)
@@ -365,12 +379,12 @@ export default function Skills({ character, onChange, pinnedSkills = [], onToggl
               </span>
 
               {/* Total with breakdown tooltip */}
-              <span className="flex-shrink-0" style={{ width: '60px', textAlign: 'center' }}>
+              <span className="flex-shrink-0 skill-tooltip-anchor" style={{ width: '60px', textAlign: 'center' }}>
                 <span className="relative inline-block"
                   onMouseEnter={() => showTooltip(skill.key)}
                   onMouseLeave={hideTooltip}
                   onTouchStart={() => startLongPress(skill.key)}
-                  onTouchEnd={() => { cancelLongPress(); setTimeout(() => setTooltip(null), 2500) }}
+                  onTouchEnd={cancelLongPress}
                   onTouchCancel={cancelLongPress}
                 >
                   <span className="font-bold cursor-help select-none inline-flex items-center justify-center rounded-lg"
